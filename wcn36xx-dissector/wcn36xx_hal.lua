@@ -206,6 +206,18 @@ msg_type_strings[188] = "DEL_BA_IND"
 msg_type_strings[189] = "DHCP_START_IND"
 msg_type_strings[190] = "DHCP_STOP_IND"
 
+local bond_state_strings = {}
+bond_state_strings[0] = "SINGLE_CHANNEL_CENTERED"
+bond_state_strings[1] = "DOUBLE_CHANNEL_LOW_PRIMARY"
+bond_state_strings[2] = "DOUBLE_CHANNEL_CENTERED"
+bond_state_strings[3] = "DOUBLE_CHANNEL_HIGH_PRIMARY"
+bond_state_strings[4] = "QUADRUPLE_CHANNEL_20MHZ_LOW_40MHZ_CENTERED"
+bond_state_strings[5] = "QUADRUPLE_CHANNEL_20MHZ_CENTERED_40MHZ_CENTERED"
+bond_state_strings[6] = "QUADRUPLE_CHANNEL_20MHZ_HIGH_40MHZ_CENTERED"
+bond_state_strings[7] = "QUADRUPLE_CHANNEL_20MHZ_LOW_40MHZ_LOW"
+bond_state_strings[8] = "QUADRUPLE_CHANNEL_20MHZ_HIGH_40MHZ_LOW"
+bond_state_strings[9] = "QUADRUPLE_CHANNEL_20MHZ_LOW_40MHZ_HIGH "
+bond_state_strings[10] = "QUADRUPLE_CHANNEL_20MHZ_HIGH_40MHZ_HIGH"
 
 local f = wcn36xx.fields
 f.msg_type = ProtoField.uint16("wcn36xx.msg_type", "msg_type", base.DEC, msg_type_strings)
@@ -213,6 +225,15 @@ f.msg_version = ProtoField.uint16("wcn36xx.msg_version", "msg_version")
 f.len = ProtoField.uint32("wcn36xx.len", "len")
 f.data = ProtoField.bytes("wcn36xx.data", "data")
 f.scan_channel = ProtoField.uint8("wcn36xx.scan_channel", "scan_channel")
+f.scan_dot11d_enabled = ProtoField.bool("wcn36xx.scan_dot11d_enabled", "dot11d_enabled")
+f.scan_dot11d_resolved = ProtoField.bool("wcn36xx.scan_dot11d_resolved", "dot11d_resolved")
+f.scan_channel_count  = ProtoField.uint8("wcn36xx.scan_channel_count", "channel_count", base.DEC)
+f.scan_channels = ProtoField.bytes("wcn36xx.scan_channels", "scan_channels", base.DEC)
+f.scan_active_min_ch_time = ProtoField.uint16("wcn36xx.scan_active_min_ch_time", "scan_active_min_ch_time", base.DEC)
+f.scan_active_max_ch_time = ProtoField.uint16("wcn36xx.scan_active_max_ch_time", "scan_active_max_ch_time", base.DEC)
+f.scan_passive_min_ch_time = ProtoField.uint16("wcn36xx.scan_active_min_ch_time", "scan_active_min_ch_time", base.DEC)
+f.scan_passive_max_ch_time = ProtoField.uint16("wcn36xx.scan_active_max_ch_time", "scan_active_max_ch_time", base.DEC)
+f.scan_phy_chan_bond_state = ProtoField.uint16("wcn36xx.scan_phy_chan_bond_state", "scan_phy_chan_bond_state", base.DEC, bond_state_strings)
 
 function wcn36xx.dissector(buffer, pinfo, tree)
 	local offset = 0
@@ -227,9 +248,10 @@ function wcn36xx.dissector(buffer, pinfo, tree)
 	header:add_le(f.msg_version, buffer(offset, 2)); offset = offset + 2
 	header:add_le(f.len, buffer(offset, 4)); offset = offset +  4
 
+	local msg_type_int = msg_type:le_uint()
 	local msg_type_str
-	if msg_type_strings[msg_type:le_uint()] ~= nil then
-		msg_type_str = msg_type_strings[msg_type:le_uint()]:lower()
+	if msg_type_strings[msg_type_int] ~= nil then
+		msg_type_str = msg_type_strings[msg_type_int]:lower()
 	else
 		msg_type_str = msg_type
 	end
@@ -239,10 +261,22 @@ function wcn36xx.dissector(buffer, pinfo, tree)
 	if buffer:len() > offset then
 		local data = buffer(offset)
 		local params = subtree:add(wcn36xx, buffer(offset), msg_type_str)
-		if ((msg_type:le_uint() == 6) or
-                    (msg_type:le_uint() == 8)) then
+		if ((msg_type_int == 6) or
+                    (msg_type_int == 8)) then
 			-- start/end scan command
 			params:add(f.scan_channel, buffer(offset, 1)); offset = offset + 1
+		elseif (msg_type_int == 151) then
+			-- update scan param
+			params:add(f.scan_dot11d_enabled, buffer(offset, 1)); offset = offset + 1
+			params:add(f.scan_dot11d_resolved, buffer(offset, 1)); offset = offset + 1
+			local channel_count = buffer(offset, 1):uint()
+			params:add(f.scan_channel_count, buffer(offset, 1)); offset = offset + 1
+			params:add(f.scan_channels, buffer(offset, channel_count)); offset = offset + 60
+			params:add_le(f.scan_active_min_ch_time, buffer(offset, 2)); offset = offset + 2
+			params:add_le(f.scan_active_max_ch_time, buffer(offset, 2)); offset = offset + 2
+			params:add_le(f.scan_passive_min_ch_time, buffer(offset, 2)); offset = offset + 2
+			params:add_le(f.scan_passive_max_ch_time, buffer(offset, 2)); offset = offset + 2
+			params:add_le(f.scan_phy_chan_bond_state, buffer(offset, 4)); offset = offset + 4
 		else
 			params:add(f.data, data)
 		end
