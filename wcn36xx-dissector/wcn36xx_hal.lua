@@ -234,6 +234,10 @@ f.scan_active_max_ch_time = ProtoField.uint16("wcn36xx.scan_active_max_ch_time",
 f.scan_passive_min_ch_time = ProtoField.uint16("wcn36xx.scan_active_min_ch_time", "scan_active_min_ch_time", base.DEC)
 f.scan_passive_max_ch_time = ProtoField.uint16("wcn36xx.scan_active_max_ch_time", "scan_active_max_ch_time", base.DEC)
 f.scan_phy_chan_bond_state = ProtoField.uint16("wcn36xx.scan_phy_chan_bond_state", "scan_phy_chan_bond_state", base.DEC, bond_state_strings)
+f.nv_frag_number = ProtoField.uint16("wcn36xx.nv_frag_number", "frag_number", base.DEC)
+f.nv_last_fragment = ProtoField.bool("wcn36xx.nv_last_fragment", "last_fragment")
+f.nv_img_buffer_size = ProtoField.uint32("wcn36xx.nv_img_buffer_size", "nv_img_buffer_size", base.DEC)
+f.nv_buffer = ProtoField.bytes("wcn36xx.nv_buffer", "nv_buffer")
 
 function wcn36xx.dissector(buffer, pinfo, tree)
 	local offset = 0
@@ -265,6 +269,13 @@ function wcn36xx.dissector(buffer, pinfo, tree)
                     (msg_type_int == 8)) then
 			-- start/end scan command
 			params:add(f.scan_channel, buffer(offset, 1)); offset = offset + 1
+		elseif (msg_type_int == 55) then
+			-- download nv
+			params:add_le(f.nv_frag_number, buffer(offset, 2)); offset = offset + 2
+			params:add_le(f.nv_last_fragment, buffer(offset, 2)); offset = offset + 2
+			local size = buffer(offset, 4):le_uint()
+			params:add_le(f.nv_img_buffer_size, buffer(offset, 4)); offset = offset + 4
+			params:add_le(f.nv_buffer, buffer(offset, size)); offset = offset + size
 		elseif (msg_type_int == 151) then
 			-- update scan param
 			params:add(f.scan_dot11d_enabled, buffer(offset, 1)); offset = offset + 1
