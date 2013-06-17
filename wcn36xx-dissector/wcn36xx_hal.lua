@@ -227,6 +227,7 @@ f.msg_type = ProtoField.uint16("wcn36xx.msg_type", "msg_type", base.DEC, msg_typ
 f.msg_version = ProtoField.uint16("wcn36xx.msg_version", "msg_version")
 f.len = ProtoField.uint32("wcn36xx.len", "len")
 f.data = ProtoField.bytes("wcn36xx.data", "data")
+
 f.scan_channel = ProtoField.uint8("wcn36xx.scan_channel", "scan_channel")
 f.scan_dot11d_enabled = ProtoField.bool("wcn36xx.scan_dot11d_enabled", "dot11d_enabled")
 f.scan_dot11d_resolved = ProtoField.bool("wcn36xx.scan_dot11d_resolved", "dot11d_resolved")
@@ -237,10 +238,25 @@ f.scan_active_max_ch_time = ProtoField.uint16("wcn36xx.scan_active_max_ch_time",
 f.scan_passive_min_ch_time = ProtoField.uint16("wcn36xx.scan_active_min_ch_time", "scan_active_min_ch_time", base.DEC)
 f.scan_passive_max_ch_time = ProtoField.uint16("wcn36xx.scan_active_max_ch_time", "scan_active_max_ch_time", base.DEC)
 f.scan_phy_chan_bond_state = ProtoField.uint16("wcn36xx.scan_phy_chan_bond_state", "scan_phy_chan_bond_state", base.DEC, bond_state_strings)
+
 f.nv_frag_number = ProtoField.uint16("wcn36xx.nv_frag_number", "frag_number", base.DEC)
 f.nv_last_fragment = ProtoField.bool("wcn36xx.nv_last_fragment", "last_fragment")
 f.nv_img_buffer_size = ProtoField.uint32("wcn36xx.nv_img_buffer_size", "nv_img_buffer_size", base.DEC)
 f.nv_buffer = ProtoField.bytes("wcn36xx.nv_buffer", "nv_buffer")
+
+f.beacon_filter_capability_info = ProtoField.uint16("wcn36xx.beacon_filter_capability_info", "capability_info", base.HEX)
+f.beacon_filter_capability_mask = ProtoField.uint16("wcn36xx.beacon_filter_capability_mask", "capability_mask", base.HEX)
+f.beacon_filter_beacon_interval = ProtoField.uint16("wcn36xx.beacon_filter_beacon_interval", "beacon_interval", base.DEC)
+f.beacon_filter_ie_num = ProtoField.uint16("wcn36xx.beacon_filter_ie_num", "ie_num", base.DEC)
+f.beacon_filter_bss_index = ProtoField.uint8("wcn36xx.beacon_filter_bss_index", "bss_index", base.DEC)
+f.beacon_filter_reserved = ProtoField.uint8("wcn36xx.beacon_filter_reserved", "reserved", base.HEX)
+
+f.beacon_filter_element_id = ProtoField.uint8("wcn36xx.beacon_filter_element_id", "element_id", base.DEC)
+f.beacon_filter_check_ie_presence = ProtoField.uint8("wcn36xx.beacon_filter_check_ie_presence", "check_ie_presence", base.DEC)
+f.beacon_filter_offset = ProtoField.uint8("wcn36xx.beacon_filter_offset", "offset", base.DEC)
+f.beacon_filter_value = ProtoField.uint8("wcn36xx.beacon_filter_value", "value", base.HEX)
+f.beacon_filter_bitmask = ProtoField.uint8("wcn36xx.beacon_bitmask", "bitmask", base.HEX)
+f.beacon_filter_ref = ProtoField.uint8("wcn36xx.beacon_filter_ref", "ref", base.HEX)
 
 function wcn36xx.dissector(buffer, pinfo, tree)
 	local offset = 0
@@ -279,6 +295,25 @@ function wcn36xx.dissector(buffer, pinfo, tree)
 			local size = buffer(offset, 4):le_uint()
 			params:add_le(f.nv_img_buffer_size, buffer(offset, 4)); offset = offset + 4
 			params:add_le(f.nv_buffer, buffer(offset, size)); offset = offset + size
+		elseif (msg_type_int == 84) then
+			-- add beacon filter
+			params:add_le(f.beacon_filter_capability_info, buffer(offset, 2)); offset = offset + 2
+			params:add_le(f.beacon_filter_capability_mask, buffer(offset, 2)); offset = offset + 2
+			params:add_le(f.beacon_filter_beacon_interval, buffer(offset, 2)); offset = offset + 2
+			local num = buffer(offset, 2):le_uint()
+			params:add_le(f.beacon_filter_ie_num, buffer(offset, 2)); offset = offset + 2
+			params:add(f.beacon_filter_bss_index, buffer(offset, 1)); offset = offset + 1
+			params:add(f.beacon_filter_reserved, buffer(offset, 1)); offset = offset + 1
+			local elements
+			for i = 1,num do
+				elements = params:add(wcn36xx, buffer(offset, 6), i)
+				elements:add(f.beacon_filter_element_id, buffer(offset, 1)); offset = offset + 1
+				elements:add(f.beacon_filter_check_ie_presence, buffer(offset, 1)); offset = offset + 1
+				elements:add(f.beacon_filter_offset, buffer(offset, 1)); offset = offset + 1
+				elements:add(f.beacon_filter_value, buffer(offset, 1)); offset = offset + 1
+				elements:add(f.beacon_filter_bitmask, buffer(offset, 1)); offset = offset + 1
+				elements:add(f.beacon_filter_ref, buffer(offset, 1)); offset = offset + 1
+			end
 		elseif (msg_type_int == 151) then
 			-- update scan param
 			params:add(f.scan_dot11d_enabled, buffer(offset, 1)); offset = offset + 1
