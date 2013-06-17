@@ -11,6 +11,9 @@
 local wcn36xx = Proto("wcn36xx", "wcn36xx HAL dissector")
 
 function wcn36xx.init()
+	local udp_table = DissectorTable.get("udp.port")
+	local pattern = 3660
+	udp_table:add(pattern, wcn36xx)
 end
 
 local msg_type_strings = {}
@@ -293,7 +296,3 @@ function wcn36xx.dissector(buffer, pinfo, tree)
 		end
 	end
 end
-
-local udp_table = DissectorTable.get("udp.port")
-local pattern = 3660
-udp_table:add(pattern, wcn36xx)
