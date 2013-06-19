@@ -209,6 +209,11 @@ msg_type_strings[188] = "DEL_BA_IND"
 msg_type_strings[189] = "DHCP_START_IND"
 msg_type_strings[190] = "DHCP_STOP_IND"
 
+local driver_type_strings = {}
+driver_type_strings[0] = "production"
+driver_type_strings[1] = "mfg"
+driver_type_strings[2] = "dvt"
+
 local bond_state_strings = {}
 bond_state_strings[0] = "SINGLE_CHANNEL_CENTERED"
 bond_state_strings[1] = "DOUBLE_CHANNEL_LOW_PRIMARY"
@@ -221,6 +226,112 @@ bond_state_strings[7] = "QUADRUPLE_CHANNEL_20MHZ_LOW_40MHZ_LOW"
 bond_state_strings[8] = "QUADRUPLE_CHANNEL_20MHZ_HIGH_40MHZ_LOW"
 bond_state_strings[9] = "QUADRUPLE_CHANNEL_20MHZ_LOW_40MHZ_HIGH "
 bond_state_strings[10] = "QUADRUPLE_CHANNEL_20MHZ_HIGH_40MHZ_HIGH"
+
+local cfg_strings = {}
+cfg_strings[0] = "STA_ID"
+cfg_strings[1] = "CURRENT_TX_ANTENNA"
+cfg_strings[2] = "CURRENT_RX_ANTENNA"
+cfg_strings[3] = "LOW_GAIN_OVERRIDE"
+cfg_strings[4] = "POWER_STATE_PER_CHAIN"
+cfg_strings[5] = "CAL_PERIOD"
+cfg_strings[6] = "CAL_CONTROL"
+cfg_strings[7] = "PROXIMITY"
+cfg_strings[8] = "NETWORK_DENSITY"
+cfg_strings[9] = "MAX_MEDIUM_TIME"
+cfg_strings[10] = "MAX_MPDUS_IN_AMPDU"
+cfg_strings[11] = "RTS_THRESHOLD"
+cfg_strings[12] = "SHORT_RETRY_LIMIT"
+cfg_strings[13] = "LONG_RETRY_LIMIT"
+cfg_strings[14] = "FRAGMENTATION_THRESHOLD"
+cfg_strings[15] = "DYNAMIC_THRESHOLD_ZERO"
+cfg_strings[16] = "DYNAMIC_THRESHOLD_ONE"
+cfg_strings[17] = "DYNAMIC_THRESHOLD_TWO"
+cfg_strings[18] = "FIXED_RATE"
+cfg_strings[19] = "RETRYRATE_POLICY"
+cfg_strings[20] = "RETRYRATE_SECONDARY"
+cfg_strings[21] = "RETRYRATE_TERTIARY"
+cfg_strings[22] = "FORCE_POLICY_PROTECTION"
+cfg_strings[23] = "FIXED_RATE_MULTICAST_24GHZ"
+cfg_strings[24] = "FIXED_RATE_MULTICAST_5GHZ"
+cfg_strings[25] = "DEFAULT_RATE_INDEX_24GHZ"
+cfg_strings[26] = "DEFAULT_RATE_INDEX_5GHZ"
+cfg_strings[27] = "MAX_BA_SESSIONS"
+cfg_strings[28] = "PS_DATA_INACTIVITY_TIMEOUT"
+cfg_strings[29] = "PS_ENABLE_BCN_FILTER"
+cfg_strings[30] = "PS_ENABLE_RSSI_MONITOR"
+cfg_strings[31] = "NUM_BEACON_PER_RSSI_AVERAGE"
+cfg_strings[32] = "STATS_PERIOD"
+cfg_strings[33] = "CFP_MAX_DURATION"
+cfg_strings[34] = "FRAME_TRANS_ENABLED"
+cfg_strings[35] = "DTIM_PERIOD"
+cfg_strings[36] = "EDCA_WMM_ACBK"
+cfg_strings[37] = "EDCA_WMM_ACBE"
+cfg_strings[38] = "EDCA_WMM_ACVO"
+cfg_strings[39] = "EDCA_WMM_ACVI"
+cfg_strings[40] = "BA_THRESHOLD_HIGH"
+cfg_strings[41] = "MAX_BA_BUFFERS"
+cfg_strings[42] = "RPE_POLLING_THRESHOLD"
+cfg_strings[43] = "RPE_AGING_THRESHOLD_FOR_AC0_REG"
+cfg_strings[44] = "RPE_AGING_THRESHOLD_FOR_AC1_REG"
+cfg_strings[45] = "RPE_AGING_THRESHOLD_FOR_AC2_REG"
+cfg_strings[46] = "RPE_AGING_THRESHOLD_FOR_AC3_REG"
+cfg_strings[47] = "NO_OF_ONCHIP_REORDER_SESSIONS"
+cfg_strings[48] = "PS_LISTEN_INTERVAL"
+cfg_strings[49] = "PS_HEART_BEAT_THRESHOLD"
+cfg_strings[50] = "PS_NTH_BEACON_FILTER"
+cfg_strings[51] = "PS_MAX_PS_POLL"
+cfg_strings[52] = "PS_MIN_RSSI_THRESHOLD"
+cfg_strings[53] = "PS_RSSI_FILTER_PERIOD"
+cfg_strings[54] = "PS_BROADCAST_FRAME_FILTER_ENABLE"
+cfg_strings[55] = "PS_IGNORE_DTIM"
+cfg_strings[56] = "PS_ENABLE_BCN_EARLY_TERM"
+cfg_strings[57] = "DYNAMIC_PS_POLL_VALUE"
+cfg_strings[58] = "PS_NULLDATA_AP_RESP_TIMEOUT"
+cfg_strings[59] = "TELE_BCN_WAKEUP_EN"
+cfg_strings[60] = "TELE_BCN_TRANS_LI"
+cfg_strings[61] = "TELE_BCN_TRANS_LI_IDLE_BCNS"
+cfg_strings[62] = "TELE_BCN_MAX_LI"
+cfg_strings[63] = "TELE_BCN_MAX_LI_IDLE_BCNS"
+cfg_strings[64] = "TX_PWR_CTRL_ENABLE"
+cfg_strings[65] = "VALID_RADAR_CHANNEL_LIST"
+cfg_strings[66] = "TX_POWER_24_20"
+cfg_strings[67] = "TX_POWER_24_40"
+cfg_strings[68] = "TX_POWER_50_20"
+cfg_strings[69] = "TX_POWER_50_40"
+cfg_strings[70] = "MCAST_BCAST_FILTER_SETTING"
+cfg_strings[71] = "BCN_EARLY_TERM_WAKEUP_INTERVAL"
+cfg_strings[72] = "MAX_TX_POWER_2_4"
+cfg_strings[73] = "MAX_TX_POWER_5"
+cfg_strings[74] = "INFRA_STA_KEEP_ALIVE_PERIOD"
+cfg_strings[75] = "ENABLE_CLOSE_LOOP"
+cfg_strings[76] = "BTC_EXECUTION_MODE"
+cfg_strings[77] = "BTC_DHCP_BT_SLOTS_TO_BLOCK"
+cfg_strings[78] = "BTC_A2DP_DHCP_BT_SUB_INTERVALS"
+cfg_strings[79] = "PS_TX_INACTIVITY_TIMEOUT"
+cfg_strings[80] = "WCNSS_API_VERSION"
+cfg_strings[81] = "AP_KEEPALIVE_TIMEOUT"
+cfg_strings[82] = "GO_KEEPALIVE_TIMEOUT"
+cfg_strings[83] = "ENABLE_MC_ADDR_LIST"
+cfg_strings[84] = "BTC_STATIC_LEN_INQ_BT"
+cfg_strings[85] = "BTC_STATIC_LEN_PAGE_BT"
+cfg_strings[86] = "BTC_STATIC_LEN_CONN_BT"
+cfg_strings[87] = "BTC_STATIC_LEN_LE_BT"
+cfg_strings[88] = "BTC_STATIC_LEN_INQ_WLAN"
+cfg_strings[89] = "BTC_STATIC_LEN_PAGE_WLAN"
+cfg_strings[90] = "BTC_STATIC_LEN_CONN_WLAN"
+cfg_strings[91] = "BTC_STATIC_LEN_LE_WLAN"
+cfg_strings[92] = "BTC_DYN_MAX_LEN_BT"
+cfg_strings[93] = "BTC_DYN_MAX_LEN_WLAN"
+cfg_strings[94] = "BTC_MAX_SCO_BLOCK_PERC"
+cfg_strings[95] = "BTC_DHCP_PROT_ON_A2DP"
+cfg_strings[96] = "BTC_DHCP_PROT_ON_SCO"
+cfg_strings[97] = "ENABLE_UNICAST_FILTER"
+cfg_strings[98] = "MAX_ASSOC_LIMIT"
+cfg_strings[99] = "ENABLE_LPWR_IMG_TRANSITION"
+cfg_strings[100] = "ENABLE_MCC_ADAPTIVE_SCHEDULER"
+cfg_strings[101] = "ENABLE_DETECT_PS_SUPPORT"
+cfg_strings[102] = "AP_LINK_MONITOR_TIMEOUT"
+cfg_strings[103] = "BTC_DWELL_TIME_MULTIPLIER"
 
 local f = wcn36xx.fields
 f.msg_type = ProtoField.uint16("wcn36xx.msg_type", "msg_type", base.DEC, msg_type_strings)
@@ -258,6 +369,49 @@ f.beacon_filter_value = ProtoField.uint8("wcn36xx.beacon_filter_value", "value",
 f.beacon_filter_bitmask = ProtoField.uint8("wcn36xx.beacon_bitmask", "bitmask", base.HEX)
 f.beacon_filter_ref = ProtoField.uint8("wcn36xx.beacon_filter_ref", "ref", base.HEX)
 
+f.update_cfg_len = ProtoField.uint32("wcn36xx.update_cfg_len", "len")
+f.cfg_id = ProtoField.uint16("wcn36xx.cfg_id", "id", base.DEC, cfg_strings)
+f.cfg_len = ProtoField.uint32("wcn36xx.update_cfg_len", "len")
+f.cfg_pad_bytes = ProtoField.bytes("wcn36xx.cfg_pad_bytes", "pad_bytes")
+f.cfg_reserve = ProtoField.bytes("wcn36xx.cfg_reserve", "reserve")
+f.cfg_body = ProtoField.bytes("wcn36xx.cfg_body", "body")
+f.cfg_value = ProtoField.uint32("wcn36xx.cfg_value", "value")
+
+f.start_driver_type = ProtoField.uint32("wcn36xx.start_driver_type", "type", base.DEC, msg_type_strings)
+f.start_len = ProtoField.uint32("wcn36xx.start_len", "len")
+
+function parse_cfg(buffer, pinfo, tree)
+	local offset = 0
+	local id
+	local len
+	local pad
+	local elements
+	while buffer:len() > offset do
+		id = buffer(offset, 2):le_uint()
+		len = buffer(offset + 2, 2):le_uint()
+		pad = buffer(offset + 4, 2):le_uint()
+		local str
+		if (cfg_strings[id] ~= nil) then
+			str = cfg_strings[id]:lower()
+		else
+			str = id
+		end
+		elements = tree:add(wcn36xx, buffer(offset, len + 8), str)
+		elements:add_le(f.cfg_id, buffer(offset, 2)); offset = offset + 2
+		elements:add_le(f.cfg_len, buffer(offset, 2)); offset = offset + 2
+		elements:add_le(f.cfg_pad_bytes, buffer(offset, 2)); offset = offset + 2
+		elements:add_le(f.cfg_reserve, buffer(offset, 2)); offset = offset + 2
+		if (len == 4) then
+			-- Value likely a uint32 so parse it like one
+			elements:add_le(f.cfg_value, buffer(offset, len)); offset = offset + len
+		else
+			elements:add(f.cfg_body, buffer(offset, len)); offset = offset + len
+		end
+		offset = offset + pad
+	end
+	return offset
+end
+
 function wcn36xx.dissector(buffer, pinfo, tree)
 	local offset = 0
 	pinfo.cols.protocol = "wcn36xx"
@@ -284,10 +438,23 @@ function wcn36xx.dissector(buffer, pinfo, tree)
 	if buffer:len() > offset then
 		local data = buffer(offset)
 		local params = subtree:add(wcn36xx, buffer(offset), msg_type_str)
-		if ((msg_type_int == 6) or
-                    (msg_type_int == 8)) then
-			-- start/end scan command
+		if (msg_type_int == 0) then
+			-- start
+			params:add_le(f.start_driver_type, buffer(offset, 4)); offset = offset + 4
+			params:add_le(f.start_len, buffer(offset, 4)); offset = offset + 4
+			while buffer:len() > offset do
+				offset = offset + parse_cfg(buffer(offset):tvb(), pinfo, params)
+			end
+		elseif ((msg_type_int == 6) or
+                        (msg_type_int == 8)) then
+			-- start/end scan
 			params:add(f.scan_channel, buffer(offset, 1)); offset = offset + 1
+		elseif (msg_type_int == 48) then
+			-- update cfg
+			params:add_le(f.update_cfg_len, buffer(offset, 4)); offset = offset + 4
+			while buffer:len() > offset do
+				offset = offset + parse_cfg(buffer(offset):tvb(), pinfo, params)
+			end
 		elseif (msg_type_int == 55) then
 			-- download nv
 			params:add_le(f.nv_frag_number, buffer(offset, 2)); offset = offset + 2
