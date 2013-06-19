@@ -1,14 +1,19 @@
 -- Protocol dissector for wcn36xx HAL (host to firmware communication)
 
 -- Install instructions
--- add dofile("wcn36xx_hal.lua") to end of wireshark init.lua
--- Enable fw dbg dump
+-- Copy this file to ~/.wireshark/plugin/ folder
+-- Apply patches to enable hal dbg dump
 -- Run the following from a shell
 --   mkfifo /tmp/wireshark
 --   wireshark -k -i /tmp/wireshark &
---   adb shell cat /proc/kmsg | grep MSG | text2pcap -o hex -u 3660,3660 - /tmp/wireshark
+--   adb shell cat /proc/kmsg | grep HALDUMP | text2pcap -o hex -u 3660,3660 - /tmp/wireshark
 
 local wcn36xx = Proto("wcn36xx", "wcn36xx HAL dissector")
+local f = wcn36xx.fields
+local msg_type_strings = {}
+local driver_type_strings = {}
+local bond_state_strings = {}
+local cfg_strings = {}
 
 function wcn36xx.init()
 	local udp_table = DissectorTable.get("udp.port")
@@ -16,7 +21,126 @@ function wcn36xx.init()
 	udp_table:add(pattern, wcn36xx)
 end
 
-local msg_type_strings = {}
+function parse_cfg(buffer, pinfo, tree)
+	local offset = 0
+	local id
+	local len
+	local pad
+	local elements
+	while buffer:len() > offset do
+		id = buffer(offset, 2):le_uint()
+		len = buffer(offset + 2, 2):le_uint()
+		pad = buffer(offset + 4, 2):le_uint()
+		local str
+		if (cfg_strings[id] ~= nil) then
+			str = cfg_strings[id]:lower()
+		else
+			str = id
+		end
+		elements = tree:add(wcn36xx, buffer(offset, len + 8), str)
+		elements:add_le(f.cfg_id, buffer(offset, 2)); offset = offset + 2
+		elements:add_le(f.cfg_len, buffer(offset, 2)); offset = offset + 2
+		elements:add_le(f.cfg_pad_bytes, buffer(offset, 2)); offset = offset + 2
+		elements:add_le(f.cfg_reserve, buffer(offset, 2)); offset = offset + 2
+		if (len == 4) then
+			-- Value likely a uint32 so parse it like one
+			elements:add_le(f.cfg_value, buffer(offset, len)); offset = offset + len
+		else
+			elements:add(f.cfg_body, buffer(offset, len)); offset = offset + len
+		end
+		offset = offset + pad
+	end
+	return offset
+end
+
+function wcn36xx.dissector(buffer, pinfo, tree)
+	local offset = 0
+	pinfo.cols.protocol = "wcn36xx"
+	pinfo.cols.info = ""
+
+	local subtree = tree:add(wcn36xx, buffer(), "wcn36xx HAL protocol data")
+	local header = subtree:add(wcn36xx, buffer(offset, 8), "header")
+
+	local msg_type = buffer(offset, 2); offset = offset + 2
+	header:add_le(f.msg_type, msg_type)
+	header:add_le(f.msg_version, buffer(offset, 2)); offset = offset + 2
+	header:add_le(f.len, buffer(offset, 4)); offset = offset +  4
+
+	local msg_type_int = msg_type:le_uint()
+	local msg_type_str
+	if msg_type_strings[msg_type_int] ~= nil then
+		msg_type_str = msg_type_strings[msg_type_int]:lower()
+	else
+		msg_type_str = msg_type
+	end
+	pinfo.cols.info:append(msg_type_str)
+
+	-- data
+	if buffer:len() > offset then
+		local data = buffer(offset)
+		local params = subtree:add(wcn36xx, buffer(offset), msg_type_str)
+		if (msg_type_int == 0) then
+			-- start
+			params:add_le(f.start_driver_type, buffer(offset, 4)); offset = offset + 4
+			params:add_le(f.start_len, buffer(offset, 4)); offset = offset + 4
+			while buffer:len() > offset do
+				offset = offset + parse_cfg(buffer(offset):tvb(), pinfo, params)
+			end
+		elseif ((msg_type_int == 6) or
+                        (msg_type_int == 8)) then
+			-- start/end scan
+			params:add(f.scan_channel, buffer(offset, 1)); offset = offset + 1
+		elseif (msg_type_int == 48) then
+			-- update cfg
+			params:add_le(f.update_cfg_len, buffer(offset, 4)); offset = offset + 4
+			while buffer:len() > offset do
+				offset = offset + parse_cfg(buffer(offset):tvb(), pinfo, params)
+			end
+		elseif (msg_type_int == 55) then
+			-- download nv
+			params:add_le(f.nv_frag_number, buffer(offset, 2)); offset = offset + 2
+			params:add_le(f.nv_last_fragment, buffer(offset, 2)); offset = offset + 2
+			local size = buffer(offset, 4):le_uint()
+			params:add_le(f.nv_img_buffer_size, buffer(offset, 4)); offset = offset + 4
+			params:add_le(f.nv_buffer, buffer(offset, size)); offset = offset + size
+		elseif (msg_type_int == 84) then
+			-- add beacon filter
+			params:add_le(f.beacon_filter_capability_info, buffer(offset, 2)); offset = offset + 2
+			params:add_le(f.beacon_filter_capability_mask, buffer(offset, 2)); offset = offset + 2
+			params:add_le(f.beacon_filter_beacon_interval, buffer(offset, 2)); offset = offset + 2
+			local num = buffer(offset, 2):le_uint()
+			params:add_le(f.beacon_filter_ie_num, buffer(offset, 2)); offset = offset + 2
+			params:add(f.beacon_filter_bss_index, buffer(offset, 1)); offset = offset + 1
+			params:add(f.beacon_filter_reserved, buffer(offset, 1)); offset = offset + 1
+			local elements
+			for i = 1,num do
+				elements = params:add(wcn36xx, buffer(offset, 6), i)
+				elements:add(f.beacon_filter_element_id, buffer(offset, 1)); offset = offset + 1
+				elements:add(f.beacon_filter_check_ie_presence, buffer(offset, 1)); offset = offset + 1
+				elements:add(f.beacon_filter_offset, buffer(offset, 1)); offset = offset + 1
+				elements:add(f.beacon_filter_value, buffer(offset, 1)); offset = offset + 1
+				elements:add(f.beacon_filter_bitmask, buffer(offset, 1)); offset = offset + 1
+				elements:add(f.beacon_filter_ref, buffer(offset, 1)); offset = offset + 1
+			end
+		elseif (msg_type_int == 151) then
+			-- update scan param
+			params:add(f.scan_dot11d_enabled, buffer(offset, 1)); offset = offset + 1
+			params:add(f.scan_dot11d_resolved, buffer(offset, 1)); offset = offset + 1
+			local channel_count = buffer(offset, 1):uint()
+			params:add(f.scan_channel_count, buffer(offset, 1)); offset = offset + 1
+			params:add(f.scan_channels, buffer(offset, channel_count)); offset = offset + 60
+			params:add_le(f.scan_active_min_ch_time, buffer(offset, 2)); offset = offset + 2
+			params:add_le(f.scan_active_max_ch_time, buffer(offset, 2)); offset = offset + 2
+			params:add_le(f.scan_passive_min_ch_time, buffer(offset, 2)); offset = offset + 2
+			params:add_le(f.scan_passive_max_ch_time, buffer(offset, 2)); offset = offset + 2
+			params:add_le(f.scan_phy_chan_bond_state, buffer(offset, 4)); offset = offset + 4
+		else
+			params:add(f.data, data)
+		end
+	end
+end
+
+-- Lookup strings
 msg_type_strings[0] = "START_REQ"
 msg_type_strings[1] = "START_RSP"
 msg_type_strings[2] = "STOP_REQ"
@@ -209,12 +333,10 @@ msg_type_strings[188] = "DEL_BA_IND"
 msg_type_strings[189] = "DHCP_START_IND"
 msg_type_strings[190] = "DHCP_STOP_IND"
 
-local driver_type_strings = {}
 driver_type_strings[0] = "production"
 driver_type_strings[1] = "mfg"
 driver_type_strings[2] = "dvt"
 
-local bond_state_strings = {}
 bond_state_strings[0] = "SINGLE_CHANNEL_CENTERED"
 bond_state_strings[1] = "DOUBLE_CHANNEL_LOW_PRIMARY"
 bond_state_strings[2] = "DOUBLE_CHANNEL_CENTERED"
@@ -227,7 +349,6 @@ bond_state_strings[8] = "QUADRUPLE_CHANNEL_20MHZ_HIGH_40MHZ_LOW"
 bond_state_strings[9] = "QUADRUPLE_CHANNEL_20MHZ_LOW_40MHZ_HIGH "
 bond_state_strings[10] = "QUADRUPLE_CHANNEL_20MHZ_HIGH_40MHZ_HIGH"
 
-local cfg_strings = {}
 cfg_strings[0] = "STA_ID"
 cfg_strings[1] = "CURRENT_TX_ANTENNA"
 cfg_strings[2] = "CURRENT_RX_ANTENNA"
@@ -333,7 +454,7 @@ cfg_strings[101] = "ENABLE_DETECT_PS_SUPPORT"
 cfg_strings[102] = "AP_LINK_MONITOR_TIMEOUT"
 cfg_strings[103] = "BTC_DWELL_TIME_MULTIPLIER"
 
-local f = wcn36xx.fields
+-- Protocol fields
 f.msg_type = ProtoField.uint16("wcn36xx.msg_type", "msg_type", base.DEC, msg_type_strings)
 f.msg_version = ProtoField.uint16("wcn36xx.msg_version", "msg_version")
 f.len = ProtoField.uint32("wcn36xx.len", "len")
@@ -380,121 +501,3 @@ f.cfg_value = ProtoField.uint32("wcn36xx.cfg_value", "value")
 f.start_driver_type = ProtoField.uint32("wcn36xx.start_driver_type", "type", base.DEC, msg_type_strings)
 f.start_len = ProtoField.uint32("wcn36xx.start_len", "len")
 
-function parse_cfg(buffer, pinfo, tree)
-	local offset = 0
-	local id
-	local len
-	local pad
-	local elements
-	while buffer:len() > offset do
-		id = buffer(offset, 2):le_uint()
-		len = buffer(offset + 2, 2):le_uint()
-		pad = buffer(offset + 4, 2):le_uint()
-		local str
-		if (cfg_strings[id] ~= nil) then
-			str = cfg_strings[id]:lower()
-		else
-			str = id
-		end
-		elements = tree:add(wcn36xx, buffer(offset, len + 8), str)
-		elements:add_le(f.cfg_id, buffer(offset, 2)); offset = offset + 2
-		elements:add_le(f.cfg_len, buffer(offset, 2)); offset = offset + 2
-		elements:add_le(f.cfg_pad_bytes, buffer(offset, 2)); offset = offset + 2
-		elements:add_le(f.cfg_reserve, buffer(offset, 2)); offset = offset + 2
-		if (len == 4) then
-			-- Value likely a uint32 so parse it like one
-			elements:add_le(f.cfg_value, buffer(offset, len)); offset = offset + len
-		else
-			elements:add(f.cfg_body, buffer(offset, len)); offset = offset + len
-		end
-		offset = offset + pad
-	end
-	return offset
-end
-
-function wcn36xx.dissector(buffer, pinfo, tree)
-	local offset = 0
-	pinfo.cols.protocol = "wcn36xx"
-	pinfo.cols.info = ""
-
-	local subtree = tree:add(wcn36xx, buffer(), "wcn36xx HAL protocol data")
-	local header = subtree:add(wcn36xx, buffer(offset, 8), "header")
-
-	local msg_type = buffer(offset, 2); offset = offset + 2
-	header:add_le(f.msg_type, msg_type)
-	header:add_le(f.msg_version, buffer(offset, 2)); offset = offset + 2
-	header:add_le(f.len, buffer(offset, 4)); offset = offset +  4
-
-	local msg_type_int = msg_type:le_uint()
-	local msg_type_str
-	if msg_type_strings[msg_type_int] ~= nil then
-		msg_type_str = msg_type_strings[msg_type_int]:lower()
-	else
-		msg_type_str = msg_type
-	end
-	pinfo.cols.info:append(msg_type_str)
-
-	-- data
-	if buffer:len() > offset then
-		local data = buffer(offset)
-		local params = subtree:add(wcn36xx, buffer(offset), msg_type_str)
-		if (msg_type_int == 0) then
-			-- start
-			params:add_le(f.start_driver_type, buffer(offset, 4)); offset = offset + 4
-			params:add_le(f.start_len, buffer(offset, 4)); offset = offset + 4
-			while buffer:len() > offset do
-				offset = offset + parse_cfg(buffer(offset):tvb(), pinfo, params)
-			end
-		elseif ((msg_type_int == 6) or
-                        (msg_type_int == 8)) then
-			-- start/end scan
-			params:add(f.scan_channel, buffer(offset, 1)); offset = offset + 1
-		elseif (msg_type_int == 48) then
-			-- update cfg
-			params:add_le(f.update_cfg_len, buffer(offset, 4)); offset = offset + 4
-			while buffer:len() > offset do
-				offset = offset + parse_cfg(buffer(offset):tvb(), pinfo, params)
-			end
-		elseif (msg_type_int == 55) then
-			-- download nv
-			params:add_le(f.nv_frag_number, buffer(offset, 2)); offset = offset + 2
-			params:add_le(f.nv_last_fragment, buffer(offset, 2)); offset = offset + 2
-			local size = buffer(offset, 4):le_uint()
-			params:add_le(f.nv_img_buffer_size, buffer(offset, 4)); offset = offset + 4
-			params:add_le(f.nv_buffer, buffer(offset, size)); offset = offset + size
-		elseif (msg_type_int == 84) then
-			-- add beacon filter
-			params:add_le(f.beacon_filter_capability_info, buffer(offset, 2)); offset = offset + 2
-			params:add_le(f.beacon_filter_capability_mask, buffer(offset, 2)); offset = offset + 2
-			params:add_le(f.beacon_filter_beacon_interval, buffer(offset, 2)); offset = offset + 2
-			local num = buffer(offset, 2):le_uint()
-			params:add_le(f.beacon_filter_ie_num, buffer(offset, 2)); offset = offset + 2
-			params:add(f.beacon_filter_bss_index, buffer(offset, 1)); offset = offset + 1
-			params:add(f.beacon_filter_reserved, buffer(offset, 1)); offset = offset + 1
-			local elements
-			for i = 1,num do
-				elements = params:add(wcn36xx, buffer(offset, 6), i)
-				elements:add(f.beacon_filter_element_id, buffer(offset, 1)); offset = offset + 1
-				elements:add(f.beacon_filter_check_ie_presence, buffer(offset, 1)); offset = offset + 1
-				elements:add(f.beacon_filter_offset, buffer(offset, 1)); offset = offset + 1
-				elements:add(f.beacon_filter_value, buffer(offset, 1)); offset = offset + 1
-				elements:add(f.beacon_filter_bitmask, buffer(offset, 1)); offset = offset + 1
-				elements:add(f.beacon_filter_ref, buffer(offset, 1)); offset = offset + 1
-			end
-		elseif (msg_type_int == 151) then
-			-- update scan param
-			params:add(f.scan_dot11d_enabled, buffer(offset, 1)); offset = offset + 1
-			params:add(f.scan_dot11d_resolved, buffer(offset, 1)); offset = offset + 1
-			local channel_count = buffer(offset, 1):uint()
-			params:add(f.scan_channel_count, buffer(offset, 1)); offset = offset + 1
-			params:add(f.scan_channels, buffer(offset, channel_count)); offset = offset + 60
-			params:add_le(f.scan_active_min_ch_time, buffer(offset, 2)); offset = offset + 2
-			params:add_le(f.scan_active_max_ch_time, buffer(offset, 2)); offset = offset + 2
-			params:add_le(f.scan_passive_min_ch_time, buffer(offset, 2)); offset = offset + 2
-			params:add_le(f.scan_passive_max_ch_time, buffer(offset, 2)); offset = offset + 2
-			params:add_le(f.scan_phy_chan_bond_state, buffer(offset, 4)); offset = offset + 4
-		else
-			params:add(f.data, data)
-		end
-	end
-end
