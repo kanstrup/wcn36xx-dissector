@@ -6,7 +6,7 @@
 -- Run the following from a shell
 --   mkfifo /tmp/wireshark
 --   wireshark -k -i /tmp/wireshark &
---   adb shell cat /proc/kmsg | grep HALDUMP | text2pcap -o hex -u 3660,3660 - /tmp/wireshark
+--   adb shell cat /proc/kmsg | grep HALDUMP | text2pcap -o hex -e 0x3660 - /tmp/wireshark
 
 local wcn36xx = Proto("wcn36xx", "wcn36xx HAL dissector")
 local f = wcn36xx.fields
@@ -17,8 +17,10 @@ local cfg_strings = {}
 local offload_type_strings = {}
 
 function wcn36xx.init()
-	local udp_table = DissectorTable.get("udp.port")
-	local pattern = 3660
+	-- Hook into ethertype parser
+	-- Bogus value 0x3660 used together with textpcap dummy header generation
+	local udp_table = DissectorTable.get("ethertype")
+	local pattern = 0x3660
 	udp_table:add(pattern, wcn36xx)
 end
 
