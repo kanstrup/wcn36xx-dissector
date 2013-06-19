@@ -14,6 +14,7 @@ local msg_type_strings = {}
 local driver_type_strings = {}
 local bond_state_strings = {}
 local cfg_strings = {}
+local offload_type_strings = {}
 
 function wcn36xx.init()
 	local udp_table = DissectorTable.get("udp.port")
@@ -139,6 +140,29 @@ function wcn36xx.dissector(buffer, pinfo, tree)
 				elements:add(f.beacon_filter_value, buffer(n, 1)); n = n + 1
 				elements:add(f.beacon_filter_bitmask, buffer(n, 1)); n = n + 1
 				elements:add(f.beacon_filter_ref, buffer(n, 1)); n = n + 1
+			end
+		elseif (msg_type_int == 90) then
+			-- host offload
+			local type = buffer(n, 1):uint()
+			params:add(f.host_offload_type, buffer(n, 1)); n = n + 1
+			params:add(f.host_offload_enable, buffer(n, 1)); n = n + 1
+			if (type == 0) then
+				-- arp reply offload
+				params:add(f.host_offload_ipv4, buffer(n, 4)); n = n + 16
+			elseif (type == 1) then
+				-- ipv6 neighbor discovery offload
+				params:add(f.host_offload_ipv6, buffer(n, 16)); n = n + 16
+			else
+				-- ipv6 ns offload
+				params:add(f.ns_offload_src_ipv6, buffer(n, 16)); n = n + 16
+				params:add(f.ns_offload_self_ipv6, buffer(n, 16)); n = n + 16
+				params:add(f.ns_offload_target_ipv6, buffer(n, 16)); n = n + 16
+				params:add(f.ns_offload_target_ipv6_2, buffer(n, 16)); n = n + 16
+				params:add_le(f.ns_offload_self_addr, buffer(n, 6)); n = n + 6
+				params:add(f.ns_offload_valid, buffer(n, 1)); n = n + 1
+				params:add(f.ns_offload_reserved2, buffer(n, 1)); n = n + 1
+				params:add(f.ns_offload_bss_index, buffer(n, 1)); n = n + 1
+				params:add_le(f.ns_offload_slot_index, buffer(n, 4)); n = n + 4
 			end
 		elseif (msg_type_int == 125) then
 			-- add sta self
@@ -481,6 +505,10 @@ cfg_strings[101] = "ENABLE_DETECT_PS_SUPPORT"
 cfg_strings[102] = "AP_LINK_MONITOR_TIMEOUT"
 cfg_strings[103] = "BTC_DWELL_TIME_MULTIPLIER"
 
+offload_type_strings[0] = "IPV4_ARP_REPLY_OFFLOAD"
+offload_type_strings[1] = "IPV6_NEIGHBOR_DISCOVERY_OFFLOAD"
+offload_type_strings[2] = "IPV6_NS_OFFLOAD"
+
 -- Protocol fields
 f.msg_type = ProtoField.uint16("wcn36xx.msg_type", "msg_type", base.DEC, msg_type_strings)
 f.msg_version = ProtoField.uint16("wcn36xx.msg_version", "msg_version")
@@ -544,3 +572,17 @@ f.add_ba_session_direction = ProtoField.uint8("wcn36xx.add_ba_session_direction"
 f.add_ba_session_id = ProtoField.uint8("wcn36xx.add_ba_session_id", "session_id")
 f.add_ba_win_size = ProtoField.uint8("wcn36xx.add_ba_win_size", "win_size")
 f.add_ba_reorder_on_chip = ProtoField.uint8("wcn36xx.add_ba_reorder_on_chip", "reorder_on_chip", base.DEC)
+
+f.host_offload_type = ProtoField.uint8("wcn36xx.host_offload_type", "type", base.DEC, offload_type_strings)
+f.host_offload_enable = ProtoField.bool("wcn36xx.host_offload_enable", "enable")
+f.host_offload_ipv4 = ProtoField.ipv4("wcn36xx.host_offload_ipv4", "ipv4")
+f.host_offload_ipv6 = ProtoField.ipv6("wcn36xx.host_offload_ipv6", "ipv6")
+f.ns_offload_src_ipv6 = ProtoField.ipv6("wcn36xx.ns_offload_src_ipv6", "src_ipv6")
+f.ns_offload_self_ipv6 = ProtoField.ipv6("wcn36xx.ns_offload_self_ipv6", "self_ipv6")
+f.ns_offload_target_ipv6 = ProtoField.ipv6("wcn36xx.ns_offload_target_ipv6", "target_ipv6")
+f.ns_offload_target_ipv6_2 = ProtoField.ipv6("wcn36xx.ns_offload_target_ipv6_2", "target_ipv6_2")
+f.ns_offload_self_addr = ProtoField.ether("wcn36xx.ns_offload_target_self_addr", "self_addr")
+f.ns_offload_valid = ProtoField.uint8("wcn36xx.ns_offload_valud", "valid", base.HEX)
+f.ns_offload_reserved2 = ProtoField.uint8("wcn36xx.ns_offload_reserved2", "reserved2")
+f.ns_offload_bss_index = ProtoField.uint8("wcn36xx.ns_offload_bss_index", "bss_index")
+f.ns_offload_slot_index = ProtoField.uint32("wcn36xx.ns_offload_slot_index", "slot_index")
