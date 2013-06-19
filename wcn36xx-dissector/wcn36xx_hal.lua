@@ -164,6 +164,18 @@ function wcn36xx.dissector(buffer, pinfo, tree)
 				params:add(f.ns_offload_bss_index, buffer(n, 1)); n = n + 1
 				params:add_le(f.ns_offload_slot_index, buffer(n, 4)); n = n + 4
 			end
+		elseif (msg_type_int == 91) then
+			-- set rssi threshold
+			params:add(f.set_rssi_threshold_t1, buffer(n, 1)); n = n + 1
+			params:add(f.set_rssi_threshold_t2, buffer(n, 1)); n = n + 1
+			params:add(f.set_rssi_threshold_t3, buffer(n, 1)); n = n + 1
+			params:add(f.set_rssi_threshold_t1pos, buffer(n, 1):bitfield(7));
+			params:add(f.set_rssi_threshold_t1neg, buffer(n, 1):bitfield(6));
+			params:add(f.set_rssi_threshold_t2pos, buffer(n, 1):bitfield(5));
+			params:add(f.set_rssi_threshold_t2neg, buffer(n, 1):bitfield(4));
+			params:add(f.set_rssi_threshold_t3pos, buffer(n, 1):bitfield(3));
+			params:add(f.set_rssi_threshold_t3neg, buffer(n, 1):bitfield(2));
+			n = n + 1
 		elseif (msg_type_int == 125) then
 			-- add sta self
 			params:add_le(f.add_sta_self_addr, buffer(n, 6)); n = n + 6
@@ -586,3 +598,13 @@ f.ns_offload_valid = ProtoField.uint8("wcn36xx.ns_offload_valud", "valid", base.
 f.ns_offload_reserved2 = ProtoField.uint8("wcn36xx.ns_offload_reserved2", "reserved2")
 f.ns_offload_bss_index = ProtoField.uint8("wcn36xx.ns_offload_bss_index", "bss_index")
 f.ns_offload_slot_index = ProtoField.uint32("wcn36xx.ns_offload_slot_index", "slot_index")
+
+f.set_rssi_threshold_t1 = ProtoField.int8("wcn36xx.set_rssi_threshold_t1", "t1")
+f.set_rssi_threshold_t2 = ProtoField.int8("wcn36xx.set_rssi_threshold_t2", "t2")
+f.set_rssi_threshold_t3 = ProtoField.int8("wcn36xx.set_rssi_threshold_t3", "t3")
+f.set_rssi_threshold_t1pos = ProtoField.bool("wcn36xx.set_rssi_threshold_t1pos", "t1posnotify")
+f.set_rssi_threshold_t1neg = ProtoField.bool("wcn36xx.set_rssi_threshold_t1neg", "t1negnotify")
+f.set_rssi_threshold_t2pos = ProtoField.bool("wcn36xx.set_rssi_threshold_t2pos", "t2posnotify")
+f.set_rssi_threshold_t2neg = ProtoField.bool("wcn36xx.set_rssi_threshold_t2neg", "t2negnotify")
+f.set_rssi_threshold_t3pos = ProtoField.bool("wcn36xx.set_rssi_threshold_t3pos", "t3posnotify")
+f.set_rssi_threshold_t3neg = ProtoField.bool("wcn36xx.set_rssi_threshold_t3ned", "t3negnotify")
