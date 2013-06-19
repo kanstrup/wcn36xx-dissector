@@ -197,6 +197,14 @@ function wcn36xx.dissector(buffer, pinfo, tree)
 			params:add_le(f.scan_passive_min_ch_time, buffer(n, 2)); n = n + 2
 			params:add_le(f.scan_passive_max_ch_time, buffer(n, 2)); n = n + 2
 			params:add_le(f.scan_phy_chan_bond_state, buffer(n, 4)); n = n + 4
+		elseif (msg_type_int == 166) then
+			-- set power params
+			params:add_le(f.set_power_params_ignore_dtim, buffer(n, 4)); n = n + 4
+			params:add_le(f.set_power_params_dtim_period, buffer(n, 4)); n = n + 4
+			params:add_le(f.set_power_params_listen_interval, buffer(n, 4)); n = n + 4
+			params:add_le(f.set_power_params_bcast_mcast_filter, buffer(n, 4)); n = n + 4
+			params:add_le(f.set_power_params_enable_bet, buffer(n, 4)); n = n + 4
+			params:add_le(f.set_power_params_bet_interval, buffer(n, 4)); n = n + 4
 		else
 			params:add(f.data, data)
 		end
@@ -608,3 +616,10 @@ f.set_rssi_threshold_t2pos = ProtoField.bool("wcn36xx.set_rssi_threshold_t2pos",
 f.set_rssi_threshold_t2neg = ProtoField.bool("wcn36xx.set_rssi_threshold_t2neg", "t2negnotify")
 f.set_rssi_threshold_t3pos = ProtoField.bool("wcn36xx.set_rssi_threshold_t3pos", "t3posnotify")
 f.set_rssi_threshold_t3neg = ProtoField.bool("wcn36xx.set_rssi_threshold_t3ned", "t3negnotify")
+
+f.set_power_params_ignore_dtim = ProtoField.bool("wcn36xx.set_power_params_ignore_dtim", "ignore_dtim")
+f.set_power_params_dtim_period = ProtoField.uint32("wcn36xx.set_power_params_dtim_period", "dtim_period")
+f.set_power_params_listen_interval = ProtoField.uint32("wcn36xx.set_power_params_listen_interval", "listen_interval")
+f.set_power_params_bcast_mcast_filter = ProtoField.uint32("wcn36xx.set_power_params_mcast_filter", "mcast_filter")
+f.set_power_params_enable_bet = ProtoField.bool("wcn36xx.set_power_params_enable_bet", "enable_bet")
+f.set_power_params_bet_interval = ProtoField.uint32("wcn36xx.set_power_params_bet_interval", "bet_interval")
