@@ -132,7 +132,12 @@ function wcn36xx.dissector(buffer, pinfo, tree)
 			params:add(f.scan_dot11d_resolved, buffer(offset, 1)); offset = offset + 1
 			local channel_count = buffer(offset, 1):uint()
 			params:add(f.scan_channel_count, buffer(offset, 1)); offset = offset + 1
-			params:add(f.scan_channels, buffer(offset, channel_count)); offset = offset + 60
+			local elements = params:add(wcn36xx, buffer(offset, channel_count), "channels")
+			local index = offset
+			for i = 1,channel_count do
+				elements:add(f.scan_channels_i, buffer(index, 1)); index = index + 1
+			end
+			offset = offset + 60
 			params:add_le(f.scan_active_min_ch_time, buffer(offset, 2)); offset = offset + 2
 			params:add_le(f.scan_active_max_ch_time, buffer(offset, 2)); offset = offset + 2
 			params:add_le(f.scan_passive_min_ch_time, buffer(offset, 2)); offset = offset + 2
@@ -468,7 +473,7 @@ f.scan_channel = ProtoField.uint8("wcn36xx.scan_channel", "scan_channel")
 f.scan_dot11d_enabled = ProtoField.bool("wcn36xx.scan_dot11d_enabled", "dot11d_enabled")
 f.scan_dot11d_resolved = ProtoField.bool("wcn36xx.scan_dot11d_resolved", "dot11d_resolved")
 f.scan_channel_count  = ProtoField.uint8("wcn36xx.scan_channel_count", "channel_count", base.DEC)
-f.scan_channels = ProtoField.bytes("wcn36xx.scan_channels", "scan_channels", base.DEC)
+f.scan_channels_i = ProtoField.uint8("wcn36xx.scan_channel", "scan_channel", base.DEC)
 f.scan_active_min_ch_time = ProtoField.uint16("wcn36xx.scan_active_min_ch_time", "scan_active_min_ch_time", base.DEC)
 f.scan_active_max_ch_time = ProtoField.uint16("wcn36xx.scan_active_max_ch_time", "scan_active_max_ch_time", base.DEC)
 f.scan_passive_min_ch_time = ProtoField.uint16("wcn36xx.scan_active_min_ch_time", "scan_active_min_ch_time", base.DEC)
