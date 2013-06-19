@@ -90,6 +90,13 @@ function wcn36xx.dissector(buffer, pinfo, tree)
                         (msg_type_int == 8)) then
 			-- start/end scan
 			params:add(f.scan_channel, buffer(n, 1)); n = n + 1
+		elseif (msg_type_int == 38) then
+			-- add ba
+			params:add(f.add_ba_session_id, buffer(n, 1)); n = n + 1
+			params:add(f.add_ba_win_size, buffer(n, 1)); n = n + 1
+			if buffer:len() > n then
+				params:add(f.add_ba_reorder_on_chip, buffer(n, 1)); n = n + 1
+			end
 		elseif (msg_type_int == 48) then
 			-- update cfg
 			params:add_le(f.update_cfg_len, buffer(n, 4)); n = n + 4
@@ -103,6 +110,17 @@ function wcn36xx.dissector(buffer, pinfo, tree)
 			local size = buffer(n, 4):le_uint()
 			params:add_le(f.nv_img_buffer_size, buffer(n, 4)); n = n + 4
 			params:add_le(f.nv_buffer, buffer(n, size)); n = n + size
+		elseif (msg_type_int == 57) then
+			-- add ba session
+			params:add_le(f.add_ba_session_sta_index, buffer(n, 2)); n = n + 2
+			params:add_le(f.add_ba_session_mac_addr, buffer(n, 6)); n = n + 6
+			params:add(f.add_ba_session_dialog_token, buffer(n, 1)); n = n + 1
+			params:add(f.add_ba_session_tid, buffer(n, 1)); n = n + 1
+			params:add(f.add_ba_session_policy, buffer(n, 1)); n = n + 1
+			params:add_le(f.add_ba_session_buffer_size, buffer(n, 2)); n = n + 2
+			params:add_le(f.add_ba_session_timeout, buffer(n, 2)); n = n + 2
+			params:add_le(f.add_ba_session_ssn, buffer(n, 2)); n = n + 2
+			params:add(f.add_ba_session_direction, buffer(n, 1)); n = n + 1
 		elseif (msg_type_int == 84) then
 			-- add beacon filter
 			params:add_le(f.beacon_filter_capability_info, buffer(n, 2)); n = n + 2
@@ -512,3 +530,17 @@ f.start_len = ProtoField.uint32("wcn36xx.start_len", "len")
 
 f.add_sta_self_addr = ProtoField.ether("wcn36xx.add_sta_self_addr", "addr")
 f.add_sta_self_status = ProtoField.uint32("wcn36xx.add_sta_self_status", "status", base.HEX)
+
+f.add_ba_session_sta_index = ProtoField.uint16("wcn36xx.add_ba_session_sta_index", "sta_index")
+f.add_ba_session_mac_addr = ProtoField.ether("wcn36xx.add_ba_session_mac_addr", "mac_addr", base.HEX)
+f.add_ba_session_dialog_token = ProtoField.uint8("wcn36xx.add_ba_session_dialog_token", "dialog_token")
+f.add_ba_session_tid = ProtoField.uint8("wcn36xx.add_ba_session_tid", "tid")
+f.add_ba_session_policy = ProtoField.uint8("wcn36xx.add_ba_session_policy", "policy")
+f.add_ba_session_buffer_size = ProtoField.uint16("wcn36xx.add_ba_session_buffer_size", "buffer_size")
+f.add_ba_session_timeout = ProtoField.uint16("wcn36xx.add_ba_session_timeout", "timeout")
+f.add_ba_session_ssn = ProtoField.uint16("wcn36xx.add_ba_session_ssn", "ssn", base.HEX)
+f.add_ba_session_direction = ProtoField.uint8("wcn36xx.add_ba_session_direction", "direction")
+
+f.add_ba_session_id = ProtoField.uint8("wcn36xx.add_ba_session_id", "session_id")
+f.add_ba_win_size = ProtoField.uint8("wcn36xx.add_ba_win_size", "win_size")
+f.add_ba_reorder_on_chip = ProtoField.uint8("wcn36xx.add_ba_reorder_on_chip", "reorder_on_chip", base.DEC)
