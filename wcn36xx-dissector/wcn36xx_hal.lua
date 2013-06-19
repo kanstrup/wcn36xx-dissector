@@ -122,6 +122,10 @@ function wcn36xx.dissector(buffer, pinfo, tree)
 				elements:add(f.beacon_filter_bitmask, buffer(offset, 1)); offset = offset + 1
 				elements:add(f.beacon_filter_ref, buffer(offset, 1)); offset = offset + 1
 			end
+		elseif (msg_type_int == 125) then
+			-- add sta self
+			params:add_le(f.add_sta_self_addr, buffer(offset, 6)); offset = offset + 6
+			params:add_le(f.add_sta_self_status, buffer(offset, 4)); offset = offset + 4
 		elseif (msg_type_int == 151) then
 			-- update scan param
 			params:add(f.scan_dot11d_enabled, buffer(offset, 1)); offset = offset + 1
@@ -501,3 +505,5 @@ f.cfg_value = ProtoField.uint32("wcn36xx.cfg_value", "value")
 f.start_driver_type = ProtoField.uint32("wcn36xx.start_driver_type", "type", base.DEC, msg_type_strings)
 f.start_len = ProtoField.uint32("wcn36xx.start_len", "len")
 
+f.add_sta_self_addr = ProtoField.ether("wcn36xx.add_sta_self_addr", "addr")
+f.add_sta_self_status = ProtoField.uint32("wcn36xx.add_sta_self_status", "status", base.HEX)
