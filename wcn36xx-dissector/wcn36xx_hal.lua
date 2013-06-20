@@ -6,7 +6,7 @@
 -- Run the following from a shell
 --   mkfifo /tmp/wireshark
 --   wireshark -k -i /tmp/wireshark &
---   adb shell cat /proc/kmsg | grep HALDUMP | text2pcap -o hex -e 0x3660 - /tmp/wireshark
+--   adb shell cat /proc/kmsg | grep HALDUMP | text2pcap -q -o hex -e 0x3660 - /tmp/wireshark
 
 local wcn36xx = Proto("wcn36xx", "wcn36xx HAL dissector")
 local f = wcn36xx.fields
@@ -15,6 +15,7 @@ local driver_type_strings = {}
 local bond_state_strings = {}
 local cfg_strings = {}
 local offload_type_strings = {}
+local sys_mode_strings = {}
 
 function wcn36xx.init()
 	-- Hook into ethertype parser
@@ -89,6 +90,24 @@ function wcn36xx.dissector(buffer, pinfo, tree)
 			while buffer:len() > n do
 				n = n + parse_cfg(buffer(n):tvb(), pinfo, params)
 			end
+		elseif (msg_type_int == 4) then
+			-- init scan
+			params:add_le(f.init_scan_mode, buffer(n, 4)); n = n + 4
+			params:add_le(f.init_scan_bssid, buffer(n, 6)); n = n + 6
+			params:add(f.init_scan_notify, buffer(n, 1)); n = n + 1
+			params:add(f.init_scan_frame_type, buffer(n, 1)); n = n + 1
+			params:add(f.init_scan_frame_len, buffer(n, 1)); n = n + 1
+			local hdr = params:add(wcn36xx, buffer(n, 24), "msg_mgmt_hdr")
+			hdr:add_le(f.hal_mac_frame_ctl, buffer(n, 2)); n = n + 2
+			hdr:add(f.hal_mac_mgmt_hdr_duration_lo, buffer(n, 1)); n = n + 1
+			hdr:add(f.hal_mac_mgmt_hdr_duration_hi, buffer(n, 1)); n = n + 1
+			hdr:add_le(f.hal_mac_mgmt_hdr_da, buffer(n, 6)); n = n + 6
+			hdr:add_le(f.hal_mac_mgmt_hdr_sa, buffer(n, 6)); n = n + 6
+			hdr:add_le(f.hal_mac_mgmt_hdr_bssid, buffer(n, 6)); n = n + 6
+			hdr:add_le(f.hal_mac_mgmt_hdr_seq_ctl, buffer(n, 2)); n = n + 2
+			local scan_entry = params:add(wcn36xx, buffer(n, 3), "scan_entry")
+			scan_entry:add(f.hal_scan_entry_bss_index, buffer(n, 2)); n = n + 2
+			scan_entry:add(f.hal_scan_entry_active_bss_count, buffer(n, 1)); n = n + 1
 		elseif ((msg_type_int == 6) or
                         (msg_type_int == 8)) then
 			-- start/end scan
@@ -100,6 +119,15 @@ function wcn36xx.dissector(buffer, pinfo, tree)
 			if buffer:len() > n then
 				params:add(f.add_ba_reorder_on_chip, buffer(n, 1)); n = n + 1
 			end
+		elseif (msg_type_int == 42) then
+			-- channel switch
+			params:add(f.ch_switch_channel_number, buffer(n, 1)); n = n + 1
+			params:add(f.ch_switch_local_power_constraint, buffer(n, 1)); n = n + 1
+			params:add_le(f.ch_switch_secondary_channel_offset, buffer(n, 4)); n = n + 4
+			params:add(f.ch_switch_tx_mgmt_power, buffer(n, 1)); n = n + 1
+			params:add(f.ch_switch_max_tx_power, buffer(n, 1)); n = n + 1
+			params:add_le(f.ch_switch_self_sta_mac_addr, buffer(n, 6)); n = n + 6
+			params:add_le(f.ch_switch_bssid, buffer(n, 6)); n = n + 6
 		elseif (msg_type_int == 48) then
 			-- update cfg
 			params:add_le(f.update_cfg_len, buffer(n, 4)); n = n + 4
@@ -531,6 +559,14 @@ offload_type_strings[0] = "IPV4_ARP_REPLY_OFFLOAD"
 offload_type_strings[1] = "IPV6_NEIGHBOR_DISCOVERY_OFFLOAD"
 offload_type_strings[2] = "IPV6_NS_OFFLOAD"
 
+sys_mode_strings[0] = "NORMAL"
+sys_mode_strings[1] = "LEARN"
+sys_mode_strings[2] = "SCAN"
+sys_mode_strings[3] = "PROMISC"
+sys_mode_strings[4] = "SUSPEND_LINK"
+sys_mode_strings[5] = "ROAM_SCAN"
+sys_mode_strings[6] = "ROAM_SUSPEND_LINK"
+
 -- Protocol fields
 f.msg_type = ProtoField.uint16("wcn36xx.msg_type", "msg_type", base.DEC, msg_type_strings)
 f.msg_version = ProtoField.uint16("wcn36xx.msg_version", "msg_version")
@@ -625,3 +661,28 @@ f.set_power_params_listen_interval = ProtoField.uint32("wcn36xx.set_power_params
 f.set_power_params_bcast_mcast_filter = ProtoField.uint32("wcn36xx.set_power_params_mcast_filter", "mcast_filter")
 f.set_power_params_enable_bet = ProtoField.bool("wcn36xx.set_power_params_enable_bet", "enable_bet")
 f.set_power_params_bet_interval = ProtoField.uint32("wcn36xx.set_power_params_bet_interval", "bet_interval")
+
+f.ch_switch_channel_number = ProtoField.uint8("wcn36xx.ch_switch_channel_number", "channel")
+f.ch_switch_local_power_constraint = ProtoField.uint8("wcn36xx.ch_switch_power_constraint", "power_constraint")
+f.ch_switch_secondary_channel_offset = ProtoField.uint32("wcn36xx.ch_switch_secondary_channel_offset", "secondary_channel_offset", base.DEC, bond_state_strings)
+f.ch_switch_tx_mgmt_power = ProtoField.uint8("wcn36xx.ch_switch_tx_mgmt_power", "tx_mgmt_power")
+f.ch_switch_max_tx_power = ProtoField.uint8("wcn36xx.ch_switch_max_tx_power", "max_tx_power")
+f.ch_switch_self_sta_mac_addr = ProtoField.ether("wcn36xx.ch_switch_self_sta_mac_addr", "self_sta_mac_addr")
+f.ch_switch_bssid = ProtoField.ether("wcn36xx.ch_switch_bssid", "bssid")
+
+f.init_scan_mode = ProtoField.uint32("wcn36xx.init_scan_mode", "mode", base.DEX, sys_mode_strings)
+f.init_scan_bssid = ProtoField.ether("wcn36xx.init_scan_bssid", "bssid")
+f.init_scan_notify = ProtoField.uint8("wcn36xx.init_scan_notify", "notify")
+f.init_scan_frame_type = ProtoField.uint8("wcn36xx.init_scan_frame_type", "frame_type")
+f.init_scan_frame_len = ProtoField.uint8("wcn36xx.init_scan_frame_len", "frame_len")
+
+f.hal_mac_frame_ctl = ProtoField.uint16("wcn36xx.hal_mac_frame_ctl", "frame_ctl")
+f.hal_mac_mgmt_hdr_duration_lo = ProtoField.uint8("wcn36xx.hal_mac_mgmt_hdr_duration_lo", "duration_lo")
+f.hal_mac_mgmt_hdr_duration_hi = ProtoField.uint8("wcn36xx.hal_mac_mgmt_hdr_duration_hi", "duration_hi")
+f.hal_mac_mgmt_hdr_da = ProtoField.bytes("wcn36xx.hal_mac_mgmt_hdr_da", "hdr_da")
+f.hal_mac_mgmt_hdr_sa = ProtoField.bytes("wcn36xx.hal_mac_mgmt_hdr_sa", "hdr_sa")
+f.hal_mac_mgmt_hdr_bssid = ProtoField.ether("wcn36xx.hal_mac_mgmt_hdr_bssid", "hdr_bssid")
+f.hal_mac_mgmt_hdr_seq_ctl = ProtoField.uint16("wcn36xx.hal_mac_mgmt_hdr_seq_ctl", "seq_ctl")
+
+f.hal_scan_entry_bss_index = ProtoField.bytes("wcn36xx.hal_scan_entry_bss_index", "bss_index")
+f.hal_scan_entry_active_bss_count = ProtoField.uint8("wcn36xx.hal_scan_entry_active_bss_count", "active_bss_count")
