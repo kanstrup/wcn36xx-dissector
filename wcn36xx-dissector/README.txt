@@ -1,8 +1,8 @@
 -- Protocol dissector for wcn36xx HAL (host to firmware communication)
 --
 -- Install instructions
--- Copy this file to ~/.wireshark/plugins/ folder
--- Apply patches to enable hal dbg dump
+-- Copy wcn36xx_hal.lua to ~/.wireshark/plugins/ folder
+-- Apply patches to the wifi device driver to hexdump the communication data
 -- Run the following from a shell
 --   mkfifo /tmp/wireshark
 --   wireshark -k -i /tmp/wireshark &
