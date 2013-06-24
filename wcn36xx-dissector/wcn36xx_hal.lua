@@ -22,6 +22,7 @@ local bond_state_strings = {}
 local cfg_strings = {}
 local offload_type_strings = {}
 local sys_mode_strings = {}
+local link_state_strings = {}
 
 function wcn36xx.init()
 	-- Hook into ethertype parser
@@ -118,6 +119,21 @@ function wcn36xx.dissector(buffer, pinfo, tree)
                         (msg_type_int == 8)) then
 			-- start/end scan
 			params:add(f.scan_channel, buffer(n, 1)); n = n + 1
+		elseif (msg_type_int == 14) then
+			-- delete sta
+			params:add(f.del_sta_sta_index, buffer(n, 1)); n = n + 1
+		elseif (msg_type_int == 18) then
+			-- delete sta
+			params:add(f.del_bss_sta_index, buffer(n, 1)); n = n + 1
+		elseif (msg_type_int == 20) then
+			-- join
+			params:add_le(f.join_bssid, buffer(n, 6)); n = n + 6
+			params:add(f.join_channel, buffer(n, 1)); n = n + 1
+			params:add_le(f.join_self_sta_mac_addr, buffer(n, 6)); n = n + 6
+			params:add(f.join_local_power_constraint, buffer(n, 1)); n = n + 1
+			params:add_le(f.join_secondary_channel_offset, buffer(n, 4)); n = n + 4
+			params:add_le(f.join_link_state, buffer(n, 4)); n = n + 4
+			params:add(f.join_max_tx_power, buffer(n, 1)); n = n + 1
 		elseif (msg_type_int == 38) then
 			-- add ba
 			params:add(f.add_ba_session_id, buffer(n, 1)); n = n + 1
@@ -134,6 +150,11 @@ function wcn36xx.dissector(buffer, pinfo, tree)
 			params:add(f.ch_switch_max_tx_power, buffer(n, 1)); n = n + 1
 			params:add_le(f.ch_switch_self_sta_mac_addr, buffer(n, 6)); n = n + 6
 			params:add_le(f.ch_switch_bssid, buffer(n, 6)); n = n + 6
+		elseif (msg_type_int == 44) then
+			-- set link state
+			params:add_le(f.set_link_st_bssid, buffer(n, 6)); n = n + 6
+			params:add_le(f.set_link_st_state, buffer(n, 4)); n = n + 4
+			params:add_le(f.set_link_st_self_mac_addr, buffer(n, 6)); n = n + 6
 		elseif (msg_type_int == 48) then
 			-- update cfg
 			params:add_le(f.update_cfg_len, buffer(n, 4)); n = n + 4
@@ -573,6 +594,22 @@ sys_mode_strings[4] = "SUSPEND_LINK"
 sys_mode_strings[5] = "ROAM_SCAN"
 sys_mode_strings[6] = "ROAM_SUSPEND_LINK"
 
+link_state_strings[0] = "IDLE"
+link_state_strings[1] = "PREASSOC"
+link_state_strings[2] = "POSTASSOC"
+link_state_strings[3] = "AP"
+link_state_strings[4] = "IBSS"
+link_state_strings[5] = "BTAMP_PREASSOC"
+link_state_strings[6] = "BTAMP_POSTASSOC"
+link_state_strings[7] = "LINK_BTAMP_AP"
+link_state_strings[8] = "BTAMP_STA"
+link_state_strings[9] = "LEARN"
+link_state_strings[10] = "SCAN"
+link_state_strings[11] = "FINISH_SCAN"
+link_state_strings[12] = "INIT_CAL"
+link_state_strings[13] = "FINISH_CAL"
+link_state_strings[14] = "LISTEN"
+
 -- Protocol fields
 f.msg_type = ProtoField.uint16("wcn36xx.msg_type", "msg_type", base.DEC, msg_type_strings)
 f.msg_version = ProtoField.uint16("wcn36xx.msg_version", "msg_version")
@@ -692,3 +729,19 @@ f.hal_mac_mgmt_hdr_seq_ctl = ProtoField.uint16("wcn36xx.hal_mac_mgmt_hdr_seq_ctl
 
 f.hal_scan_entry_bss_index = ProtoField.bytes("wcn36xx.hal_scan_entry_bss_index", "bss_index")
 f.hal_scan_entry_active_bss_count = ProtoField.uint8("wcn36xx.hal_scan_entry_active_bss_count", "active_bss_count")
+
+f.del_sta_sta_index = ProtoField.uint8("wcn36xx.del_sta_sta_index", "sta_index")
+
+f.del_bss_sta_index = ProtoField.uint8("wcn36xx.del_bss_sta_index", "sta_index")
+
+f.set_link_st_bssid = ProtoField.ether("wcn36xx.set_link_st_bssid", "bssid")
+f.set_link_st_state = ProtoField.uint32("wcn36xx.set_link_st_state", "state", base.DEC, link_state_strings)
+f.set_link_st_self_mac_addr = ProtoField.ether("wcn36xx.set_link_st_state", "self_mac_addr")
+
+f.join_bssid = ProtoField.ether("wcn36xx.join_bssid", "bssid")
+f.join_channel = ProtoField.uint8("wcn36xx.join_channel", "local_power_constraint")
+f.join_self_sta_mac_addr = ProtoField.ether("wcn36xx.join_self_sta_mac_addr", "self_sta_mac_addr")
+f.join_local_power_constraint = ProtoField.uint8("wcn36xx.join_local_power_constraint", "local_power_constraint")
+f.join_secondary_channel_offset = ProtoField.uint32("wcn36xx.join_secondary_channel_offset", "secondary_channel_offset", base.DEC, bond_state_strings)
+f.join_link_state = ProtoField.uint32("wcn36xx.join_link_st_state", "state", base.DEC, link_state_strings)
+f.join_max_tx_power = ProtoField.int8("wcn36xx.join_max_tx_power", "max_tx_power")
