@@ -93,8 +93,10 @@ function wcn36xx.dissector(buffer, pinfo, tree)
 		if (msg_type_int == 0) then
 			-- start
 			params:add_le(f.start_driver_type, buffer(n, 4)); n = n + 4
+			local start_len = buffer(n, 4):le_uint()
 			params:add_le(f.start_len, buffer(n, 4)); n = n + 4
-			while buffer:len() > n do
+			while ((buffer:len() > n) and
+			       (start_len > (n - 8))) do
 				n = n + parse_cfg(buffer(n):tvb(), pinfo, params)
 			end
 		elseif (msg_type_int == 4) then
