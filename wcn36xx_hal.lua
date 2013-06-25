@@ -88,8 +88,8 @@ function wcn36xx.dissector(buffer, pinfo, tree)
 
 	-- data
 	if buffer:len() > n then
-		local data = buffer(n)
 		local params = subtree:add(wcn36xx, buffer(n), msg_type_str)
+
 		if (msg_type_int == 0) then
 			-- start
 			params:add_le(f.start_driver_type, buffer(n, 4)); n = n + 4
@@ -264,8 +264,36 @@ function wcn36xx.dissector(buffer, pinfo, tree)
 			params:add_le(f.set_power_params_bcast_mcast_filter, buffer(n, 4)); n = n + 4
 			params:add_le(f.set_power_params_enable_bet, buffer(n, 4)); n = n + 4
 			params:add_le(f.set_power_params_bet_interval, buffer(n, 4)); n = n + 4
+		elseif ((msg_type_int < 191) and
+			(string.find(msg_type_strings[msg_type_int], "RSP") ~= nil)) then
+			-- parse responses
+			local status
+			if (msg_type_int == 1) then
+				-- start rsp
+				status = buffer(n, 2):le_uint()
+				params:add_le(f.start_rsp_status, buffer(n, 2)); n = n + 2
+			else
+				-- all others
+				if (msg_type_int == 116) then
+					-- set max tx power
+					n = n + 1
+				end
+				status = buffer(n, 4):le_uint()
+				params:add_le(f.rsp_status, buffer(n, 4)); n = n + 4
+			end
+
+			if (status == 0) then
+				pinfo.cols.info:append(" success")
+			else
+				pinfo.cols.info:append(" failure "..status);
+			end
 		else
-			params:add(f.data, data)
+			-- unknown command
+		end
+
+		-- add data not parsed above
+		if (buffer:len() > n) then
+			params:add(f.data, buffer(n))
 		end
 	end
 end
@@ -747,3 +775,6 @@ f.join_local_power_constraint = ProtoField.uint8("wcn36xx.join_local_power_const
 f.join_secondary_channel_offset = ProtoField.uint32("wcn36xx.join_secondary_channel_offset", "secondary_channel_offset", base.DEC, bond_state_strings)
 f.join_link_state = ProtoField.uint32("wcn36xx.join_link_st_state", "state", base.DEC, link_state_strings)
 f.join_max_tx_power = ProtoField.int8("wcn36xx.join_max_tx_power", "max_tx_power")
+
+f.rsp_status = ProtoField.uint32("wcn36xx.rsp_status", "status", base.HEX)
+f.start_rsp_status = ProtoField.uint16("wcn36xx.start_rsp_status", "status", base.HEX)
