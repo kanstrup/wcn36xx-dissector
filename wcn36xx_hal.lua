@@ -24,6 +24,12 @@ local offload_type_strings = {}
 local sys_mode_strings = {}
 local link_state_strings = {}
 
+-- Firmware version
+local fw_major = 0
+local fw_minor = 0
+local fw_version = 0
+local fw_revision = 0
+
 function wcn36xx.init()
 	-- Hook into ethertype parser
 	-- Bogus value 0x3660 used together with textpcap dummy header generation
@@ -272,6 +278,16 @@ function wcn36xx.dissector(buffer, pinfo, tree)
 				-- start rsp
 				status = buffer(n, 2):le_uint()
 				params:add_le(f.start_rsp_status, buffer(n, 2)); n = n + 2
+				-- jump to fw version
+				n = n + 2
+				fw_revision = buffer(n, 1)
+				fw_version = buffer(n + 1, 1)
+				fw_minor = buffer(n + 2, 1)
+				fw_major = buffer(n + 3, 1)
+				params:add(f.start_rsp_fw_revision, buffer(n, 1)); n = n + 1
+				params:add(f.start_rsp_fw_version, buffer(n, 1)); n = n + 1
+				params:add(f.start_rsp_fw_minor, buffer(n, 1)); n = n + 1
+				params:add(f.start_rsp_fw_major, buffer(n, 1)); n = n + 1
 			else
 				-- all others
 				if (msg_type_int == 116) then
@@ -287,6 +303,9 @@ function wcn36xx.dissector(buffer, pinfo, tree)
 			else
 				pinfo.cols.info:append(" failure "..status);
 			end
+			if (msg_type_int == 1) then
+				pinfo.cols.info:append(", fw_version "..fw_major.."."..fw_minor.."."..fw_version.."."..fw_revision)
+			end
 		else
 			-- unknown command
 		end
@@ -298,6 +317,19 @@ function wcn36xx.dissector(buffer, pinfo, tree)
 	end
 end
 
+function get_fw_version()
+	if (fw_major == 0) then
+		version = 0
+	elseif (not (fw_major == 1 and
+		     fw_minor == 4 and
+		     fw_version == 1 and
+		     fw_revision == 2)) then
+		version = 1
+	else
+		version = 2
+	end
+	return version
+end
 -- Lookup strings
 msg_type_strings[0] = "START_REQ"
 msg_type_strings[1] = "START_RSP"
@@ -778,3 +810,7 @@ f.join_max_tx_power = ProtoField.int8("wcn36xx.join_max_tx_power", "max_tx_power
 
 f.rsp_status = ProtoField.uint32("wcn36xx.rsp_status", "status", base.HEX)
 f.start_rsp_status = ProtoField.uint16("wcn36xx.start_rsp_status", "status", base.HEX)
+f.start_rsp_fw_major = ProtoField.uint8("wcn36xx.start_rsp_fw_major", "fw_major")
+f.start_rsp_fw_minor = ProtoField.uint8("wcn36xx.start_rsp_fw_minor", "fw_minor")
+f.start_rsp_fw_version = ProtoField.uint8("wcn36xx.start_rsp_fw_version", "fw_version")
+f.start_rsp_fw_revision = ProtoField.uint8("wcn36xx.start_rsp_fw_revision", "fw_revision")
