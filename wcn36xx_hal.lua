@@ -70,25 +70,37 @@ function parse_cfg(buffer, pinfo, tree)
 	return n
 end
 
-function wcn36xx.dissector(buffer, pinfo, tree)
+function wcn36xx.dissector(inbuffer, pinfo, tree)
 	local n = 0
+	local buffer = inbuffer
 	pinfo.cols.protocol = "wcn36xx"
 	pinfo.cols.info = ""
+
+	local msg_type_int = buffer(0, 2):le_uint();
+	local cmd_len = buffer(4, 4):le_uint()
+
+	if (buffer:len() <= 46) then
+		-- Ethernet frames are 64 (60) bytes minimum. Remove dummy
+		-- trailing data if commands are smaller than that.
+		buffer = buffer(0, cmd_len)
+	end
 
 	local subtree = tree:add(wcn36xx, buffer(), "wcn36xx HAL protocol data")
 	local header = subtree:add(wcn36xx, buffer(n, 8), "header")
 
-	local msg_type = buffer(n, 2); n = n + 2
-	header:add_le(f.msg_type, msg_type)
+	if (buffer:len() <= 46) then
+		tree:add(wcn36xx, inbuffer(cmd_len), "Ethernet frame dummy data")
+	end
+
+	header:add_le(f.msg_type, buffer(n, 2)); n = n + 2
 	header:add_le(f.msg_version, buffer(n, 2)); n = n + 2
 	header:add_le(f.len, buffer(n, 4)); n = n +  4
 
-	local msg_type_int = msg_type:le_uint()
 	local msg_type_str
 	if msg_type_strings[msg_type_int] ~= nil then
 		msg_type_str = msg_type_strings[msg_type_int]:lower()
 	else
-		msg_type_str = msg_type
+		msg_type_str = msg_type_int
 	end
 	pinfo.cols.info:append(msg_type_str)
 
