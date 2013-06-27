@@ -76,7 +76,7 @@ function wcn36xx.dissector(inbuffer, pinfo, tree)
 	pinfo.cols.protocol = "wcn36xx"
 	pinfo.cols.info = ""
 
-	local msg_type_int = buffer(0, 2):le_uint();
+	local msg_type = buffer(0, 2):le_uint();
 	local cmd_len = buffer(4, 4):le_uint()
 
 	if (buffer:len() <= 46) then
@@ -97,10 +97,10 @@ function wcn36xx.dissector(inbuffer, pinfo, tree)
 	header:add_le(f.len, buffer(n, 4)); n = n +  4
 
 	local msg_type_str
-	if msg_type_strings[msg_type_int] ~= nil then
-		msg_type_str = msg_type_strings[msg_type_int]:lower()
+	if msg_type_strings[msg_type] ~= nil then
+		msg_type_str = msg_type_strings[msg_type]:lower()
 	else
-		msg_type_str = msg_type_int
+		msg_type_str = msg_type
 	end
 	pinfo.cols.info:append(msg_type_str)
 
@@ -108,7 +108,7 @@ function wcn36xx.dissector(inbuffer, pinfo, tree)
 	if buffer:len() > n then
 		local params = subtree:add(wcn36xx, buffer(n), msg_type_str)
 
-		if (msg_type_int == 0) then
+		if (msg_type == 0) then
 			-- start
 			params:add_le(f.start_driver_type, buffer(n, 4)); n = n + 4
 			local start_len = buffer(n, 4):le_uint()
@@ -117,7 +117,7 @@ function wcn36xx.dissector(inbuffer, pinfo, tree)
 			       (start_len > (n - 8))) do
 				n = n + parse_cfg(buffer(n):tvb(), pinfo, params)
 			end
-		elseif (msg_type_int == 4) then
+		elseif (msg_type == 4) then
 			-- init scan
 			params:add_le(f.init_scan_mode, buffer(n, 4)); n = n + 4
 			params:add_le(f.init_scan_bssid, buffer(n, 6)); n = n + 6
@@ -135,17 +135,17 @@ function wcn36xx.dissector(inbuffer, pinfo, tree)
 			local scan_entry = params:add(wcn36xx, buffer(n, 3), "scan_entry")
 			scan_entry:add(f.hal_scan_entry_bss_index, buffer(n, 2)); n = n + 2
 			scan_entry:add(f.hal_scan_entry_active_bss_count, buffer(n, 1)); n = n + 1
-		elseif ((msg_type_int == 6) or
-                        (msg_type_int == 8)) then
+		elseif ((msg_type == 6) or
+                        (msg_type == 8)) then
 			-- start/end scan
 			params:add(f.scan_channel, buffer(n, 1)); n = n + 1
-		elseif (msg_type_int == 14) then
+		elseif (msg_type == 14) then
 			-- delete sta
 			params:add(f.del_sta_sta_index, buffer(n, 1)); n = n + 1
-		elseif (msg_type_int == 18) then
+		elseif (msg_type == 18) then
 			-- delete sta
 			params:add(f.del_bss_sta_index, buffer(n, 1)); n = n + 1
-		elseif (msg_type_int == 20) then
+		elseif (msg_type == 20) then
 			-- join
 			params:add_le(f.join_bssid, buffer(n, 6)); n = n + 6
 			params:add(f.join_channel, buffer(n, 1)); n = n + 1
@@ -154,14 +154,14 @@ function wcn36xx.dissector(inbuffer, pinfo, tree)
 			params:add_le(f.join_secondary_channel_offset, buffer(n, 4)); n = n + 4
 			params:add_le(f.join_link_state, buffer(n, 4)); n = n + 4
 			params:add(f.join_max_tx_power, buffer(n, 1)); n = n + 1
-		elseif (msg_type_int == 38) then
+		elseif (msg_type == 38) then
 			-- add ba
 			params:add(f.add_ba_session_id, buffer(n, 1)); n = n + 1
 			params:add(f.add_ba_win_size, buffer(n, 1)); n = n + 1
 			if buffer:len() > n then
 				params:add(f.add_ba_reorder_on_chip, buffer(n, 1)); n = n + 1
 			end
-		elseif (msg_type_int == 42) then
+		elseif (msg_type == 42) then
 			-- channel switch
 			params:add(f.ch_switch_channel_number, buffer(n, 1)); n = n + 1
 			params:add(f.ch_switch_local_power_constraint, buffer(n, 1)); n = n + 1
@@ -170,25 +170,25 @@ function wcn36xx.dissector(inbuffer, pinfo, tree)
 			params:add(f.ch_switch_max_tx_power, buffer(n, 1)); n = n + 1
 			params:add_le(f.ch_switch_self_sta_mac_addr, buffer(n, 6)); n = n + 6
 			params:add_le(f.ch_switch_bssid, buffer(n, 6)); n = n + 6
-		elseif (msg_type_int == 44) then
+		elseif (msg_type == 44) then
 			-- set link state
 			params:add_le(f.set_link_st_bssid, buffer(n, 6)); n = n + 6
 			params:add_le(f.set_link_st_state, buffer(n, 4)); n = n + 4
 			params:add_le(f.set_link_st_self_mac_addr, buffer(n, 6)); n = n + 6
-		elseif (msg_type_int == 48) then
+		elseif (msg_type == 48) then
 			-- update cfg
 			params:add_le(f.update_cfg_len, buffer(n, 4)); n = n + 4
 			while buffer:len() > n do
 				n = n + parse_cfg(buffer(n):tvb(), pinfo, params)
 			end
-		elseif (msg_type_int == 55) then
+		elseif (msg_type == 55) then
 			-- download nv
 			params:add_le(f.nv_frag_number, buffer(n, 2)); n = n + 2
 			params:add_le(f.nv_last_fragment, buffer(n, 2)); n = n + 2
 			local size = buffer(n, 4):le_uint()
 			params:add_le(f.nv_img_buffer_size, buffer(n, 4)); n = n + 4
 			params:add_le(f.nv_buffer, buffer(n, size)); n = n + size
-		elseif (msg_type_int == 57) then
+		elseif (msg_type == 57) then
 			-- add ba session
 			params:add_le(f.add_ba_session_sta_index, buffer(n, 2)); n = n + 2
 			params:add_le(f.add_ba_session_mac_addr, buffer(n, 6)); n = n + 6
@@ -199,7 +199,7 @@ function wcn36xx.dissector(inbuffer, pinfo, tree)
 			params:add_le(f.add_ba_session_timeout, buffer(n, 2)); n = n + 2
 			params:add_le(f.add_ba_session_ssn, buffer(n, 2)); n = n + 2
 			params:add(f.add_ba_session_direction, buffer(n, 1)); n = n + 1
-		elseif (msg_type_int == 84) then
+		elseif (msg_type == 84) then
 			-- add beacon filter
 			params:add_le(f.beacon_filter_capability_info, buffer(n, 2)); n = n + 2
 			params:add_le(f.beacon_filter_capability_mask, buffer(n, 2)); n = n + 2
@@ -218,7 +218,7 @@ function wcn36xx.dissector(inbuffer, pinfo, tree)
 				elements:add(f.beacon_filter_bitmask, buffer(n, 1)); n = n + 1
 				elements:add(f.beacon_filter_ref, buffer(n, 1)); n = n + 1
 			end
-		elseif (msg_type_int == 90) then
+		elseif (msg_type == 90) then
 			-- host offload
 			local type = buffer(n, 1):uint()
 			params:add(f.host_offload_type, buffer(n, 1)); n = n + 1
@@ -241,7 +241,7 @@ function wcn36xx.dissector(inbuffer, pinfo, tree)
 				params:add(f.ns_offload_bss_index, buffer(n, 1)); n = n + 1
 				params:add_le(f.ns_offload_slot_index, buffer(n, 4)); n = n + 4
 			end
-		elseif (msg_type_int == 91) then
+		elseif (msg_type == 91) then
 			-- set rssi threshold
 			params:add(f.set_rssi_threshold_t1, buffer(n, 1)); n = n + 1
 			params:add(f.set_rssi_threshold_t2, buffer(n, 1)); n = n + 1
@@ -253,11 +253,11 @@ function wcn36xx.dissector(inbuffer, pinfo, tree)
 			params:add(f.set_rssi_threshold_t3pos, buffer(n, 1):bitfield(3));
 			params:add(f.set_rssi_threshold_t3neg, buffer(n, 1):bitfield(2));
 			n = n + 1
-		elseif (msg_type_int == 125) then
+		elseif (msg_type == 125) then
 			-- add sta self
 			params:add_le(f.add_sta_self_addr, buffer(n, 6)); n = n + 6
 			params:add_le(f.add_sta_self_status, buffer(n, 4)); n = n + 4
-		elseif (msg_type_int == 151) then
+		elseif (msg_type == 151) then
 			-- update scan param
 			params:add(f.scan_dot11d_enabled, buffer(n, 1)); n = n + 1
 			params:add(f.scan_dot11d_resolved, buffer(n, 1)); n = n + 1
@@ -274,7 +274,7 @@ function wcn36xx.dissector(inbuffer, pinfo, tree)
 			params:add_le(f.scan_passive_min_ch_time, buffer(n, 2)); n = n + 2
 			params:add_le(f.scan_passive_max_ch_time, buffer(n, 2)); n = n + 2
 			params:add_le(f.scan_phy_chan_bond_state, buffer(n, 4)); n = n + 4
-		elseif (msg_type_int == 166) then
+		elseif (msg_type == 166) then
 			-- set power params
 			params:add_le(f.set_power_params_ignore_dtim, buffer(n, 4)); n = n + 4
 			params:add_le(f.set_power_params_dtim_period, buffer(n, 4)); n = n + 4
@@ -282,11 +282,11 @@ function wcn36xx.dissector(inbuffer, pinfo, tree)
 			params:add_le(f.set_power_params_bcast_mcast_filter, buffer(n, 4)); n = n + 4
 			params:add_le(f.set_power_params_enable_bet, buffer(n, 4)); n = n + 4
 			params:add_le(f.set_power_params_bet_interval, buffer(n, 4)); n = n + 4
-		elseif ((msg_type_int < 191) and
-			(string.find(msg_type_strings[msg_type_int], "RSP") ~= nil)) then
+		elseif ((msg_type < 191) and
+			(string.find(msg_type_strings[msg_type], "RSP") ~= nil)) then
 			-- parse responses
 			local status
-			if (msg_type_int == 1) then
+			if (msg_type == 1) then
 				-- start rsp
 				status = buffer(n, 2):le_uint()
 				params:add_le(f.start_rsp_status, buffer(n, 2)); n = n + 2
@@ -302,7 +302,7 @@ function wcn36xx.dissector(inbuffer, pinfo, tree)
 				params:add(f.start_rsp_fw_major, buffer(n, 1)); n = n + 1
 			else
 				-- all others
-				if (msg_type_int == 116) then
+				if (msg_type == 116) then
 					-- set max tx power
 					n = n + 1
 				end
@@ -315,7 +315,7 @@ function wcn36xx.dissector(inbuffer, pinfo, tree)
 			else
 				pinfo.cols.info:append(" failure "..status);
 			end
-			if (msg_type_int == 1) then
+			if (msg_type == 1) then
 				pinfo.cols.info:append(", fw_version "..fw_major.."."..fw_minor.."."..fw_version.."."..fw_revision)
 			end
 		else
