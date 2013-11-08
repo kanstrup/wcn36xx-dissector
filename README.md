@@ -18,6 +18,6 @@ Install instructions
 Live capture
 ------------
 1) Start wireshark: <pre>wireshark -k -i /tmp/wireshark &</pre>
-2) To capture HAL commands run: <pre>adb shell cat /proc/kmsg | grep SMD | text2pcap -q -o hex -e 0x3660 - /tmp/wireshark</pre>
+2) To capture HAL commands run: <pre>adb shell cat /proc/kmsg | grep -E "SMD <<<|HAL >>>" | text2pcap -q -o hex -e 0x3660 - /tmp/wireshark</pre>
 2) To capture skb rxbd run: <pre>adb shell cat /proc/kmsg | grep "BD   <<<" | text2pcap -q -o hex -e 0x3661 - /tmp/wireshark</pre>
 2) To capture skb txbd run: <pre>adb shell cat /proc/kmsg | grep "BD   >>> " | text2pcap -q -o hex -e 0x3662 - /tmp/wireshark</pre>
