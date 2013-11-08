@@ -304,12 +304,34 @@ function wcn36xx.dissector(inbuffer, pinfo, tree)
 				params:add(f.start_rsp_fw_version, buffer(n, 1)); n = n + 1
 				params:add(f.start_rsp_fw_minor, buffer(n, 1)); n = n + 1
 				params:add(f.start_rsp_fw_major, buffer(n, 1)); n = n + 1
+			elseif (msg_type == 60) then
+				-- trigger ba
+				params:add_le(f.trigger_ba_rsp_bssid, buffer(n, 6)); n = n + 6
+				status = buffer(n, 4):le_uint()
+				params:add_le(f.rsp_status, buffer(n, 4)); n = n + 4
+				params:add_le(f.trigger_ba_rsp_candidate_cnt, buffer(n, 2)); n = n + 2
+			elseif (msg_type == 75) then
+				-- tl flush ac
+				params:add(f.tl_flush_ac_sta_id, buffer(n, 1)); n = n + 1
+				params:add(f.tl_flush_ac_tid, buffer(n, 1)); n = n + 1
+				status = buffer(n, 4):le_uint()
+				params:add_le(f.rsp_status, buffer(n, 4)); n = n + 4
+			elseif (msg_type == 116) then
+				-- set max tx power
+				params:add(f.set_max_tx_power_rsp_power, buffer(n, 1)); n = n + 1
+				status = buffer(n, 4):le_uint()
+				params:add_le(f.rsp_status, buffer(n, 4)); n = n + 4
+			elseif (msg_type == 124) then
+				-- start oem data
+				params:add(f.start_oem_data_data, buffer(n))
+				status = 0
+			elseif (msg_type == 140) then
+				-- enable radar
+				params:add_le(f.enable_radar_rsp_bssid, buffer(n, 6)); n = n + 6
+				status = buffer(n, 4):le_uint()
+				params:add_le(f.rsp_status, buffer(n, 4)); n = n + 4
 			else
 				-- all others
-				if (msg_type == 116) then
-					-- set max tx power
-					n = n + 1
-				end
 				status = buffer(n, 4):le_uint()
 				params:add_le(f.rsp_status, buffer(n, 4)); n = n + 4
 			end
@@ -830,3 +852,13 @@ f.start_rsp_fw_major = ProtoField.uint8("wcn36xx.start_rsp_fw_major", "fw_major"
 f.start_rsp_fw_minor = ProtoField.uint8("wcn36xx.start_rsp_fw_minor", "fw_minor")
 f.start_rsp_fw_version = ProtoField.uint8("wcn36xx.start_rsp_fw_version", "fw_version")
 f.start_rsp_fw_revision = ProtoField.uint8("wcn36xx.start_rsp_fw_revision", "fw_revision")
+
+f.tl_flush_ac_sta_id = ProtoField.uint8("wcn36xx.tl_flush_ac_sta_id", "sta_id")
+f.tl_flush_ac_tid = ProtoField.uint8("wcn36xx.tl_flush_ac_tid", "tid")
+
+f.set_max_tx_power_rsp_power = ProtoField.uint8("wcn36xx.set_max_tx_power_rsp_power", "power")
+
+f.trigger_ba_rsp_bssid = ProtoField.ether("wcn36xx.trigger_ba_rsp_bssid", "bssid")
+f.trigger_ba_rsp_candidate_cnt = ProtoField.uint16("wcn36xx.trigger_ba_rsp_candidate_cnt", "candidate_cnt")
+
+f.enable_radar_rsp_bssid = ProtoField.ether("wcn36xx.trigger_ba_rsp_bssid", "bssid")
