@@ -84,6 +84,10 @@ function wcn36xx.dissector(inbuffer, pinfo, tree)
 		-- trailing data if commands are smaller than that.
 		buffer = buffer(0, cmd_len)
 	end
+	if (cmd_len == 0) then
+		pinfo.cols.info:append("zero length command!")
+		return
+	end
 
 	local subtree = tree:add(wcn36xx, buffer(), "wcn36xx HAL protocol data")
 	local header = subtree:add(wcn36xx, buffer(n, 8), "header")
