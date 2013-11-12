@@ -23,6 +23,9 @@ local cfg_strings = {}
 local offload_type_strings = {}
 local sys_mode_strings = {}
 local link_state_strings = {}
+local filter_type_strings = {}
+local filter_protocol_type_strings = {}
+local filter_cmp_type_strings = {}
 
 -- Firmware version
 local fw_major = 0
@@ -278,6 +281,33 @@ function wcn36xx.dissector(inbuffer, pinfo, tree)
 			params:add_le(f.scan_passive_min_ch_time, buffer(n, 2)); n = n + 2
 			params:add_le(f.scan_passive_max_ch_time, buffer(n, 2)); n = n + 2
 			params:add_le(f.scan_phy_chan_bond_state, buffer(n, 4)); n = n + 4
+		elseif (msg_type == 157) then
+			-- 8023 multicast list
+			params:add(f.multicast_list_data_offset, buffer(n, 1)); n = n + 1
+			local addr_count = buffer(n, 4):le_uint()
+			params:add_le(f.multicast_list_addr_count, buffer(n, 4)); n = n + 4
+			for i = 1,addr_count do
+				params:add_le(f.multicast_list_address, buffer(n, 6)); n = n + 6
+			end
+			params:add(f.multicast_list_bss_index, buffer(n, 1)); n = n + 1
+		elseif (msg_type == 159) then
+			-- rcv packet filter
+			params:add(f.rcv_packet_filter_id, buffer(n, 1)); n = n + 1
+			params:add(f.rcv_packet_filter_type, buffer(n, 1)); n = n + 1
+			local count = buffer(n, 1):uint()
+			params:add(f.rcv_packet_filter_params_count, buffer(n, 1)); n = n + 1
+			params:add_le(f.rcv_packet_filter_coalesce_time, buffer(n, 4)); n = n + 4
+			params:add(f.rcv_packet_filter_bssid, buffer(n, 1)); n = n + 1
+			for i = 1,count do
+				local fltparams = subtree:add(wcn36xx, buffer(n, 22), i)
+				fltparams:add(f.rcv_packet_filter_param_protocol_layer, buffer(n, 1)); n = n + 1
+				fltparams:add(f.rcv_packet_filter_param_cmp_flag, buffer(n, 1)); n = n + 1
+				fltparams:add_le(f.rcv_packet_filter_param_data_length, buffer(n, 2)); n = n + 2
+				fltparams:add(f.rcv_packet_filter_param_data_offset, buffer(n, 1)); n = n + 1
+				fltparams:add(f.rcv_packet_filter_param_reserved, buffer(n, 1)); n = n + 1
+				fltparams:add(f.rcv_packet_filter_param_compare_data, buffer(n, 8)); n = n + 8
+				fltparams:add(f.rcv_packet_filter_param_data_mask, buffer(n, 8)); n = n + 8
+			end
 		elseif (msg_type == 166) then
 			-- set power params
 			params:add_le(f.set_power_params_ignore_dtim, buffer(n, 4)); n = n + 4
@@ -530,8 +560,8 @@ msg_type_strings[155] = "SET_TX_PER_TRACKING_RSP"
 msg_type_strings[156] = "TX_PER_HIT_IND"
 msg_type_strings[157] = "8023_MULTICAST_LIST_REQ"
 msg_type_strings[158] = "8023_MULTICAST_LIST_RSP"
-msg_type_strings[159] = "8023_MULTICAST_LIST_REQ"
-msg_type_strings[160] = "8023_MULTICAST_LIST_RSP"
+msg_type_strings[159] = "SET_PACKET_FILTER_REQ"
+msg_type_strings[160] = "SET_PACKET_FILTER_RSP"
 msg_type_strings[161] = "PACKET_FILTER_MATCH_COUNT_REQ"
 msg_type_strings[162] = "PACKET_FILTER_MATCH_COUNT_RSP"
 msg_type_strings[163] = "CLEAR_PACKET_FILTER_REQ"
@@ -748,6 +778,22 @@ link_state_strings[12] = "INIT_CAL"
 link_state_strings[13] = "FINISH_CAL"
 link_state_strings[14] = "LISTEN"
 
+filter_type_strings[0] = "INVALID"
+filter_type_strings[1] = "FILTER_PKT"
+filter_type_strings[2] = "BUFFER_PKT"
+
+filter_protocol_type_strings[0] = "INVALID"
+filter_protocol_type_strings[1] = "MAC"
+filter_protocol_type_strings[2] = "ARP"
+filter_protocol_type_strings[3] = "IPV4"
+filter_protocol_type_strings[4] = "IPV6"
+filter_protocol_type_strings[5] = "UDP"
+
+filter_cmp_type_strings[0] = "INVALID"
+filter_cmp_type_strings[1] = "EQUAL"
+filter_cmp_type_strings[2] = "MASK_EQUAL"
+filter_cmp_type_strings[3] = "NOT_EQUAL"
+
 -- Protocol fields
 f.msg_type = ProtoField.uint16("wcn36xx.msg_type", "msg_type", base.DEC, msg_type_strings)
 f.msg_version = ProtoField.uint16("wcn36xx.msg_version", "msg_version")
@@ -835,6 +881,24 @@ f.set_rssi_threshold_t2pos = ProtoField.bool("wcn36xx.set_rssi_threshold_t2pos",
 f.set_rssi_threshold_t2neg = ProtoField.bool("wcn36xx.set_rssi_threshold_t2neg", "t2negnotify")
 f.set_rssi_threshold_t3pos = ProtoField.bool("wcn36xx.set_rssi_threshold_t3pos", "t3posnotify")
 f.set_rssi_threshold_t3neg = ProtoField.bool("wcn36xx.set_rssi_threshold_t3ned", "t3negnotify")
+
+f.multicast_list_data_offset = ProtoField.uint8("wcn36xx.multicast_list_data_offset", "data_offset")
+f.multicast_list_addr_count = ProtoField.uint32("wcn36xx.multicast_list_addr_count", "addr_count")
+f.multicast_list_address = ProtoField.ether("wcn36xx.multicast_list_address", "address")
+f.multicast_list_bss_index = ProtoField.uint8("wcn36xx.multicast_list_bss_index", "bss_index")
+
+f.rcv_packet_filter_id = ProtoField.uint8("wcn36xx.rcv_packet_filter_id", "id")
+f.rcv_packet_filter_type = ProtoField.uint8("wcn36xx.rcv_packet_filter_type", "type", base.HEX, filter_type_strings)
+f.rcv_packet_filter_params_count = ProtoField.uint8("wcn36xx.rcv_packet_filter_id", "params_count")
+f.rcv_packet_filter_coalesce_time = ProtoField.uint32("wcn36xx.rcv_packet_filter_coalesce_time", "coalesce_time")
+f.rcv_packet_filter_bssid = ProtoField.uint8("wcn36xx.rcv_packet_filter_bssid", "bssid")
+f.rcv_packet_filter_param_protocol_layer = ProtoField.uint8("wcn36xx.rcv_packet_filter_param_protocol_layer", "protocol_layer", base.HEX, filter_protocol_type_strings)
+f.rcv_packet_filter_param_cmp_flag = ProtoField.uint8("wcn36xx.rcv_packet_filter_param_cmp_flag", "cmp_flag", base.HEX, filter_cmp_type_strings)
+f.rcv_packet_filter_param_data_length = ProtoField.uint16("wcn36xx.rcv_packet_filter_param_data_length", "data_length")
+f.rcv_packet_filter_param_data_offset = ProtoField.uint8("wcn36xx.rcv_packet_filter_param_data_offset", "data_offset")
+f.rcv_packet_filter_param_reserved = ProtoField.uint8("wcn36xx.rcv_packet_filter_param_reserved", "reserved")
+f.rcv_packet_filter_param_compare_data = ProtoField.bytes("wcn36xx.rcv_packet_filter_param_compare_data", "compare_data")
+f.rcv_packet_filter_param_data_mask = ProtoField.bytes("wcn36xx.rcv_packet_filter_param_data_mask", "data_mask")
 
 f.set_power_params_ignore_dtim = ProtoField.bool("wcn36xx.set_power_params_ignore_dtim", "ignore_dtim")
 f.set_power_params_dtim_period = ProtoField.uint32("wcn36xx.set_power_params_dtim_period", "dtim_period")
