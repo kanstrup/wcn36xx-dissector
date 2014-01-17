@@ -26,6 +26,9 @@ local link_state_strings = {}
 local filter_type_strings = {}
 local filter_protocol_type_strings = {}
 local filter_cmp_type_strings = {}
+local del_ba_direction_strings = {}
+local ani_ed_type_strings = {}
+local ani_wep_type_strings = {}
 
 -- Firmware version
 local fw_major = 0
@@ -163,6 +166,18 @@ function wcn36xx.dissector(inbuffer, pinfo, tree)
 			params:add_le(f.join_secondary_channel_offset, buffer(n, 4)); n = n + 4
 			params:add_le(f.join_link_state, buffer(n, 4)); n = n + 4
 			params:add(f.join_max_tx_power, buffer(n, 1)); n = n + 1
+		elseif (msg_type == 28) then
+			-- remove bss key
+			params:add(f.bss_index, buffer(n, 1)); n = n + 1
+			params:add_le(f.ani_ed_enc_type, buffer(n, 4)); n = n + 4
+			params:add(f.rmv_bsskey_key_id, buffer(n, 1)); n = n + 1
+			params:add_le(f.rmv_bsskey_wep_type, buffer(n, 4)); n = n + 4
+		elseif (msg_type == 30) then
+			-- remove sta key
+			params:add_le(f.rmv_stakey_sta_index, buffer(n, 2)); n = n + 2
+			params:add_le(f.ani_ed_enc_type, buffer(n, 4)); n = n + 4
+			params:add(f.rmv_stakey_key_id, buffer(n, 1)); n = n + 1
+			params:add(f.rmv_stakey_unicast, buffer(n, 1)); n = n + 1
 		elseif (msg_type == 38) then
 			-- add ba
 			params:add(f.add_ba_session_id, buffer(n, 1)); n = n + 1
@@ -170,6 +185,11 @@ function wcn36xx.dissector(inbuffer, pinfo, tree)
 			if buffer:len() > n then
 				params:add(f.add_ba_reorder_on_chip, buffer(n, 1)); n = n + 1
 			end
+		elseif (msg_type == 40) then
+			-- del ba
+			params:add_le(f.del_ba_sta_id, buffer(n, 2)); n = n + 2
+			params:add(f.tid, buffer(n, 1)); n = n + 1
+			params:add(f.del_ba_direction, buffer(n, 1)); n = n + 1
 		elseif (msg_type == 42) then
 			-- channel switch
 			local channel = buffer(n, 1):uint(); n = n + 1
@@ -186,6 +206,10 @@ function wcn36xx.dissector(inbuffer, pinfo, tree)
 			params:add_le(f.bssid, buffer(n, 6)); n = n + 6
 			params:add_le(f.set_link_st_state, buffer(n, 4)); n = n + 4
 			params:add_le(f.set_link_st_self_mac_addr, buffer(n, 6)); n = n + 6
+		elseif (msg_type == 46) then
+			-- get stats
+			params:add_le(f.get_stats_sta_id, buffer(n, 4)); n = n + 4
+			params:add_le(f.get_stats_stats_mask, buffer(n, 4)); n = n + 4
 		elseif (msg_type == 48) then
 			-- update cfg
 			params:add_le(f.update_cfg_len, buffer(n, 4)); n = n + 4
@@ -811,6 +835,21 @@ filter_cmp_type_strings[1] = "EQUAL"
 filter_cmp_type_strings[2] = "MASK_EQUAL"
 filter_cmp_type_strings[3] = "NOT_EQUAL"
 
+del_ba_direction_strings[0] = "RECIPIENT"
+del_ba_direction_strings[1] = "ORIGINATOR"
+
+ani_ed_type_strings[0] = "NONE"
+ani_ed_type_strings[1] = "WEP40"
+ani_ed_type_strings[2] = "WEP104"
+ani_ed_type_strings[3] = "TKIP"
+ani_ed_type_strings[4] = "CCMP"
+ani_ed_type_strings[5] = "WPI"
+ani_ed_type_strings[6] = "AES_128_CMAC"
+ani_ed_type_strings[7] = "NOT_IMPLEMENTED"
+
+ani_wep_type_strings[0] = "WEP_STATIC"
+ani_wep_type_strings[1] = "WEP_DYNAMIC"
+
 -- Protocol fields
 f.msg_type = ProtoField.uint16("wcn36xx.msg_type", "msg_type", base.DEC, msg_type_strings)
 f.msg_version = ProtoField.uint16("wcn36xx.msg_version", "msg_version")
@@ -821,6 +860,7 @@ f.bss_index = ProtoField.uint8("wcn36xx.bss_index", "bss_index", base.DEC)
 f.bssid = ProtoField.ether("wcn36xx.bssid", "bssid")
 f.sta_index = ProtoField.uint8("wcn36xx.sta_index", "sta_index")
 f.tid = ProtoField.uint8("wcn36xx.tid", "tid")
+f.ani_ed_enc_type = ProtoField.uint32("wcn36xx.ani_ed_enc_type", "enc_type", base.DEC, ani_ed_type_strings)
 
 f.scan_channel = ProtoField.uint8("wcn36xx.scan_channel", "scan_channel")
 f.scan_dot11d_enabled = ProtoField.bool("wcn36xx.scan_dot11d_enabled", "dot11d_enabled")
@@ -886,6 +926,9 @@ f.add_ba_session_direction = ProtoField.uint8("wcn36xx.add_ba_session_direction"
 f.add_ba_session_id = ProtoField.uint8("wcn36xx.add_ba_session_id", "session_id")
 f.add_ba_win_size = ProtoField.uint8("wcn36xx.add_ba_win_size", "win_size")
 f.add_ba_reorder_on_chip = ProtoField.uint8("wcn36xx.add_ba_reorder_on_chip", "reorder_on_chip", base.DEC)
+
+f.del_ba_sta_id = ProtoField.uint16("wcn36xx.del_ba_sta_id", "sta_id")
+f.del_ba_direction = ProtoField.uint8("wcn36xx.del_ba_direction", "direction", base.DEC, del_ba_direction_strings)
 
 f.host_offload_type = ProtoField.uint8("wcn36xx.host_offload_type", "type", base.DEC, offload_type_strings)
 f.host_offload_enable = ProtoField.bool("wcn36xx.host_offload_enable", "enable")
@@ -958,12 +1001,22 @@ f.hal_scan_entry_active_bss_count = ProtoField.uint8("wcn36xx.hal_scan_entry_act
 f.set_link_st_state = ProtoField.uint32("wcn36xx.set_link_st_state", "state", base.DEC, link_state_strings)
 f.set_link_st_self_mac_addr = ProtoField.ether("wcn36xx.set_link_st_state", "self_mac_addr")
 
+f.get_stats_sta_id = ProtoField.uint32("wcn36xx.get_stats_sta_id", "sta_id", base.DEC)
+f.get_stats_stats_mask = ProtoField.uint32("wcn36xx.get_stats_stats_mask", "stats_mask", base.HEX)
+
 f.join_channel = ProtoField.uint8("wcn36xx.join_channel", "local_power_constraint")
 f.join_self_sta_mac_addr = ProtoField.ether("wcn36xx.join_self_sta_mac_addr", "self_sta_mac_addr")
 f.join_local_power_constraint = ProtoField.uint8("wcn36xx.join_local_power_constraint", "local_power_constraint")
 f.join_secondary_channel_offset = ProtoField.uint32("wcn36xx.join_secondary_channel_offset", "secondary_channel_offset", base.DEC, bond_state_strings)
 f.join_link_state = ProtoField.uint32("wcn36xx.join_link_st_state", "state", base.DEC, link_state_strings)
 f.join_max_tx_power = ProtoField.int8("wcn36xx.join_max_tx_power", "max_tx_power")
+
+f.rmv_bsskey_key_id = ProtoField.int8("wcn36xx.rmv_bsskey_key_id", "key_id")
+f.rmv_bsskey_wep_type = ProtoField.uint32("wcn36xx.rmv_bsskey_wep_type", "wep_type", base.DEC, ani_wep_type_strings)
+
+f.rmv_stakey_sta_index = ProtoField.int16("wcn36xx.rmv_stakey_sta_index", "sta_index")
+f.rmv_stakey_key_id = ProtoField.int8("wcn36xx.rmv_stakey_key_id", "key_id")
+f.rmv_stakey_unicast= ProtoField.bool("wcn36xx.rmv_stakey_unicast", "unicast")
 
 f.rsp_status = ProtoField.uint32("wcn36xx.rsp_status", "status", base.HEX)
 f.start_rsp_status = ProtoField.uint16("wcn36xx.start_rsp_status", "status", base.HEX)
