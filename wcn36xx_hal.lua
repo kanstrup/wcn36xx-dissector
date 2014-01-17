@@ -999,7 +999,7 @@ f.hal_scan_entry_bss_index = ProtoField.bytes("wcn36xx.hal_scan_entry_bss_index"
 f.hal_scan_entry_active_bss_count = ProtoField.uint8("wcn36xx.hal_scan_entry_active_bss_count", "active_bss_count")
 
 f.set_link_st_state = ProtoField.uint32("wcn36xx.set_link_st_state", "state", base.DEC, link_state_strings)
-f.set_link_st_self_mac_addr = ProtoField.ether("wcn36xx.set_link_st_state", "self_mac_addr")
+f.set_link_st_self_mac_addr = ProtoField.ether("wcn36xx.set_link_st_self_mac_addr", "self_mac_addr")
 
 f.get_stats_sta_id = ProtoField.uint32("wcn36xx.get_stats_sta_id", "sta_id", base.DEC)
 f.get_stats_stats_mask = ProtoField.uint32("wcn36xx.get_stats_stats_mask", "stats_mask", base.HEX)
