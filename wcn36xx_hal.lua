@@ -210,6 +210,19 @@ function wcn36xx.dissector(inbuffer, pinfo, tree)
 			params:add_le(f.add_ba_session_timeout, buffer(n, 2)); n = n + 2
 			params:add_le(f.add_ba_session_ssn, buffer(n, 2)); n = n + 2
 			params:add(f.add_ba_session_direction, buffer(n, 1)); n = n + 1
+		elseif (msg_type == 78) then
+			-- enter bmps
+			params:add(f.enter_bmps_bss_index, buffer(n, 1)); n = n + 1
+			params:add_le(f.enter_bmps_tbtt, buffer(n, 8)); n = n + 8
+			params:add(f.enter_bmps_dtim_count, buffer(n, 1)); n = n + 1
+			params:add(f.enter_bmps_dtim_period, buffer(n, 1)); n = n + 1
+			params:add_le(f.enter_bmps_rssi_filter_period, buffer(n, 4)); n = n + 4
+			params:add_le(f.enter_bmps_num_beacon_per_rssi_average, buffer(n, 4)); n = n + 4
+			params:add(f.enter_bmps_rssi_filter_enable, buffer(n, 1)); n = n + 1
+		elseif (msg_type == 79) then
+			-- exit bmps
+			params:add(f.exit_bmps_send_data_null, buffer(n, 1)); n = n + 1
+			params:add(f.exit_bmps_bss_index, buffer(n, 1)); n = n + 1
 		elseif (msg_type == 84) then
 			-- add beacon filter
 			params:add_le(f.beacon_filter_capability_info, buffer(n, 2)); n = n + 2
@@ -847,6 +860,17 @@ f.start_len = ProtoField.uint32("wcn36xx.start_len", "len")
 
 f.add_sta_self_addr = ProtoField.ether("wcn36xx.add_sta_self_addr", "addr")
 f.add_sta_self_status = ProtoField.uint32("wcn36xx.add_sta_self_status", "status", base.HEX)
+
+f.enter_bmps_bss_index = ProtoField.uint8("wcn36xx.enter_bmps_bss_index", "bss_index")
+f.enter_bmps_tbtt = ProtoField.uint64("wcn36xx.enter_bmps_tbtt", "tbtt", base.HEX)
+f.enter_bmps_dtim_count = ProtoField.uint8("wcn36xx.enter_bmps_dtim_count", "dtim_count")
+f.enter_bmps_dtim_period = ProtoField.uint8("wcn36xx.enter_bmps_dtim_period", "dtim_period")
+f.enter_bmps_rssi_filter_period = ProtoField.uint32("wcn36xx.enter_bmps_rssi_filter_period", "rssi_filter_period")
+f.enter_bmps_num_beacon_per_rssi_average = ProtoField.uint32("wcn36xx.enter_bmps_num_beacon_per_rssi_average", "num_beacon_per_rssi_average")
+f.enter_bmps_rssi_filter_enable = ProtoField.bool("wcn36xx.enter_bmps_rssi_filter_enable", "rssi_filter_enable")
+
+f.exit_bmps_send_data_null = ProtoField.bool("wcn36xx.exit_bmps_send_data_null", "send_data_null")
+f.exit_bmps_bss_index = ProtoField.uint8("wcn36xx.exit_bmps_bss_index", "bss_index")
 
 f.add_ba_session_sta_index = ProtoField.uint16("wcn36xx.add_ba_session_sta_index", "sta_index")
 f.add_ba_session_mac_addr = ProtoField.ether("wcn36xx.add_ba_session_mac_addr", "mac_addr", base.HEX)
