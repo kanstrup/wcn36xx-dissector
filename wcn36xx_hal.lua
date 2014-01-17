@@ -127,7 +127,7 @@ function wcn36xx.dissector(inbuffer, pinfo, tree)
 		elseif (msg_type == 4) then
 			-- init scan
 			params:add_le(f.init_scan_mode, buffer(n, 4)); n = n + 4
-			params:add_le(f.init_scan_bssid, buffer(n, 6)); n = n + 6
+			params:add_le(f.bssid, buffer(n, 6)); n = n + 6
 			params:add(f.init_scan_notify, buffer(n, 1)); n = n + 1
 			params:add(f.init_scan_frame_type, buffer(n, 1)); n = n + 1
 			params:add(f.init_scan_frame_len, buffer(n, 1)); n = n + 1
@@ -137,7 +137,7 @@ function wcn36xx.dissector(inbuffer, pinfo, tree)
 			hdr:add(f.hal_mac_mgmt_hdr_duration_hi, buffer(n, 1)); n = n + 1
 			hdr:add_le(f.hal_mac_mgmt_hdr_da, buffer(n, 6)); n = n + 6
 			hdr:add_le(f.hal_mac_mgmt_hdr_sa, buffer(n, 6)); n = n + 6
-			hdr:add_le(f.hal_mac_mgmt_hdr_bssid, buffer(n, 6)); n = n + 6
+			hdr:add_le(f.bssid, buffer(n, 6)); n = n + 6
 			hdr:add_le(f.hal_mac_mgmt_hdr_seq_ctl, buffer(n, 2)); n = n + 2
 			local scan_entry = params:add(wcn36xx, buffer(n, 3), "scan_entry")
 			scan_entry:add(f.hal_scan_entry_bss_index, buffer(n, 2)); n = n + 2
@@ -150,13 +150,13 @@ function wcn36xx.dissector(inbuffer, pinfo, tree)
 			params:add(f.scan_channel, channel)
 		elseif (msg_type == 14) then
 			-- delete sta
-			params:add(f.del_sta_sta_index, buffer(n, 1)); n = n + 1
+			params:add(f.sta_index, buffer(n, 1)); n = n + 1
 		elseif (msg_type == 18) then
-			-- delete sta
-			params:add(f.del_bss_sta_index, buffer(n, 1)); n = n + 1
+			-- delete bss
+			params:add(f.sta_index, buffer(n, 1)); n = n + 1
 		elseif (msg_type == 20) then
 			-- join
-			params:add_le(f.join_bssid, buffer(n, 6)); n = n + 6
+			params:add_le(f.bssid, buffer(n, 6)); n = n + 6
 			params:add(f.join_channel, buffer(n, 1)); n = n + 1
 			params:add_le(f.join_self_sta_mac_addr, buffer(n, 6)); n = n + 6
 			params:add(f.join_local_power_constraint, buffer(n, 1)); n = n + 1
@@ -180,10 +180,10 @@ function wcn36xx.dissector(inbuffer, pinfo, tree)
 			params:add(f.ch_switch_tx_mgmt_power, buffer(n, 1)); n = n + 1
 			params:add(f.ch_switch_max_tx_power, buffer(n, 1)); n = n + 1
 			params:add_le(f.ch_switch_self_sta_mac_addr, buffer(n, 6)); n = n + 6
-			params:add_le(f.ch_switch_bssid, buffer(n, 6)); n = n + 6
+			params:add_le(f.bssid, buffer(n, 6)); n = n + 6
 		elseif (msg_type == 44) then
 			-- set link state
-			params:add_le(f.set_link_st_bssid, buffer(n, 6)); n = n + 6
+			params:add_le(f.bssid, buffer(n, 6)); n = n + 6
 			params:add_le(f.set_link_st_state, buffer(n, 4)); n = n + 4
 			params:add_le(f.set_link_st_self_mac_addr, buffer(n, 6)); n = n + 6
 		elseif (msg_type == 48) then
@@ -204,7 +204,7 @@ function wcn36xx.dissector(inbuffer, pinfo, tree)
 			params:add_le(f.add_ba_session_sta_index, buffer(n, 2)); n = n + 2
 			params:add_le(f.add_ba_session_mac_addr, buffer(n, 6)); n = n + 6
 			params:add(f.add_ba_session_dialog_token, buffer(n, 1)); n = n + 1
-			params:add(f.add_ba_session_tid, buffer(n, 1)); n = n + 1
+			params:add(f.tid, buffer(n, 1)); n = n + 1
 			params:add(f.add_ba_session_policy, buffer(n, 1)); n = n + 1
 			params:add_le(f.add_ba_session_buffer_size, buffer(n, 2)); n = n + 2
 			params:add_le(f.add_ba_session_timeout, buffer(n, 2)); n = n + 2
@@ -212,7 +212,7 @@ function wcn36xx.dissector(inbuffer, pinfo, tree)
 			params:add(f.add_ba_session_direction, buffer(n, 1)); n = n + 1
 		elseif (msg_type == 78) then
 			-- enter bmps
-			params:add(f.enter_bmps_bss_index, buffer(n, 1)); n = n + 1
+			params:add(f.bss_index, buffer(n, 1)); n = n + 1
 			params:add_le(f.enter_bmps_tbtt, buffer(n, 8)); n = n + 8
 			params:add(f.enter_bmps_dtim_count, buffer(n, 1)); n = n + 1
 			params:add(f.enter_bmps_dtim_period, buffer(n, 1)); n = n + 1
@@ -222,7 +222,7 @@ function wcn36xx.dissector(inbuffer, pinfo, tree)
 		elseif (msg_type == 79) then
 			-- exit bmps
 			params:add(f.exit_bmps_send_data_null, buffer(n, 1)); n = n + 1
-			params:add(f.exit_bmps_bss_index, buffer(n, 1)); n = n + 1
+			params:add(f.bss_index, buffer(n, 1)); n = n + 1
 		elseif (msg_type == 84) then
 			-- add beacon filter
 			params:add_le(f.beacon_filter_capability_info, buffer(n, 2)); n = n + 2
@@ -230,7 +230,7 @@ function wcn36xx.dissector(inbuffer, pinfo, tree)
 			params:add_le(f.beacon_filter_beacon_interval, buffer(n, 2)); n = n + 2
 			local num = buffer(n, 2):le_uint()
 			params:add_le(f.beacon_filter_ie_num, buffer(n, 2)); n = n + 2
-			params:add(f.beacon_filter_bss_index, buffer(n, 1)); n = n + 1
+			params:add(f.bss_index, buffer(n, 1)); n = n + 1
 			params:add(f.beacon_filter_reserved, buffer(n, 1)); n = n + 1
 			local elements
 			for i = 1,num do
@@ -262,7 +262,7 @@ function wcn36xx.dissector(inbuffer, pinfo, tree)
 				params:add_le(f.ns_offload_self_addr, buffer(n, 6)); n = n + 6
 				params:add(f.ns_offload_valid, buffer(n, 1)); n = n + 1
 				params:add(f.ns_offload_reserved2, buffer(n, 1)); n = n + 1
-				params:add(f.ns_offload_bss_index, buffer(n, 1)); n = n + 1
+				params:add(f.bss_index, buffer(n, 1)); n = n + 1
 				params:add_le(f.ns_offload_slot_index, buffer(n, 4)); n = n + 4
 			end
 		elseif (msg_type == 91) then
@@ -306,7 +306,7 @@ function wcn36xx.dissector(inbuffer, pinfo, tree)
 			for i = 1,addr_count do
 				params:add_le(f.multicast_list_address, buffer(n, 6)); n = n + 6
 			end
-			params:add(f.multicast_list_bss_index, buffer(n, 1)); n = n + 1
+			params:add(f.bss_index, buffer(n, 1)); n = n + 1
 		elseif (msg_type == 159) then
 			-- rcv packet filter
 			params:add(f.rcv_packet_filter_id, buffer(n, 1)); n = n + 1
@@ -314,7 +314,7 @@ function wcn36xx.dissector(inbuffer, pinfo, tree)
 			local count = buffer(n, 1):uint()
 			params:add(f.rcv_packet_filter_params_count, buffer(n, 1)); n = n + 1
 			params:add_le(f.rcv_packet_filter_coalesce_time, buffer(n, 4)); n = n + 4
-			params:add(f.rcv_packet_filter_bssid, buffer(n, 1)); n = n + 1
+			params:add(f.bss_index, buffer(n, 1)); n = n + 1
 			for i = 1,count do
 				local fltparams = subtree:add(wcn36xx, buffer(n, 22), i)
 				fltparams:add(f.rcv_packet_filter_param_protocol_layer, buffer(n, 1)); n = n + 1
@@ -353,14 +353,14 @@ function wcn36xx.dissector(inbuffer, pinfo, tree)
 				params:add(f.start_rsp_fw_major, buffer(n, 1)); n = n + 1
 			elseif (msg_type == 60) then
 				-- trigger ba
-				params:add_le(f.trigger_ba_rsp_bssid, buffer(n, 6)); n = n + 6
+				params:add_le(f.bssid, buffer(n, 6)); n = n + 6
 				status = buffer(n, 4):le_uint()
 				params:add_le(f.rsp_status, buffer(n, 4)); n = n + 4
 				params:add_le(f.trigger_ba_rsp_candidate_cnt, buffer(n, 2)); n = n + 2
 			elseif (msg_type == 75) then
 				-- tl flush ac
 				params:add(f.tl_flush_ac_sta_id, buffer(n, 1)); n = n + 1
-				params:add(f.tl_flush_ac_tid, buffer(n, 1)); n = n + 1
+				params:add(f.tid, buffer(n, 1)); n = n + 1
 				status = buffer(n, 4):le_uint()
 				params:add_le(f.rsp_status, buffer(n, 4)); n = n + 4
 			elseif (msg_type == 116) then
@@ -376,7 +376,7 @@ function wcn36xx.dissector(inbuffer, pinfo, tree)
 				status = 0
 			elseif (msg_type == 140) then
 				-- enable radar
-				params:add_le(f.enable_radar_rsp_bssid, buffer(n, 6)); n = n + 6
+				params:add_le(f.bssid, buffer(n, 6)); n = n + 6
 				status = buffer(n, 4):le_uint()
 				params:add_le(f.rsp_status, buffer(n, 4)); n = n + 4
 			else
@@ -817,6 +817,11 @@ f.msg_version = ProtoField.uint16("wcn36xx.msg_version", "msg_version")
 f.len = ProtoField.uint32("wcn36xx.len", "len")
 f.data = ProtoField.bytes("wcn36xx.data", "data")
 
+f.bss_index = ProtoField.uint8("wcn36xx.bss_index", "bss_index", base.DEC)
+f.bssid = ProtoField.ether("wcn36xx.bssid", "bssid")
+f.sta_index = ProtoField.uint8("wcn36xx.sta_index", "sta_index")
+f.tid = ProtoField.uint8("wcn36xx.tid", "tid")
+
 f.scan_channel = ProtoField.uint8("wcn36xx.scan_channel", "scan_channel")
 f.scan_dot11d_enabled = ProtoField.bool("wcn36xx.scan_dot11d_enabled", "dot11d_enabled")
 f.scan_dot11d_resolved = ProtoField.bool("wcn36xx.scan_dot11d_resolved", "dot11d_resolved")
@@ -837,7 +842,6 @@ f.beacon_filter_capability_info = ProtoField.uint16("wcn36xx.beacon_filter_capab
 f.beacon_filter_capability_mask = ProtoField.uint16("wcn36xx.beacon_filter_capability_mask", "capability_mask", base.HEX)
 f.beacon_filter_beacon_interval = ProtoField.uint16("wcn36xx.beacon_filter_beacon_interval", "beacon_interval", base.DEC)
 f.beacon_filter_ie_num = ProtoField.uint16("wcn36xx.beacon_filter_ie_num", "ie_num", base.DEC)
-f.beacon_filter_bss_index = ProtoField.uint8("wcn36xx.beacon_filter_bss_index", "bss_index", base.DEC)
 f.beacon_filter_reserved = ProtoField.uint8("wcn36xx.beacon_filter_reserved", "reserved", base.HEX)
 
 f.beacon_filter_element_id = ProtoField.uint8("wcn36xx.beacon_filter_element_id", "element_id", base.DEC)
@@ -861,7 +865,6 @@ f.start_len = ProtoField.uint32("wcn36xx.start_len", "len")
 f.add_sta_self_addr = ProtoField.ether("wcn36xx.add_sta_self_addr", "addr")
 f.add_sta_self_status = ProtoField.uint32("wcn36xx.add_sta_self_status", "status", base.HEX)
 
-f.enter_bmps_bss_index = ProtoField.uint8("wcn36xx.enter_bmps_bss_index", "bss_index")
 f.enter_bmps_tbtt = ProtoField.uint64("wcn36xx.enter_bmps_tbtt", "tbtt", base.HEX)
 f.enter_bmps_dtim_count = ProtoField.uint8("wcn36xx.enter_bmps_dtim_count", "dtim_count")
 f.enter_bmps_dtim_period = ProtoField.uint8("wcn36xx.enter_bmps_dtim_period", "dtim_period")
@@ -870,12 +873,10 @@ f.enter_bmps_num_beacon_per_rssi_average = ProtoField.uint32("wcn36xx.enter_bmps
 f.enter_bmps_rssi_filter_enable = ProtoField.bool("wcn36xx.enter_bmps_rssi_filter_enable", "rssi_filter_enable")
 
 f.exit_bmps_send_data_null = ProtoField.bool("wcn36xx.exit_bmps_send_data_null", "send_data_null")
-f.exit_bmps_bss_index = ProtoField.uint8("wcn36xx.exit_bmps_bss_index", "bss_index")
 
 f.add_ba_session_sta_index = ProtoField.uint16("wcn36xx.add_ba_session_sta_index", "sta_index")
 f.add_ba_session_mac_addr = ProtoField.ether("wcn36xx.add_ba_session_mac_addr", "mac_addr", base.HEX)
 f.add_ba_session_dialog_token = ProtoField.uint8("wcn36xx.add_ba_session_dialog_token", "dialog_token")
-f.add_ba_session_tid = ProtoField.uint8("wcn36xx.add_ba_session_tid", "tid")
 f.add_ba_session_policy = ProtoField.uint8("wcn36xx.add_ba_session_policy", "policy")
 f.add_ba_session_buffer_size = ProtoField.uint16("wcn36xx.add_ba_session_buffer_size", "buffer_size")
 f.add_ba_session_timeout = ProtoField.uint16("wcn36xx.add_ba_session_timeout", "timeout")
@@ -897,7 +898,6 @@ f.ns_offload_target_ipv6_2 = ProtoField.ipv6("wcn36xx.ns_offload_target_ipv6_2",
 f.ns_offload_self_addr = ProtoField.ether("wcn36xx.ns_offload_target_self_addr", "self_addr")
 f.ns_offload_valid = ProtoField.uint8("wcn36xx.ns_offload_valud", "valid", base.HEX)
 f.ns_offload_reserved2 = ProtoField.uint8("wcn36xx.ns_offload_reserved2", "reserved2")
-f.ns_offload_bss_index = ProtoField.uint8("wcn36xx.ns_offload_bss_index", "bss_index")
 f.ns_offload_slot_index = ProtoField.uint32("wcn36xx.ns_offload_slot_index", "slot_index")
 
 f.set_rssi_threshold_t1 = ProtoField.int8("wcn36xx.set_rssi_threshold_t1", "t1")
@@ -913,13 +913,11 @@ f.set_rssi_threshold_t3neg = ProtoField.bool("wcn36xx.set_rssi_threshold_t3ned",
 f.multicast_list_data_offset = ProtoField.uint8("wcn36xx.multicast_list_data_offset", "data_offset")
 f.multicast_list_addr_count = ProtoField.uint32("wcn36xx.multicast_list_addr_count", "addr_count")
 f.multicast_list_address = ProtoField.ether("wcn36xx.multicast_list_address", "address")
-f.multicast_list_bss_index = ProtoField.uint8("wcn36xx.multicast_list_bss_index", "bss_index")
 
 f.rcv_packet_filter_id = ProtoField.uint8("wcn36xx.rcv_packet_filter_id", "id")
 f.rcv_packet_filter_type = ProtoField.uint8("wcn36xx.rcv_packet_filter_type", "type", base.HEX, filter_type_strings)
 f.rcv_packet_filter_params_count = ProtoField.uint8("wcn36xx.rcv_packet_filter_id", "params_count")
 f.rcv_packet_filter_coalesce_time = ProtoField.uint32("wcn36xx.rcv_packet_filter_coalesce_time", "coalesce_time")
-f.rcv_packet_filter_bssid = ProtoField.uint8("wcn36xx.rcv_packet_filter_bssid", "bssid")
 f.rcv_packet_filter_param_protocol_layer = ProtoField.uint8("wcn36xx.rcv_packet_filter_param_protocol_layer", "protocol_layer", base.HEX, filter_protocol_type_strings)
 f.rcv_packet_filter_param_cmp_flag = ProtoField.uint8("wcn36xx.rcv_packet_filter_param_cmp_flag", "cmp_flag", base.HEX, filter_cmp_type_strings)
 f.rcv_packet_filter_param_data_length = ProtoField.uint16("wcn36xx.rcv_packet_filter_param_data_length", "data_length")
@@ -941,10 +939,8 @@ f.ch_switch_secondary_channel_offset = ProtoField.uint32("wcn36xx.ch_switch_seco
 f.ch_switch_tx_mgmt_power = ProtoField.uint8("wcn36xx.ch_switch_tx_mgmt_power", "tx_mgmt_power")
 f.ch_switch_max_tx_power = ProtoField.uint8("wcn36xx.ch_switch_max_tx_power", "max_tx_power")
 f.ch_switch_self_sta_mac_addr = ProtoField.ether("wcn36xx.ch_switch_self_sta_mac_addr", "self_sta_mac_addr")
-f.ch_switch_bssid = ProtoField.ether("wcn36xx.ch_switch_bssid", "bssid")
 
 f.init_scan_mode = ProtoField.uint32("wcn36xx.init_scan_mode", "mode", base.DEX, sys_mode_strings)
-f.init_scan_bssid = ProtoField.ether("wcn36xx.init_scan_bssid", "bssid")
 f.init_scan_notify = ProtoField.uint8("wcn36xx.init_scan_notify", "notify")
 f.init_scan_frame_type = ProtoField.uint8("wcn36xx.init_scan_frame_type", "frame_type")
 f.init_scan_frame_len = ProtoField.uint8("wcn36xx.init_scan_frame_len", "frame_len")
@@ -954,21 +950,14 @@ f.hal_mac_mgmt_hdr_duration_lo = ProtoField.uint8("wcn36xx.hal_mac_mgmt_hdr_dura
 f.hal_mac_mgmt_hdr_duration_hi = ProtoField.uint8("wcn36xx.hal_mac_mgmt_hdr_duration_hi", "duration_hi")
 f.hal_mac_mgmt_hdr_da = ProtoField.bytes("wcn36xx.hal_mac_mgmt_hdr_da", "hdr_da")
 f.hal_mac_mgmt_hdr_sa = ProtoField.bytes("wcn36xx.hal_mac_mgmt_hdr_sa", "hdr_sa")
-f.hal_mac_mgmt_hdr_bssid = ProtoField.ether("wcn36xx.hal_mac_mgmt_hdr_bssid", "hdr_bssid")
 f.hal_mac_mgmt_hdr_seq_ctl = ProtoField.uint16("wcn36xx.hal_mac_mgmt_hdr_seq_ctl", "seq_ctl")
 
 f.hal_scan_entry_bss_index = ProtoField.bytes("wcn36xx.hal_scan_entry_bss_index", "bss_index")
 f.hal_scan_entry_active_bss_count = ProtoField.uint8("wcn36xx.hal_scan_entry_active_bss_count", "active_bss_count")
 
-f.del_sta_sta_index = ProtoField.uint8("wcn36xx.del_sta_sta_index", "sta_index")
-
-f.del_bss_sta_index = ProtoField.uint8("wcn36xx.del_bss_sta_index", "sta_index")
-
-f.set_link_st_bssid = ProtoField.ether("wcn36xx.set_link_st_bssid", "bssid")
 f.set_link_st_state = ProtoField.uint32("wcn36xx.set_link_st_state", "state", base.DEC, link_state_strings)
 f.set_link_st_self_mac_addr = ProtoField.ether("wcn36xx.set_link_st_state", "self_mac_addr")
 
-f.join_bssid = ProtoField.ether("wcn36xx.join_bssid", "bssid")
 f.join_channel = ProtoField.uint8("wcn36xx.join_channel", "local_power_constraint")
 f.join_self_sta_mac_addr = ProtoField.ether("wcn36xx.join_self_sta_mac_addr", "self_sta_mac_addr")
 f.join_local_power_constraint = ProtoField.uint8("wcn36xx.join_local_power_constraint", "local_power_constraint")
@@ -984,11 +973,7 @@ f.start_rsp_fw_version = ProtoField.uint8("wcn36xx.start_rsp_fw_version", "fw_ve
 f.start_rsp_fw_revision = ProtoField.uint8("wcn36xx.start_rsp_fw_revision", "fw_revision")
 
 f.tl_flush_ac_sta_id = ProtoField.uint8("wcn36xx.tl_flush_ac_sta_id", "sta_id")
-f.tl_flush_ac_tid = ProtoField.uint8("wcn36xx.tl_flush_ac_tid", "tid")
 
 f.set_max_tx_power_rsp_power = ProtoField.uint8("wcn36xx.set_max_tx_power_rsp_power", "power")
 
-f.trigger_ba_rsp_bssid = ProtoField.ether("wcn36xx.trigger_ba_rsp_bssid", "bssid")
 f.trigger_ba_rsp_candidate_cnt = ProtoField.uint16("wcn36xx.trigger_ba_rsp_candidate_cnt", "candidate_cnt")
-
-f.enable_radar_rsp_bssid = ProtoField.ether("wcn36xx.trigger_ba_rsp_bssid", "bssid")
