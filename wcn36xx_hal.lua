@@ -143,9 +143,11 @@ function wcn36xx.dissector(inbuffer, pinfo, tree)
 			scan_entry:add(f.hal_scan_entry_bss_index, buffer(n, 2)); n = n + 2
 			scan_entry:add(f.hal_scan_entry_active_bss_count, buffer(n, 1)); n = n + 1
 		elseif ((msg_type == 6) or
-                        (msg_type == 8)) then
+			(msg_type == 8)) then
 			-- start/end scan
-			params:add(f.scan_channel, buffer(n, 1)); n = n + 1
+			local channel = buffer(n, 1):uint(); n = n + 1
+			pinfo.cols.info:append(", channel "..channel)
+			params:add(f.scan_channel, channel)
 		elseif (msg_type == 14) then
 			-- delete sta
 			params:add(f.del_sta_sta_index, buffer(n, 1)); n = n + 1
@@ -170,7 +172,9 @@ function wcn36xx.dissector(inbuffer, pinfo, tree)
 			end
 		elseif (msg_type == 42) then
 			-- channel switch
-			params:add(f.ch_switch_channel_number, buffer(n, 1)); n = n + 1
+			local channel = buffer(n, 1):uint(); n = n + 1
+			pinfo.cols.info:append(", channel "..channel)
+			params:add(f.ch_switch_channel_number, channel)
 			params:add(f.ch_switch_local_power_constraint, buffer(n, 1)); n = n + 1
 			params:add_le(f.ch_switch_secondary_channel_offset, buffer(n, 4)); n = n + 4
 			params:add(f.ch_switch_tx_mgmt_power, buffer(n, 1)); n = n + 1
