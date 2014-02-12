@@ -325,6 +325,8 @@ function wcn36xx.dissector(inbuffer, pinfo, tree)
 				-- start oem data
 				params:add(f.start_oem_data_data, buffer(n))
 				status = 0
+			elseif (msg_type == 176) then
+				status = 0
 			elseif (msg_type == 140) then
 				-- enable radar
 				params:add_le(f.enable_radar_rsp_bssid, buffer(n, 6)); n = n + 6
