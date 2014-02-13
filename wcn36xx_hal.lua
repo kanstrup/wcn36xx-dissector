@@ -243,6 +243,14 @@ function wcn36xx.dissector(inbuffer, pinfo, tree)
 			params:add_le(f.join_secondary_channel_offset, buffer(n, 4)); n = n + 4
 			params:add_le(f.join_link_state, buffer(n, 4)); n = n + 4
 			params:add(f.join_max_tx_power, buffer(n, 1)); n = n + 1
+		elseif (msg_type == 26) then
+			-- SET_STAKEY_REQ
+			params:add_le(f.SET_STAKEY_REQ_staIdx, buffer(n, 2)); n = n + 2
+			params:add_le(f.SET_STAKEY_REQ_encType, buffer(n, 4)); n = n + 4
+			params:add_le(f.SET_STAKEY_REQ_wepType, buffer(n, 4)); n = n + 4
+			params:add_le(f.SET_STAKEY_REQ_defWEPIdx, buffer(n, 1)); n = n + 1
+			params:add_le(f.SET_STAKEY_REQ_key, buffer(n, 228)); n = n + 228
+			params:add_le(f.SET_STAKEY_REQ_singleTidRc, buffer(n, 1)); n = n + 1
 		elseif (msg_type == 28) then
 			-- remove bss key
 			params:add(f.bss_index, buffer(n, 1)); n = n + 1
@@ -1233,4 +1241,11 @@ f.UPDATE_BEACON_REQ_llnNonGFCoexist = ProtoField.uint8("wcn36xx.UPDATE_BEACON_RE
 f.UPDATE_BEACON_REQ_fLsigTXOPProtectionFullSupport = ProtoField.uint8("wcn36xx.UPDATE_BEACON_REQ_fLsigTXOPProtectionFullSupport", "fLsigTXOPProtectionFullSupport")
 f.UPDATE_BEACON_REQ_fRIFSMode = ProtoField.uint8("wcn36xx.UPDATE_BEACON_REQ_fRIFSMode", "fRIFSMode")
 f.UPDATE_BEACON_REQ_paramChangeBitmap = ProtoField.uint16("wcn36xx.UPDATE_BEACON_REQ_paramChangeBitmap", "paramChangeBitmap")
+
+f.SET_STAKEY_REQ_staIdx = ProtoField.uint16("wcn36xx.SET_STAKEY_REQ_staIdx", "staIdx")
+f.SET_STAKEY_REQ_encType = ProtoField.uint32("wcn36xx.SET_STAKEY_REQ_encType", "encType")
+f.SET_STAKEY_REQ_wepType = ProtoField.uint32("wcn36xx.SET_STAKEY_REQ_wepType", "wepType")
+f.SET_STAKEY_REQ_defWEPIdx = ProtoField.uint8("wcn36xx.SET_STAKEY_REQ_defWEPIdx", "defWEPIdx")
+f.SET_STAKEY_REQ_key = ProtoField.bytes("wcn36xx.SET_STAKEY_REQ_key", "key")
+f.SET_STAKEY_REQ_singleTidRc = ProtoField.uint8("wcn36xx.SET_STAKEY_REQ_singleTidRc", "singleTidRc")
 
