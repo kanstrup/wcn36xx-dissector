@@ -498,6 +498,22 @@ function wcn36xx.dissector(inbuffer, pinfo, tree)
 				params:add(f.start_rsp_fw_version, buffer(n, 1)); n = n + 1
 				params:add(f.start_rsp_fw_minor, buffer(n, 1)); n = n + 1
 				params:add(f.start_rsp_fw_major, buffer(n, 1)); n = n + 1
+			elseif (msg_type == 17) then
+				-- CONFIG_BSS_RSP
+				status = 0
+				params:add_le(f.CONFIG_BSS_RSP_status, buffer(n, 4)); n = n + 4
+				params:add_le(f.CONFIG_BSS_RSP_bssIdx, buffer(n, 1)); n = n + 1
+				params:add_le(f.CONFIG_BSS_RSP_dpuDescIndx, buffer(n, 1)); n = n + 1
+				params:add_le(f.CONFIG_BSS_RSP_ucastDpuSignature, buffer(n, 1)); n = n + 1
+				params:add_le(f.CONFIG_BSS_RSP_bcastDpuDescIndx, buffer(n, 1)); n = n + 1
+				params:add_le(f.CONFIG_BSS_RSP_bcastDpuSignature, buffer(n, 1)); n = n + 1
+				params:add_le(f.CONFIG_BSS_RSP_mgmtDpuDescIndx, buffer(n, 1)); n = n + 1
+				params:add_le(f.CONFIG_BSS_RSP_mgmtDpuSignature, buffer(n, 1)); n = n + 1
+				params:add_le(f.CONFIG_BSS_RSP_bssStaIdx, buffer(n, 1)); n = n + 1
+				params:add_le(f.CONFIG_BSS_RSP_bssSelfStaIdx, buffer(n, 1)); n = n + 1
+				params:add_le(f.CONFIG_BSS_RSP_bssBcastStaIdx, buffer(n, 1)); n = n + 1
+				params:add_le(f.CONFIG_BSS_RSP_staMac, buffer(n, 6)); n = n + 6
+				params:add_le(f.CONFIG_BSS_RSP_txMgmtPower, buffer(n, 1)); n = n + 1
 			elseif (msg_type == 60) then
 				-- trigger ba
 				params:add_le(f.bssid, buffer(n, 6)); n = n + 6
@@ -1271,4 +1287,18 @@ f.FINISH_SCAN_REQ_frameType = ProtoField.uint8("wcn36xx.FINISH_SCAN_REQ_frameTyp
 f.FINISH_SCAN_REQ_frameLength = ProtoField.uint8("wcn36xx.FINISH_SCAN_REQ_frameLength", "frameLength")
 f.FINISH_SCAN_REQ_macMgmtHdr = ProtoField.bytes("wcn36xx.FINISH_SCAN_REQ_macMgmtHdr", "macMgmtHdr")
 f.FINISH_SCAN_REQ_scanEntry = ProtoField.bytes("wcn36xx.FINISH_SCAN_REQ_scanEntry", "scanEntry")
+
+f.CONFIG_BSS_RSP_status = ProtoField.uint32("wcn36xx.CONFIG_BSS_RSP_status", "status")
+f.CONFIG_BSS_RSP_bssIdx = ProtoField.uint8("wcn36xx.CONFIG_BSS_RSP_bssIdx", "bssIdx")
+f.CONFIG_BSS_RSP_dpuDescIndx = ProtoField.uint8("wcn36xx.CONFIG_BSS_RSP_dpuDescIndx", "dpuDescIndx")
+f.CONFIG_BSS_RSP_ucastDpuSignature = ProtoField.uint8("wcn36xx.CONFIG_BSS_RSP_ucastDpuSignature", "ucastDpuSignature")
+f.CONFIG_BSS_RSP_bcastDpuDescIndx = ProtoField.uint8("wcn36xx.CONFIG_BSS_RSP_bcastDpuDescIndx", "bcastDpuDescIndx")
+f.CONFIG_BSS_RSP_bcastDpuSignature = ProtoField.uint8("wcn36xx.CONFIG_BSS_RSP_bcastDpuSignature", "bcastDpuSignature")
+f.CONFIG_BSS_RSP_mgmtDpuDescIndx = ProtoField.uint8("wcn36xx.CONFIG_BSS_RSP_mgmtDpuDescIndx", "mgmtDpuDescIndx")
+f.CONFIG_BSS_RSP_mgmtDpuSignature = ProtoField.uint8("wcn36xx.CONFIG_BSS_RSP_mgmtDpuSignature", "mgmtDpuSignature")
+f.CONFIG_BSS_RSP_bssStaIdx = ProtoField.uint8("wcn36xx.CONFIG_BSS_RSP_bssStaIdx", "bssStaIdx")
+f.CONFIG_BSS_RSP_bssSelfStaIdx = ProtoField.uint8("wcn36xx.CONFIG_BSS_RSP_bssSelfStaIdx", "bssSelfStaIdx")
+f.CONFIG_BSS_RSP_bssBcastStaIdx = ProtoField.uint8("wcn36xx.CONFIG_BSS_RSP_bssBcastStaIdx", "bssBcastStaIdx")
+f.CONFIG_BSS_RSP_staMac = ProtoField.ether("wcn36xx.CONFIG_BSS_RSP_staMac", "staMac")
+f.CONFIG_BSS_RSP_txMgmtPower = ProtoField.uint8("wcn36xx.CONFIG_BSS_RSP_txMgmtPower", "txMgmtPower")
 
