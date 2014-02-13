@@ -151,6 +151,17 @@ function wcn36xx.dissector(inbuffer, pinfo, tree)
 			local channel = buffer(n, 1):uint(); n = n + 1
 			pinfo.cols.info:append(", channel "..channel)
 			params:add(f.scan_channel, channel)
+		elseif (msg_type == 10) then
+			-- FINISH_SCAN_REQ
+			params:add_le(f.FINISH_SCAN_REQ_scanMode, buffer(n, 4)); n = n + 4
+			params:add_le(f.FINISH_SCAN_REQ_currentOperChannel, buffer(n, 1)); n = n + 1
+			params:add_le(f.FINISH_SCAN_REQ_cbState, buffer(n, 4)); n = n + 4
+			params:add_le(f.FINISH_SCAN_REQ_bssid, buffer(n, 6)); n = n + 6
+			params:add_le(f.FINISH_SCAN_REQ_notifyBss, buffer(n, 1)); n = n + 1
+			params:add_le(f.FINISH_SCAN_REQ_frameType, buffer(n, 1)); n = n + 1
+			params:add_le(f.FINISH_SCAN_REQ_frameLength, buffer(n, 1)); n = n + 1
+			params:add_le(f.FINISH_SCAN_REQ_macMgmtHdr, buffer(n, 24)); n = n + 24
+			params:add_le(f.FINISH_SCAN_REQ_scanEntry, buffer(n, 3)); n = n + 3
 		elseif (msg_type == 12) then
 			-- CONFIG_STA_REQ
 			params:add_le(f.CONFIG_STA_REQ_bssId, buffer(n, 6)); n = n + 6
@@ -1250,4 +1261,14 @@ f.SET_STAKEY_REQ_wepType = ProtoField.uint32("wcn36xx.SET_STAKEY_REQ_wepType", "
 f.SET_STAKEY_REQ_defWEPIdx = ProtoField.uint8("wcn36xx.SET_STAKEY_REQ_defWEPIdx", "defWEPIdx")
 f.SET_STAKEY_REQ_key = ProtoField.bytes("wcn36xx.SET_STAKEY_REQ_key", "key")
 f.SET_STAKEY_REQ_singleTidRc = ProtoField.uint8("wcn36xx.SET_STAKEY_REQ_singleTidRc", "singleTidRc")
+
+f.FINISH_SCAN_REQ_scanMode = ProtoField.uint32("wcn36xx.FINISH_SCAN_REQ_scanMode", "scanMode")
+f.FINISH_SCAN_REQ_currentOperChannel = ProtoField.uint8("wcn36xx.FINISH_SCAN_REQ_currentOperChannel", "currentOperChannel")
+f.FINISH_SCAN_REQ_cbState = ProtoField.uint32("wcn36xx.FINISH_SCAN_REQ_cbState", "cbState")
+f.FINISH_SCAN_REQ_bssid = ProtoField.ether("wcn36xx.FINISH_SCAN_REQ_bssid", "bssid")
+f.FINISH_SCAN_REQ_notifyBss = ProtoField.uint8("wcn36xx.FINISH_SCAN_REQ_notifyBss", "notifyBss")
+f.FINISH_SCAN_REQ_frameType = ProtoField.uint8("wcn36xx.FINISH_SCAN_REQ_frameType", "frameType")
+f.FINISH_SCAN_REQ_frameLength = ProtoField.uint8("wcn36xx.FINISH_SCAN_REQ_frameLength", "frameLength")
+f.FINISH_SCAN_REQ_macMgmtHdr = ProtoField.bytes("wcn36xx.FINISH_SCAN_REQ_macMgmtHdr", "macMgmtHdr")
+f.FINISH_SCAN_REQ_scanEntry = ProtoField.bytes("wcn36xx.FINISH_SCAN_REQ_scanEntry", "scanEntry")
 
