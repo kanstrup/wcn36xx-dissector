@@ -552,7 +552,10 @@ function wcn36xx.dissector(inbuffer, pinfo, tree)
 				status = 0
 			elseif (msg_type == 152) then
 				status = 0
+			elseif (msg_type == 167) then
+				status = 0
 			elseif (msg_type == 176) then
+				--WLAN_HAL_SET_POWER_PARAMS_RSP
 				status = 0
 			elseif (msg_type == 140) then
 				-- enable radar
