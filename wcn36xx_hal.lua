@@ -151,6 +151,39 @@ function wcn36xx.dissector(inbuffer, pinfo, tree)
 			local channel = buffer(n, 1):uint(); n = n + 1
 			pinfo.cols.info:append(", channel "..channel)
 			params:add(f.scan_channel, channel)
+		elseif (msg_type == 12) then
+			-- CONFIG_STA_REQ
+			params:add_le(f.CONFIG_STA_REQ_bssId, buffer(n, 6)); n = n + 6
+			params:add_le(f.CONFIG_STA_REQ_assocId, buffer(n, 2)); n = n + 2
+			params:add_le(f.CONFIG_STA_REQ_staType, buffer(n, 1)); n = n + 1
+			params:add_le(f.CONFIG_STA_REQ_shortPreambleSupported, buffer(n, 1)); n = n + 1
+			params:add_le(f.CONFIG_STA_REQ_staMac, buffer(n, 6)); n = n + 6
+			params:add_le(f.CONFIG_STA_REQ_listenInterval, buffer(n, 2)); n = n + 2
+			params:add_le(f.CONFIG_STA_REQ_wmmEnabled, buffer(n, 1)); n = n + 1
+			params:add_le(f.CONFIG_STA_REQ_htCapable, buffer(n, 1)); n = n + 1
+			params:add_le(f.CONFIG_STA_REQ_txChannelWidthSet, buffer(n, 1)); n = n + 1
+			params:add_le(f.CONFIG_STA_REQ_rifsMode, buffer(n, 1)); n = n + 1
+			params:add_le(f.CONFIG_STA_REQ_lsigTxopProtection, buffer(n, 1)); n = n + 1
+			params:add_le(f.CONFIG_STA_REQ_maxAmpduSize, buffer(n, 1)); n = n + 1
+			params:add_le(f.CONFIG_STA_REQ_maxAmpduDensity, buffer(n, 1)); n = n + 1
+			params:add_le(f.CONFIG_STA_REQ_maxAmsduSize, buffer(n, 1)); n = n + 1
+			params:add_le(f.CONFIG_STA_REQ_fShortGI40Mhz, buffer(n, 1)); n = n + 1
+			params:add_le(f.CONFIG_STA_REQ_fShortGI20Mhz, buffer(n, 1)); n = n + 1
+			params:add_le(f.CONFIG_STA_REQ_rmfEnabled, buffer(n, 1)); n = n + 1
+			params:add_le(f.CONFIG_STA_REQ_encryptType, buffer(n, 4)); n = n + 4
+			params:add_le(f.CONFIG_STA_REQ_action, buffer(n, 1)); n = n + 1
+			params:add_le(f.CONFIG_STA_REQ_uAPSD, buffer(n, 1)); n = n + 1
+			params:add_le(f.CONFIG_STA_REQ_maxSPLen, buffer(n, 1)); n = n + 1
+			params:add_le(f.CONFIG_STA_REQ_greenFieldCapable, buffer(n, 1)); n = n + 1
+			params:add_le(f.CONFIG_STA_REQ_mimoPS, buffer(n, 4)); n = n + 4
+			params:add_le(f.CONFIG_STA_REQ_delayedBASupport, buffer(n, 1)); n = n + 1
+			params:add_le(f.CONFIG_STA_REQ_us32MaxAmpduDuration, buffer(n, 1)); n = n + 1
+			params:add_le(f.CONFIG_STA_REQ_fDsssCckMode40Mhz, buffer(n, 1)); n = n + 1
+			params:add_le(f.CONFIG_STA_REQ_staIdx, buffer(n, 1)); n = n + 1
+			params:add_le(f.CONFIG_STA_REQ_bssIdx, buffer(n, 1)); n = n + 1
+			params:add_le(f.CONFIG_STA_REQ_p2pCapableSta, buffer(n, 1)); n = n + 1
+			params:add_le(f.CONFIG_STA_REQ_reserved, buffer(n, 1)); n = n + 1
+			params:add_le(f.CONFIG_STA_REQ_supportedRates, buffer(n, 58)); n = n + 58
 		elseif (msg_type == 14) then
 			-- delete sta
 			params:add(f.sta_index, buffer(n, 1)); n = n + 1
@@ -1030,3 +1063,36 @@ f.tl_flush_ac_sta_id = ProtoField.uint8("wcn36xx.tl_flush_ac_sta_id", "sta_id")
 f.set_max_tx_power_rsp_power = ProtoField.uint8("wcn36xx.set_max_tx_power_rsp_power", "power")
 
 f.trigger_ba_rsp_candidate_cnt = ProtoField.uint16("wcn36xx.trigger_ba_rsp_candidate_cnt", "candidate_cnt")
+
+f.CONFIG_STA_REQ_bssId = ProtoField.ether("wcn36xx.CONFIG_STA_REQ_bssId", "bssId")
+f.CONFIG_STA_REQ_assocId = ProtoField.uint16("wcn36xx.CONFIG_STA_REQ_assocId", "assocId")
+f.CONFIG_STA_REQ_staType = ProtoField.uint8("wcn36xx.CONFIG_STA_REQ_staType", "staType")
+f.CONFIG_STA_REQ_shortPreambleSupported = ProtoField.uint8("wcn36xx.CONFIG_STA_REQ_shortPreambleSupported", "shortPreambleSupported")
+f.CONFIG_STA_REQ_staMac = ProtoField.ether("wcn36xx.CONFIG_STA_REQ_staMac", "staMac")
+f.CONFIG_STA_REQ_listenInterval = ProtoField.uint16("wcn36xx.CONFIG_STA_REQ_listenInterval", "listenInterval")
+f.CONFIG_STA_REQ_wmmEnabled = ProtoField.uint8("wcn36xx.CONFIG_STA_REQ_wmmEnabled", "wmmEnabled")
+f.CONFIG_STA_REQ_htCapable = ProtoField.uint8("wcn36xx.CONFIG_STA_REQ_htCapable", "htCapable")
+f.CONFIG_STA_REQ_txChannelWidthSet = ProtoField.uint8("wcn36xx.CONFIG_STA_REQ_txChannelWidthSet", "txChannelWidthSet")
+f.CONFIG_STA_REQ_rifsMode = ProtoField.uint8("wcn36xx.CONFIG_STA_REQ_rifsMode", "rifsMode")
+f.CONFIG_STA_REQ_lsigTxopProtection = ProtoField.uint8("wcn36xx.CONFIG_STA_REQ_lsigTxopProtection", "lsigTxopProtection")
+f.CONFIG_STA_REQ_maxAmpduSize = ProtoField.uint8("wcn36xx.CONFIG_STA_REQ_maxAmpduSize", "maxAmpduSize")
+f.CONFIG_STA_REQ_maxAmpduDensity = ProtoField.uint8("wcn36xx.CONFIG_STA_REQ_maxAmpduDensity", "maxAmpduDensity")
+f.CONFIG_STA_REQ_maxAmsduSize = ProtoField.uint8("wcn36xx.CONFIG_STA_REQ_maxAmsduSize", "maxAmsduSize")
+f.CONFIG_STA_REQ_fShortGI40Mhz = ProtoField.uint8("wcn36xx.CONFIG_STA_REQ_fShortGI40Mhz", "fShortGI40Mhz")
+f.CONFIG_STA_REQ_fShortGI20Mhz = ProtoField.uint8("wcn36xx.CONFIG_STA_REQ_fShortGI20Mhz", "fShortGI20Mhz")
+f.CONFIG_STA_REQ_rmfEnabled = ProtoField.uint8("wcn36xx.CONFIG_STA_REQ_rmfEnabled", "rmfEnabled")
+f.CONFIG_STA_REQ_encryptType = ProtoField.uint32("wcn36xx.CONFIG_STA_REQ_encryptType", "encryptType")
+f.CONFIG_STA_REQ_action = ProtoField.uint8("wcn36xx.CONFIG_STA_REQ_action", "action")
+f.CONFIG_STA_REQ_uAPSD = ProtoField.uint8("wcn36xx.CONFIG_STA_REQ_uAPSD", "uAPSD")
+f.CONFIG_STA_REQ_maxSPLen = ProtoField.uint8("wcn36xx.CONFIG_STA_REQ_maxSPLen", "maxSPLen")
+f.CONFIG_STA_REQ_greenFieldCapable = ProtoField.uint8("wcn36xx.CONFIG_STA_REQ_greenFieldCapable", "greenFieldCapable")
+f.CONFIG_STA_REQ_mimoPS = ProtoField.uint32("wcn36xx.CONFIG_STA_REQ_mimoPS", "mimoPS")
+f.CONFIG_STA_REQ_delayedBASupport = ProtoField.uint8("wcn36xx.CONFIG_STA_REQ_delayedBASupport", "delayedBASupport")
+f.CONFIG_STA_REQ_us32MaxAmpduDuration = ProtoField.uint8("wcn36xx.CONFIG_STA_REQ_us32MaxAmpduDuration", "us32MaxAmpduDuration")
+f.CONFIG_STA_REQ_fDsssCckMode40Mhz = ProtoField.uint8("wcn36xx.CONFIG_STA_REQ_fDsssCckMode40Mhz", "fDsssCckMode40Mhz")
+f.CONFIG_STA_REQ_staIdx = ProtoField.uint8("wcn36xx.CONFIG_STA_REQ_staIdx", "staIdx")
+f.CONFIG_STA_REQ_bssIdx = ProtoField.uint8("wcn36xx.CONFIG_STA_REQ_bssIdx", "bssIdx")
+f.CONFIG_STA_REQ_p2pCapableSta = ProtoField.uint8("wcn36xx.CONFIG_STA_REQ_p2pCapableSta", "p2pCapableSta")
+f.CONFIG_STA_REQ_reserved = ProtoField.uint8("wcn36xx.CONFIG_STA_REQ_reserved", "reserved")
+f.CONFIG_STA_REQ_supportedRates = ProtoField.bytes("wcn36xx.CONFIG_STA_REQ_supportedRates", "supportedRates")
+
