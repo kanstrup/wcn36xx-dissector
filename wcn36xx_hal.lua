@@ -254,6 +254,13 @@ function wcn36xx.dissector(inbuffer, pinfo, tree)
 			params:add_le(f.join_secondary_channel_offset, buffer(n, 4)); n = n + 4
 			params:add_le(f.join_link_state, buffer(n, 4)); n = n + 4
 			params:add(f.join_max_tx_power, buffer(n, 1)); n = n + 1
+		elseif (msg_type == 24) then
+			-- SET_BSSKEY_REQ
+			params:add_le(f.SET_BSSKEY_REQ_bssIdx, buffer(n, 1)); n = n + 1
+			params:add_le(f.SET_BSSKEY_REQ_encType, buffer(n, 4)); n = n + 4
+			params:add_le(f.SET_BSSKEY_REQ_numKeys, buffer(n, 1)); n = n + 1
+			params:add_le(f.SET_BSSKEY_REQ_key, buffer(n, 228)); n = n + 228
+			params:add_le(f.SET_BSSKEY_REQ_singleTidRc, buffer(n, 1)); n = n + 1
 		elseif (msg_type == 26) then
 			-- SET_STAKEY_REQ
 			params:add_le(f.SET_STAKEY_REQ_staIdx, buffer(n, 2)); n = n + 2
@@ -1302,3 +1309,8 @@ f.CONFIG_BSS_RSP_bssBcastStaIdx = ProtoField.uint8("wcn36xx.CONFIG_BSS_RSP_bssBc
 f.CONFIG_BSS_RSP_staMac = ProtoField.ether("wcn36xx.CONFIG_BSS_RSP_staMac", "staMac")
 f.CONFIG_BSS_RSP_txMgmtPower = ProtoField.uint8("wcn36xx.CONFIG_BSS_RSP_txMgmtPower", "txMgmtPower")
 
+f.SET_BSSKEY_REQ_bssIdx = ProtoField.uint8("wcn36xx.SET_BSSKEY_REQ_bssIdx", "bssIdx")
+f.SET_BSSKEY_REQ_encType = ProtoField.uint32("wcn36xx.SET_BSSKEY_REQ_encType", "encType")
+f.SET_BSSKEY_REQ_numKeys = ProtoField.uint8("wcn36xx.SET_BSSKEY_REQ_numKeys", "numKeys")
+f.SET_BSSKEY_REQ_key = ProtoField.bytes("wcn36xx.SET_BSSKEY_REQ_key", "key")
+f.SET_BSSKEY_REQ_singleTidRc = ProtoField.uint8("wcn36xx.SET_BSSKEY_REQ_singleTidRc", "singleTidRc")
