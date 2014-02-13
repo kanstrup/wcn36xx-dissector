@@ -311,6 +311,20 @@ function wcn36xx.dissector(inbuffer, pinfo, tree)
 			params:add_le(f.add_ba_session_timeout, buffer(n, 2)); n = n + 2
 			params:add_le(f.add_ba_session_ssn, buffer(n, 2)); n = n + 2
 			params:add(f.add_ba_session_direction, buffer(n, 1)); n = n + 1
+		elseif (msg_type == 61) then
+			-- UPDATE_BEACON_REQ
+			params:add_le(f.UPDATE_BEACON_REQ_bssIdx, buffer(n, 1)); n = n + 1
+			params:add_le(f.UPDATE_BEACON_REQ_fShortPreamble, buffer(n, 1)); n = n + 1
+			params:add_le(f.UPDATE_BEACON_REQ_fShortSlotTime, buffer(n, 1)); n = n + 1
+			params:add_le(f.UPDATE_BEACON_REQ_beaconInterval, buffer(n, 2)); n = n + 2
+			params:add_le(f.UPDATE_BEACON_REQ_llaCoexist, buffer(n, 1)); n = n + 1
+			params:add_le(f.UPDATE_BEACON_REQ_llbCoexist, buffer(n, 1)); n = n + 1
+			params:add_le(f.UPDATE_BEACON_REQ_llgCoexist, buffer(n, 1)); n = n + 1
+			params:add_le(f.UPDATE_BEACON_REQ_ht20MhzCoexist, buffer(n, 1)); n = n + 1
+			params:add_le(f.UPDATE_BEACON_REQ_llnNonGFCoexist, buffer(n, 1)); n = n + 1
+			params:add_le(f.UPDATE_BEACON_REQ_fLsigTXOPProtectionFullSupport, buffer(n, 1)); n = n + 1
+			params:add_le(f.UPDATE_BEACON_REQ_fRIFSMode, buffer(n, 1)); n = n + 1
+			params:add_le(f.UPDATE_BEACON_REQ_paramChangeBitmap, buffer(n, 2)); n = n + 2
 		elseif (msg_type == 63) then
 			-- SEND_BEACON_REQ
 			params:add_le(f.SEND_BEACON_REQ_beaconLength, buffer(n, 4)); n = n + 4
@@ -1206,4 +1220,17 @@ f.UPDATE_PROBE_RSP_TEMPLATE_REQ_pProbeRespTemplate = ProtoField.bytes("wcn36xx.U
 f.UPDATE_PROBE_RSP_TEMPLATE_REQ_probeRespTemplateLen = ProtoField.uint32("wcn36xx.UPDATE_PROBE_RSP_TEMPLATE_REQ_probeRespTemplateLen", "probeRespTemplateLen")
 f.UPDATE_PROBE_RSP_TEMPLATE_REQ_ucProxyProbeReqValidIEBmap = ProtoField.bytes("wcn36xx.UPDATE_PROBE_RSP_TEMPLATE_REQ_ucProxyProbeReqValidIEBmap", "ucProxyProbeReqValidIEBmap")
 f.UPDATE_PROBE_RSP_TEMPLATE_REQ_bssId = ProtoField.ether("wcn36xx.UPDATE_PROBE_RSP_TEMPLATE_REQ_bssId", "bssId")
+
+f.UPDATE_BEACON_REQ_bssIdx = ProtoField.uint8("wcn36xx.UPDATE_BEACON_REQ_bssIdx", "bssIdx")
+f.UPDATE_BEACON_REQ_fShortPreamble = ProtoField.uint8("wcn36xx.UPDATE_BEACON_REQ_fShortPreamble", "fShortPreamble")
+f.UPDATE_BEACON_REQ_fShortSlotTime = ProtoField.uint8("wcn36xx.UPDATE_BEACON_REQ_fShortSlotTime", "fShortSlotTime")
+f.UPDATE_BEACON_REQ_beaconInterval = ProtoField.uint16("wcn36xx.UPDATE_BEACON_REQ_beaconInterval", "beaconInterval")
+f.UPDATE_BEACON_REQ_llaCoexist = ProtoField.uint8("wcn36xx.UPDATE_BEACON_REQ_llaCoexist", "llaCoexist")
+f.UPDATE_BEACON_REQ_llbCoexist = ProtoField.uint8("wcn36xx.UPDATE_BEACON_REQ_llbCoexist", "llbCoexist")
+f.UPDATE_BEACON_REQ_llgCoexist = ProtoField.uint8("wcn36xx.UPDATE_BEACON_REQ_llgCoexist", "llgCoexist")
+f.UPDATE_BEACON_REQ_ht20MhzCoexist = ProtoField.uint8("wcn36xx.UPDATE_BEACON_REQ_ht20MhzCoexist", "ht20MhzCoexist")
+f.UPDATE_BEACON_REQ_llnNonGFCoexist = ProtoField.uint8("wcn36xx.UPDATE_BEACON_REQ_llnNonGFCoexist", "llnNonGFCoexist")
+f.UPDATE_BEACON_REQ_fLsigTXOPProtectionFullSupport = ProtoField.uint8("wcn36xx.UPDATE_BEACON_REQ_fLsigTXOPProtectionFullSupport", "fLsigTXOPProtectionFullSupport")
+f.UPDATE_BEACON_REQ_fRIFSMode = ProtoField.uint8("wcn36xx.UPDATE_BEACON_REQ_fRIFSMode", "fRIFSMode")
+f.UPDATE_BEACON_REQ_paramChangeBitmap = ProtoField.uint16("wcn36xx.UPDATE_BEACON_REQ_paramChangeBitmap", "paramChangeBitmap")
 
