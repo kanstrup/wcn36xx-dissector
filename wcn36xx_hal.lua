@@ -318,6 +318,12 @@ function wcn36xx.dissector(inbuffer, pinfo, tree)
 			params:add_le(f.SEND_BEACON_REQ_bssId, buffer(n, 6)); n = n + 6
 			params:add_le(f.SEND_BEACON_REQ_timIeOffset, buffer(n, 4)); n = n + 4
 			params:add_le(f.SEND_BEACON_REQ_p2pIeOffset, buffer(n, 2)); n = n + 2
+		elseif (msg_type == 68) then
+			-- UPDATE_PROBE_RSP_TEMPLATE_REQ
+			params:add_le(f.UPDATE_PROBE_RSP_TEMPLATE_REQ_pProbeRespTemplate, buffer(n, 384)); n = n + 384
+			params:add_le(f.UPDATE_PROBE_RSP_TEMPLATE_REQ_probeRespTemplateLen, buffer(n, 4)); n = n + 4
+			params:add_le(f.UPDATE_PROBE_RSP_TEMPLATE_REQ_ucProxyProbeReqValidIEBmap, buffer(n, 32)); n = n + 32
+			params:add_le(f.UPDATE_PROBE_RSP_TEMPLATE_REQ_bssId, buffer(n, 6)); n = n + 6
 		elseif (msg_type == 78) then
 			-- enter bmps
 			params:add(f.bss_index, buffer(n, 1)); n = n + 1
@@ -1195,4 +1201,9 @@ f.SEND_BEACON_REQ_beacon = ProtoField.bytes("wcn36xx.SEND_BEACON_REQ_beacon", "b
 f.SEND_BEACON_REQ_bssId = ProtoField.ether("wcn36xx.SEND_BEACON_REQ_bssId", "bssId")
 f.SEND_BEACON_REQ_timIeOffset = ProtoField.uint32("wcn36xx.SEND_BEACON_REQ_timIeOffset", "timIeOffset")
 f.SEND_BEACON_REQ_p2pIeOffset = ProtoField.uint16("wcn36xx.SEND_BEACON_REQ_p2pIeOffset", "p2pIeOffset")
+
+f.UPDATE_PROBE_RSP_TEMPLATE_REQ_pProbeRespTemplate = ProtoField.bytes("wcn36xx.UPDATE_PROBE_RSP_TEMPLATE_REQ_pProbeRespTemplate", "pProbeRespTemplate")
+f.UPDATE_PROBE_RSP_TEMPLATE_REQ_probeRespTemplateLen = ProtoField.uint32("wcn36xx.UPDATE_PROBE_RSP_TEMPLATE_REQ_probeRespTemplateLen", "probeRespTemplateLen")
+f.UPDATE_PROBE_RSP_TEMPLATE_REQ_ucProxyProbeReqValidIEBmap = ProtoField.bytes("wcn36xx.UPDATE_PROBE_RSP_TEMPLATE_REQ_ucProxyProbeReqValidIEBmap", "ucProxyProbeReqValidIEBmap")
+f.UPDATE_PROBE_RSP_TEMPLATE_REQ_bssId = ProtoField.ether("wcn36xx.UPDATE_PROBE_RSP_TEMPLATE_REQ_bssId", "bssId")
 
