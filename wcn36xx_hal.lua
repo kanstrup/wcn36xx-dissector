@@ -521,6 +521,14 @@ function wcn36xx.dissector(inbuffer, pinfo, tree)
 				params:add_le(f.CONFIG_BSS_RSP_bssBcastStaIdx, buffer(n, 1)); n = n + 1
 				params:add_le(f.CONFIG_BSS_RSP_staMac, buffer(n, 6)); n = n + 6
 				params:add_le(f.CONFIG_BSS_RSP_txMgmtPower, buffer(n, 1)); n = n + 1
+			elseif (msg_type == 47) then
+				-- GET_STATS_RSP
+				status = 0
+				params:add_le(f.GET_STATS_RSP_status, buffer(n, 4)); n = n + 4
+				params:add_le(f.GET_STATS_RSP_staId, buffer(n, 4)); n = n + 4
+				params:add_le(f.GET_STATS_RSP_statsMask, buffer(n, 4)); n = n + 4
+				params:add_le(f.GET_STATS_RSP_msgType, buffer(n, 2)); n = n + 2
+				params:add_le(f.GET_STATS_RSP_msgLen, buffer(n, 2)); n = n + 2
 			elseif (msg_type == 60) then
 				-- trigger ba
 				params:add_le(f.bssid, buffer(n, 6)); n = n + 6
@@ -1314,3 +1322,10 @@ f.SET_BSSKEY_REQ_encType = ProtoField.uint32("wcn36xx.SET_BSSKEY_REQ_encType", "
 f.SET_BSSKEY_REQ_numKeys = ProtoField.uint8("wcn36xx.SET_BSSKEY_REQ_numKeys", "numKeys")
 f.SET_BSSKEY_REQ_key = ProtoField.bytes("wcn36xx.SET_BSSKEY_REQ_key", "key")
 f.SET_BSSKEY_REQ_singleTidRc = ProtoField.uint8("wcn36xx.SET_BSSKEY_REQ_singleTidRc", "singleTidRc")
+
+f.GET_STATS_RSP_status = ProtoField.uint32("wcn36xx.GET_STATS_RSP_status", "status")
+f.GET_STATS_RSP_staId = ProtoField.uint32("wcn36xx.GET_STATS_RSP_staId", "staId")
+f.GET_STATS_RSP_statsMask = ProtoField.uint32("wcn36xx.GET_STATS_RSP_statsMask", "statsMask")
+f.GET_STATS_RSP_msgType = ProtoField.uint16("wcn36xx.GET_STATS_RSP_msgType", "msgType")
+f.GET_STATS_RSP_msgLen = ProtoField.uint16("wcn36xx.GET_STATS_RSP_msgLen", "msgLen")
+
