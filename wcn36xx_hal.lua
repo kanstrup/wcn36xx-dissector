@@ -311,6 +311,13 @@ function wcn36xx.dissector(inbuffer, pinfo, tree)
 			params:add_le(f.add_ba_session_timeout, buffer(n, 2)); n = n + 2
 			params:add_le(f.add_ba_session_ssn, buffer(n, 2)); n = n + 2
 			params:add(f.add_ba_session_direction, buffer(n, 1)); n = n + 1
+		elseif (msg_type == 63) then
+			-- SEND_BEACON_REQ
+			params:add_le(f.SEND_BEACON_REQ_beaconLength, buffer(n, 4)); n = n + 4
+			params:add_le(f.SEND_BEACON_REQ_beacon, buffer(n, 384)); n = n + 384
+			params:add_le(f.SEND_BEACON_REQ_bssId, buffer(n, 6)); n = n + 6
+			params:add_le(f.SEND_BEACON_REQ_timIeOffset, buffer(n, 4)); n = n + 4
+			params:add_le(f.SEND_BEACON_REQ_p2pIeOffset, buffer(n, 2)); n = n + 2
 		elseif (msg_type == 78) then
 			-- enter bmps
 			params:add(f.bss_index, buffer(n, 1)); n = n + 1
@@ -1182,4 +1189,10 @@ f.CONFIG_BSS_bSpectrumMgtEnable = ProtoField.uint8("wcn36xx.CONFIG_BSS_bSpectrum
 f.CONFIG_BSS_txMgmtPower = ProtoField.uint8("wcn36xx.CONFIG_BSS_txMgmtPower", "txMgmtPower")
 f.CONFIG_BSS_maxTxPower = ProtoField.uint8("wcn36xx.CONFIG_BSS_maxTxPower", "maxTxPower")
 f.CONFIG_BSS_staContext = ProtoField.bytes("wcn36xx.CONFIG_BSS_staContext", "staContext")
+
+f.SEND_BEACON_REQ_beaconLength = ProtoField.uint32("wcn36xx.SEND_BEACON_REQ_beaconLength", "beaconLength")
+f.SEND_BEACON_REQ_beacon = ProtoField.bytes("wcn36xx.SEND_BEACON_REQ_beacon", "beacon")
+f.SEND_BEACON_REQ_bssId = ProtoField.ether("wcn36xx.SEND_BEACON_REQ_bssId", "bssId")
+f.SEND_BEACON_REQ_timIeOffset = ProtoField.uint32("wcn36xx.SEND_BEACON_REQ_timIeOffset", "timIeOffset")
+f.SEND_BEACON_REQ_p2pIeOffset = ProtoField.uint16("wcn36xx.SEND_BEACON_REQ_p2pIeOffset", "p2pIeOffset")
 
