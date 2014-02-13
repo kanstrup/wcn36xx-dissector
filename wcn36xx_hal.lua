@@ -508,6 +508,8 @@ function wcn36xx.dissector(inbuffer, pinfo, tree)
 				-- start oem data
 				params:add(f.start_oem_data_data, buffer(n))
 				status = 0
+			elseif (msg_type == 152) then
+				status = 0
 			elseif (msg_type == 176) then
 				status = 0
 			elseif (msg_type == 140) then
