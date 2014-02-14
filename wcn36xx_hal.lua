@@ -164,7 +164,7 @@ function wcn36xx.dissector(inbuffer, pinfo, tree)
 			params:add_le(f.FINISH_SCAN_REQ_frameLength, buffer(n, 1)); n = n + 1
 			params:add_le(f.FINISH_SCAN_REQ_macMgmtHdr, buffer(n, 24)); n = n + 24
 			params:add_le(f.FINISH_SCAN_REQ_scanEntry, buffer(n, 3)); n = n + 3
-		elseif (msg_type == 12) then
+		elseif (msg_type == 12 and cmd_len == 114) then
 			-- CONFIG_STA_REQ
 			params:add_le(f.CONFIG_STA_REQ_bssId, buffer(n, 6)); n = n + 6
 			params:add_le(f.CONFIG_STA_REQ_assocId, buffer(n, 2)); n = n + 2
@@ -197,6 +197,41 @@ function wcn36xx.dissector(inbuffer, pinfo, tree)
 			params:add_le(f.CONFIG_STA_REQ_p2pCapableSta, buffer(n, 1)); n = n + 1
 			params:add_le(f.CONFIG_STA_REQ_reserved, buffer(n, 1)); n = n + 1
 			params:add_le(f.CONFIG_STA_REQ_supportedRates, buffer(n, 58)); n = n + 58
+		elseif (msg_type == 12 and cmd_len == 124) then
+			-- CONFIG_STA_REQ_V1
+			params:add_le(f.CONFIG_STA_REQ_V1_bssId, buffer(n, 6)); n = n + 6
+			params:add_le(f.CONFIG_STA_REQ_V1_assocId, buffer(n, 2)); n = n + 2
+			params:add_le(f.CONFIG_STA_REQ_V1_staType, buffer(n, 1)); n = n + 1
+			params:add_le(f.CONFIG_STA_REQ_V1_shortPreambleSupported, buffer(n, 1)); n = n + 1
+			params:add_le(f.CONFIG_STA_REQ_V1_staMac, buffer(n, 6)); n = n + 6
+			params:add_le(f.CONFIG_STA_REQ_V1_listenInterval, buffer(n, 2)); n = n + 2
+			params:add_le(f.CONFIG_STA_REQ_V1_wmmEnabled, buffer(n, 1)); n = n + 1
+			params:add_le(f.CONFIG_STA_REQ_V1_htCapable, buffer(n, 1)); n = n + 1
+			params:add_le(f.CONFIG_STA_REQ_V1_txChannelWidthSet, buffer(n, 1)); n = n + 1
+			params:add_le(f.CONFIG_STA_REQ_V1_rifsMode, buffer(n, 1)); n = n + 1
+			params:add_le(f.CONFIG_STA_REQ_V1_lsigTxopProtection, buffer(n, 1)); n = n + 1
+			params:add_le(f.CONFIG_STA_REQ_V1_maxAmpduSize, buffer(n, 1)); n = n + 1
+			params:add_le(f.CONFIG_STA_REQ_V1_maxAmpduDensity, buffer(n, 1)); n = n + 1
+			params:add_le(f.CONFIG_STA_REQ_V1_maxAmsduSize, buffer(n, 1)); n = n + 1
+			params:add_le(f.CONFIG_STA_REQ_V1_fShortGI40Mhz, buffer(n, 1)); n = n + 1
+			params:add_le(f.CONFIG_STA_REQ_V1_fShortGI20Mhz, buffer(n, 1)); n = n + 1
+			params:add_le(f.CONFIG_STA_REQ_V1_rmfEnabled, buffer(n, 1)); n = n + 1
+			params:add_le(f.CONFIG_STA_REQ_V1_encryptType, buffer(n, 4)); n = n + 4
+			params:add_le(f.CONFIG_STA_REQ_V1_action, buffer(n, 1)); n = n + 1
+			params:add_le(f.CONFIG_STA_REQ_V1_uAPSD, buffer(n, 1)); n = n + 1
+			params:add_le(f.CONFIG_STA_REQ_V1_maxSPLen, buffer(n, 1)); n = n + 1
+			params:add_le(f.CONFIG_STA_REQ_V1_greenFieldCapable, buffer(n, 1)); n = n + 1
+			params:add_le(f.CONFIG_STA_REQ_V1_mimoPS, buffer(n, 4)); n = n + 4
+			params:add_le(f.CONFIG_STA_REQ_V1_delayedBASupport, buffer(n, 1)); n = n + 1
+			params:add_le(f.CONFIG_STA_REQ_V1_us32MaxAmpduDuration, buffer(n, 1)); n = n + 1
+			params:add_le(f.CONFIG_STA_REQ_V1_fDsssCckMode40Mhz, buffer(n, 1)); n = n + 1
+			params:add_le(f.CONFIG_STA_REQ_V1_staIdx, buffer(n, 1)); n = n + 1
+			params:add_le(f.CONFIG_STA_REQ_V1_bssIdx, buffer(n, 1)); n = n + 1
+			params:add_le(f.CONFIG_STA_REQ_V1_p2pCapableSta, buffer(n, 1)); n = n + 1
+			params:add_le(f.CONFIG_STA_REQ_V1_misc_flags, buffer(n, 1)); n = n + 1
+			params:add_le(f.CONFIG_STA_REQ_V1_supportedRates, buffer(n, 66)); n = n + 66
+			params:add_le(f.CONFIG_STA_REQ_V1_vhtCapable, buffer(n, 1)); n = n + 1
+			params:add_le(f.CONFIG_STA_REQ_V1_vhtTxChannelWidthSet, buffer(n, 1)); n = n + 1
 		elseif (msg_type == 14) then
 			-- delete sta
 			params:add(f.sta_index, buffer(n, 1)); n = n + 1
@@ -1350,6 +1385,40 @@ f.CONFIG_STA_REQ_bssIdx = ProtoField.uint8("wcn36xx.CONFIG_STA_REQ_bssIdx", "bss
 f.CONFIG_STA_REQ_p2pCapableSta = ProtoField.uint8("wcn36xx.CONFIG_STA_REQ_p2pCapableSta", "p2pCapableSta")
 f.CONFIG_STA_REQ_reserved = ProtoField.uint8("wcn36xx.CONFIG_STA_REQ_reserved", "reserved")
 f.CONFIG_STA_REQ_supportedRates = ProtoField.bytes("wcn36xx.CONFIG_STA_REQ_supportedRates", "supportedRates")
+
+f.CONFIG_STA_REQ_V1_bssId = ProtoField.ether("wcn36xx.CONFIG_STA_REQ_V1_bssId", "bssId")
+f.CONFIG_STA_REQ_V1_assocId = ProtoField.uint16("wcn36xx.CONFIG_STA_REQ_V1_assocId", "assocId")
+f.CONFIG_STA_REQ_V1_staType = ProtoField.uint8("wcn36xx.CONFIG_STA_REQ_V1_staType", "staType")
+f.CONFIG_STA_REQ_V1_shortPreambleSupported = ProtoField.uint8("wcn36xx.CONFIG_STA_REQ_V1_shortPreambleSupported", "shortPreambleSupported")
+f.CONFIG_STA_REQ_V1_staMac = ProtoField.ether("wcn36xx.CONFIG_STA_REQ_V1_staMac", "staMac")
+f.CONFIG_STA_REQ_V1_listenInterval = ProtoField.uint16("wcn36xx.CONFIG_STA_REQ_V1_listenInterval", "listenInterval")
+f.CONFIG_STA_REQ_V1_wmmEnabled = ProtoField.uint8("wcn36xx.CONFIG_STA_REQ_V1_wmmEnabled", "wmmEnabled")
+f.CONFIG_STA_REQ_V1_htCapable = ProtoField.uint8("wcn36xx.CONFIG_STA_REQ_V1_htCapable", "htCapable")
+f.CONFIG_STA_REQ_V1_txChannelWidthSet = ProtoField.uint8("wcn36xx.CONFIG_STA_REQ_V1_txChannelWidthSet", "txChannelWidthSet")
+f.CONFIG_STA_REQ_V1_rifsMode = ProtoField.uint8("wcn36xx.CONFIG_STA_REQ_V1_rifsMode", "rifsMode")
+f.CONFIG_STA_REQ_V1_lsigTxopProtection = ProtoField.uint8("wcn36xx.CONFIG_STA_REQ_V1_lsigTxopProtection", "lsigTxopProtection")
+f.CONFIG_STA_REQ_V1_maxAmpduSize = ProtoField.uint8("wcn36xx.CONFIG_STA_REQ_V1_maxAmpduSize", "maxAmpduSize")
+f.CONFIG_STA_REQ_V1_maxAmpduDensity = ProtoField.uint8("wcn36xx.CONFIG_STA_REQ_V1_maxAmpduDensity", "maxAmpduDensity")
+f.CONFIG_STA_REQ_V1_maxAmsduSize = ProtoField.uint8("wcn36xx.CONFIG_STA_REQ_V1_maxAmsduSize", "maxAmsduSize")
+f.CONFIG_STA_REQ_V1_fShortGI40Mhz = ProtoField.uint8("wcn36xx.CONFIG_STA_REQ_V1_fShortGI40Mhz", "fShortGI40Mhz")
+f.CONFIG_STA_REQ_V1_fShortGI20Mhz = ProtoField.uint8("wcn36xx.CONFIG_STA_REQ_V1_fShortGI20Mhz", "fShortGI20Mhz")
+f.CONFIG_STA_REQ_V1_rmfEnabled = ProtoField.uint8("wcn36xx.CONFIG_STA_REQ_V1_rmfEnabled", "rmfEnabled")
+f.CONFIG_STA_REQ_V1_encryptType = ProtoField.uint32("wcn36xx.CONFIG_STA_REQ_V1_encryptType", "encryptType")
+f.CONFIG_STA_REQ_V1_action = ProtoField.uint8("wcn36xx.CONFIG_STA_REQ_V1_action", "action")
+f.CONFIG_STA_REQ_V1_uAPSD = ProtoField.uint8("wcn36xx.CONFIG_STA_REQ_V1_uAPSD", "uAPSD")
+f.CONFIG_STA_REQ_V1_maxSPLen = ProtoField.uint8("wcn36xx.CONFIG_STA_REQ_V1_maxSPLen", "maxSPLen")
+f.CONFIG_STA_REQ_V1_greenFieldCapable = ProtoField.uint8("wcn36xx.CONFIG_STA_REQ_V1_greenFieldCapable", "greenFieldCapable")
+f.CONFIG_STA_REQ_V1_mimoPS = ProtoField.uint32("wcn36xx.CONFIG_STA_REQ_V1_mimoPS", "mimoPS")
+f.CONFIG_STA_REQ_V1_delayedBASupport = ProtoField.uint8("wcn36xx.CONFIG_STA_REQ_V1_delayedBASupport", "delayedBASupport")
+f.CONFIG_STA_REQ_V1_us32MaxAmpduDuration = ProtoField.uint8("wcn36xx.CONFIG_STA_REQ_V1_us32MaxAmpduDuration", "us32MaxAmpduDuration")
+f.CONFIG_STA_REQ_V1_fDsssCckMode40Mhz = ProtoField.uint8("wcn36xx.CONFIG_STA_REQ_V1_fDsssCckMode40Mhz", "fDsssCckMode40Mhz")
+f.CONFIG_STA_REQ_V1_staIdx = ProtoField.uint8("wcn36xx.CONFIG_STA_REQ_V1_staIdx", "staIdx")
+f.CONFIG_STA_REQ_V1_bssIdx = ProtoField.uint8("wcn36xx.CONFIG_STA_REQ_V1_bssIdx", "bssIdx")
+f.CONFIG_STA_REQ_V1_p2pCapableSta = ProtoField.uint8("wcn36xx.CONFIG_STA_REQ_V1_p2pCapableSta", "p2pCapableSta")
+f.CONFIG_STA_REQ_V1_misc_flags = ProtoField.uint8("wcn36xx.CONFIG_STA_REQ_V1_misc_flags", "misc_flags")
+f.CONFIG_STA_REQ_V1_supportedRates = ProtoField.bytes("wcn36xx.CONFIG_STA_REQ_V1_supportedRates", "supportedRates")
+f.CONFIG_STA_REQ_V1_vhtCapable = ProtoField.uint8("wcn36xx.CONFIG_STA_REQ_V1_vhtCapable", "vhtCapable")
+f.CONFIG_STA_REQ_V1_vhtTxChannelWidthSet = ProtoField.uint8("wcn36xx.CONFIG_STA_REQ_V1_vhtTxChannelWidthSet", "vhtTxChannelWidthSet")
 
 f.CONFIG_BSS_bssId = ProtoField.ether("wcn36xx.CONFIG_BSS_bssId", "bssId")
 f.CONFIG_BSS_selfMacAddr = ProtoField.ether("wcn36xx.CONFIG_BSS_selfMacAddr", "selfMacAddr")
