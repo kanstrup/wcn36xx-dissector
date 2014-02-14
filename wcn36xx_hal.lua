@@ -1400,7 +1400,7 @@ f.CONFIG_BSS_RSP_staMac = ProtoField.ether("wcn36xx.CONFIG_BSS_RSP_staMac", "sta
 f.CONFIG_BSS_RSP_txMgmtPower = ProtoField.uint8("wcn36xx.CONFIG_BSS_RSP_txMgmtPower", "txMgmtPower")
 
 f.SET_BSSKEY_REQ_bssIdx = ProtoField.uint8("wcn36xx.SET_BSSKEY_REQ_bssIdx", "bssIdx")
-f.SET_BSSKEY_REQ_encType = ProtoField.uint32("wcn36xx.SET_BSSKEY_REQ_encType", "encType")
+f.SET_BSSKEY_REQ_encType = ProtoField.uint32("wcn36xx.SET_BSSKEY_REQ_encType", "encType", base.DEC, ani_ed_type_strings)
 f.SET_BSSKEY_REQ_numKeys = ProtoField.uint8("wcn36xx.SET_BSSKEY_REQ_numKeys", "numKeys")
 f.SET_BSSKEY_REQ_key = ProtoField.bytes("wcn36xx.SET_BSSKEY_REQ_key", "key")
 f.SET_BSSKEY_REQ_singleTidRc = ProtoField.uint8("wcn36xx.SET_BSSKEY_REQ_singleTidRc", "singleTidRc")
