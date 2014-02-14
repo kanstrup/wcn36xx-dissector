@@ -1375,9 +1375,9 @@ f.SET_STAKEY_REQ_defWEPIdx = ProtoField.uint8("wcn36xx.SET_STAKEY_REQ_defWEPIdx"
 f.SET_STAKEY_REQ_key = ProtoField.bytes("wcn36xx.SET_STAKEY_REQ_key", "key")
 f.SET_STAKEY_REQ_singleTidRc = ProtoField.uint8("wcn36xx.SET_STAKEY_REQ_singleTidRc", "singleTidRc")
 
-f.FINISH_SCAN_REQ_scanMode = ProtoField.uint32("wcn36xx.FINISH_SCAN_REQ_scanMode", "scanMode")
+f.FINISH_SCAN_REQ_scanMode = ProtoField.uint32("wcn36xx.FINISH_SCAN_REQ_scanMode", "scanMode", base.HEX, sys_mode_strings)
 f.FINISH_SCAN_REQ_currentOperChannel = ProtoField.uint8("wcn36xx.FINISH_SCAN_REQ_currentOperChannel", "currentOperChannel")
-f.FINISH_SCAN_REQ_cbState = ProtoField.uint32("wcn36xx.FINISH_SCAN_REQ_cbState", "cbState")
+f.FINISH_SCAN_REQ_cbState = ProtoField.uint32("wcn36xx.FINISH_SCAN_REQ_cbState", "cbState", base.DEC, bond_state_strings)
 f.FINISH_SCAN_REQ_bssid = ProtoField.ether("wcn36xx.FINISH_SCAN_REQ_bssid", "bssid")
 f.FINISH_SCAN_REQ_notifyBss = ProtoField.uint8("wcn36xx.FINISH_SCAN_REQ_notifyBss", "notifyBss")
 f.FINISH_SCAN_REQ_frameType = ProtoField.uint8("wcn36xx.FINISH_SCAN_REQ_frameType", "frameType")
