@@ -1369,8 +1369,8 @@ f.UPDATE_BEACON_REQ_fRIFSMode = ProtoField.uint8("wcn36xx.UPDATE_BEACON_REQ_fRIF
 f.UPDATE_BEACON_REQ_paramChangeBitmap = ProtoField.uint16("wcn36xx.UPDATE_BEACON_REQ_paramChangeBitmap", "paramChangeBitmap")
 
 f.SET_STAKEY_REQ_staIdx = ProtoField.uint16("wcn36xx.SET_STAKEY_REQ_staIdx", "staIdx")
-f.SET_STAKEY_REQ_encType = ProtoField.uint32("wcn36xx.SET_STAKEY_REQ_encType", "encType")
-f.SET_STAKEY_REQ_wepType = ProtoField.uint32("wcn36xx.SET_STAKEY_REQ_wepType", "wepType")
+f.SET_STAKEY_REQ_encType = ProtoField.uint32("wcn36xx.SET_STAKEY_REQ_encType", "encType", base.DEC, ani_ed_type_strings)
+f.SET_STAKEY_REQ_wepType = ProtoField.uint32("wcn36xx.SET_STAKEY_REQ_wepType", "wepType", base.DEC, ani_wep_type_strings)
 f.SET_STAKEY_REQ_defWEPIdx = ProtoField.uint8("wcn36xx.SET_STAKEY_REQ_defWEPIdx", "defWEPIdx")
 f.SET_STAKEY_REQ_key = ProtoField.bytes("wcn36xx.SET_STAKEY_REQ_key", "key")
 f.SET_STAKEY_REQ_singleTidRc = ProtoField.uint8("wcn36xx.SET_STAKEY_REQ_singleTidRc", "singleTidRc")
