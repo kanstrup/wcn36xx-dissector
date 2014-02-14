@@ -1174,7 +1174,7 @@ f.ch_switch_tx_mgmt_power = ProtoField.uint8("wcn36xx.ch_switch_tx_mgmt_power", 
 f.ch_switch_max_tx_power = ProtoField.uint8("wcn36xx.ch_switch_max_tx_power", "max_tx_power")
 f.ch_switch_self_sta_mac_addr = ProtoField.ether("wcn36xx.ch_switch_self_sta_mac_addr", "self_sta_mac_addr")
 
-f.init_scan_mode = ProtoField.uint32("wcn36xx.init_scan_mode", "mode", base.DEX, sys_mode_strings)
+f.init_scan_mode = ProtoField.uint32("wcn36xx.init_scan_mode", "mode", base.DEC, sys_mode_strings)
 f.init_scan_notify = ProtoField.uint8("wcn36xx.init_scan_notify", "notify")
 f.init_scan_frame_type = ProtoField.uint8("wcn36xx.init_scan_frame_type", "frame_type")
 f.init_scan_frame_len = ProtoField.uint8("wcn36xx.init_scan_frame_len", "frame_len")
