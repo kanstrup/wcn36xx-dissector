@@ -151,9 +151,129 @@ function wcn36xx.dissector(inbuffer, pinfo, tree)
 			local channel = buffer(n, 1):uint(); n = n + 1
 			pinfo.cols.info:append(", channel "..channel)
 			params:add(f.scan_channel, channel)
+		elseif (msg_type == 10) then
+			-- FINISH_SCAN_REQ
+			params:add_le(f.FINISH_SCAN_REQ_scanMode, buffer(n, 4)); n = n + 4
+			params:add_le(f.FINISH_SCAN_REQ_currentOperChannel, buffer(n, 1)); n = n + 1
+			params:add_le(f.FINISH_SCAN_REQ_cbState, buffer(n, 4)); n = n + 4
+			params:add_le(f.FINISH_SCAN_REQ_bssid, buffer(n, 6)); n = n + 6
+			params:add_le(f.FINISH_SCAN_REQ_notifyBss, buffer(n, 1)); n = n + 1
+			params:add_le(f.FINISH_SCAN_REQ_frameType, buffer(n, 1)); n = n + 1
+			params:add_le(f.FINISH_SCAN_REQ_frameLength, buffer(n, 1)); n = n + 1
+			params:add_le(f.FINISH_SCAN_REQ_macMgmtHdr, buffer(n, 24)); n = n + 24
+			params:add_le(f.FINISH_SCAN_REQ_scanEntry, buffer(n, 3)); n = n + 3
+		elseif (msg_type == 12) then
+			-- CONFIG_STA_REQ
+			params:add_le(f.CONFIG_STA_REQ_bssId, buffer(n, 6)); n = n + 6
+			params:add_le(f.CONFIG_STA_REQ_assocId, buffer(n, 2)); n = n + 2
+			params:add_le(f.CONFIG_STA_REQ_staType, buffer(n, 1)); n = n + 1
+			params:add_le(f.CONFIG_STA_REQ_shortPreambleSupported, buffer(n, 1)); n = n + 1
+			params:add_le(f.CONFIG_STA_REQ_staMac, buffer(n, 6)); n = n + 6
+			params:add_le(f.CONFIG_STA_REQ_listenInterval, buffer(n, 2)); n = n + 2
+			params:add_le(f.CONFIG_STA_REQ_wmmEnabled, buffer(n, 1)); n = n + 1
+			params:add_le(f.CONFIG_STA_REQ_htCapable, buffer(n, 1)); n = n + 1
+			params:add_le(f.CONFIG_STA_REQ_txChannelWidthSet, buffer(n, 1)); n = n + 1
+			params:add_le(f.CONFIG_STA_REQ_rifsMode, buffer(n, 1)); n = n + 1
+			params:add_le(f.CONFIG_STA_REQ_lsigTxopProtection, buffer(n, 1)); n = n + 1
+			params:add_le(f.CONFIG_STA_REQ_maxAmpduSize, buffer(n, 1)); n = n + 1
+			params:add_le(f.CONFIG_STA_REQ_maxAmpduDensity, buffer(n, 1)); n = n + 1
+			params:add_le(f.CONFIG_STA_REQ_maxAmsduSize, buffer(n, 1)); n = n + 1
+			params:add_le(f.CONFIG_STA_REQ_fShortGI40Mhz, buffer(n, 1)); n = n + 1
+			params:add_le(f.CONFIG_STA_REQ_fShortGI20Mhz, buffer(n, 1)); n = n + 1
+			params:add_le(f.CONFIG_STA_REQ_rmfEnabled, buffer(n, 1)); n = n + 1
+			params:add_le(f.CONFIG_STA_REQ_encryptType, buffer(n, 4)); n = n + 4
+			params:add_le(f.CONFIG_STA_REQ_action, buffer(n, 1)); n = n + 1
+			params:add_le(f.CONFIG_STA_REQ_uAPSD, buffer(n, 1)); n = n + 1
+			params:add_le(f.CONFIG_STA_REQ_maxSPLen, buffer(n, 1)); n = n + 1
+			params:add_le(f.CONFIG_STA_REQ_greenFieldCapable, buffer(n, 1)); n = n + 1
+			params:add_le(f.CONFIG_STA_REQ_mimoPS, buffer(n, 4)); n = n + 4
+			params:add_le(f.CONFIG_STA_REQ_delayedBASupport, buffer(n, 1)); n = n + 1
+			params:add_le(f.CONFIG_STA_REQ_us32MaxAmpduDuration, buffer(n, 1)); n = n + 1
+			params:add_le(f.CONFIG_STA_REQ_fDsssCckMode40Mhz, buffer(n, 1)); n = n + 1
+			params:add_le(f.CONFIG_STA_REQ_staIdx, buffer(n, 1)); n = n + 1
+			params:add_le(f.CONFIG_STA_REQ_bssIdx, buffer(n, 1)); n = n + 1
+			params:add_le(f.CONFIG_STA_REQ_p2pCapableSta, buffer(n, 1)); n = n + 1
+			params:add_le(f.CONFIG_STA_REQ_reserved, buffer(n, 1)); n = n + 1
+			params:add_le(f.CONFIG_STA_REQ_supportedRates, buffer(n, 58)); n = n + 58
 		elseif (msg_type == 14) then
 			-- delete sta
 			params:add(f.sta_index, buffer(n, 1)); n = n + 1
+		elseif (msg_type == 16) then
+			-- CONFIG_BSS
+			params:add_le(f.CONFIG_BSS_bssId, buffer(n, 6)); n = n + 6
+			params:add_le(f.CONFIG_BSS_selfMacAddr, buffer(n, 6)); n = n + 6
+			params:add_le(f.CONFIG_BSS_bssType, buffer(n, 4)); n = n + 4
+			params:add_le(f.CONFIG_BSS_operMode, buffer(n, 1)); n = n + 1
+			params:add_le(f.CONFIG_BSS_nwType, buffer(n, 4)); n = n + 4
+			params:add_le(f.CONFIG_BSS_shortSlotTimeSupported, buffer(n, 1)); n = n + 1
+			params:add_le(f.CONFIG_BSS_llaCoexist, buffer(n, 1)); n = n + 1
+			params:add_le(f.CONFIG_BSS_llbCoexist, buffer(n, 1)); n = n + 1
+			params:add_le(f.CONFIG_BSS_llgCoexist, buffer(n, 1)); n = n + 1
+			params:add_le(f.CONFIG_BSS_ht20Coexist, buffer(n, 1)); n = n + 1
+			params:add_le(f.CONFIG_BSS_llnNonGFCoexist, buffer(n, 1)); n = n + 1
+			params:add_le(f.CONFIG_BSS_fLsigTXOPProtectionFullSupport, buffer(n, 1)); n = n + 1
+			params:add_le(f.CONFIG_BSS_fRIFSMode, buffer(n, 1)); n = n + 1
+			params:add_le(f.CONFIG_BSS_beaconInterval, buffer(n, 2)); n = n + 2
+			params:add_le(f.CONFIG_BSS_dtimPeriod, buffer(n, 1)); n = n + 1
+			params:add_le(f.CONFIG_BSS_txChannelWidthSet, buffer(n, 1)); n = n + 1
+			params:add_le(f.CONFIG_BSS_currentOperChannel, buffer(n, 1)); n = n + 1
+			params:add_le(f.CONFIG_BSS_currentExtChannel, buffer(n, 1)); n = n + 1
+			params:add_le(f.CONFIG_BSS_reserved, buffer(n, 1)); n = n + 1
+			params:add_le(f.CONFIG_BSS_ssId, buffer(n, 33)); n = n + 33
+			params:add_le(f.CONFIG_BSS_action, buffer(n, 1)); n = n + 1
+			params:add_le(f.CONFIG_BSS_rateSet, buffer(n, 13)); n = n + 13
+			params:add_le(f.CONFIG_BSS_htCapable, buffer(n, 1)); n = n + 1
+			params:add_le(f.CONFIG_BSS_obssProtEnabled, buffer(n, 1)); n = n + 1
+			params:add_le(f.CONFIG_BSS_rmfEnabled, buffer(n, 1)); n = n + 1
+			params:add_le(f.CONFIG_BSS_htOperMode, buffer(n, 4)); n = n + 4
+			params:add_le(f.CONFIG_BSS_dualCTSProtection, buffer(n, 1)); n = n + 1
+			params:add_le(f.CONFIG_BSS_ucMaxProbeRespRetryLimit, buffer(n, 1)); n = n + 1
+			params:add_le(f.CONFIG_BSS_bHiddenSSIDEn, buffer(n, 1)); n = n + 1
+			params:add_le(f.CONFIG_BSS_bProxyProbeRespEn, buffer(n, 1)); n = n + 1
+			params:add_le(f.CONFIG_BSS_edcaParamsValid, buffer(n, 1)); n = n + 1
+			params:add_le(f.CONFIG_BSS_acbe, buffer(n, 4)); n = n + 4
+			params:add_le(f.CONFIG_BSS_acbk, buffer(n, 4)); n = n + 4
+			params:add_le(f.CONFIG_BSS_acvi, buffer(n, 4)); n = n + 4
+			params:add_le(f.CONFIG_BSS_acvo, buffer(n, 4)); n = n + 4
+			params:add_le(f.CONFIG_BSS_extSetStaKeyParamValid, buffer(n, 1)); n = n + 1
+			params:add_le(f.CONFIG_BSS_extSetStaKeyParam, buffer(n, 240)); n = n + 240
+			params:add_le(f.CONFIG_BSS_halPersona, buffer(n, 1)); n = n + 1
+			params:add_le(f.CONFIG_BSS_bSpectrumMgtEnable, buffer(n, 1)); n = n + 1
+			params:add_le(f.CONFIG_BSS_txMgmtPower, buffer(n, 1)); n = n + 1
+			params:add_le(f.CONFIG_BSS_maxTxPower, buffer(n, 1)); n = n + 1
+
+			params:add_le(f.CONFIG_BSS_staContext_staContext_bssId, buffer(n, 6)); n = n + 6
+			params:add_le(f.CONFIG_BSS_staContext_staContext_assocId, buffer(n, 2)); n = n + 2
+			params:add_le(f.CONFIG_BSS_staContext_staContext_staType, buffer(n, 1)); n = n + 1
+			params:add_le(f.CONFIG_BSS_staContext_staContext_shortPreambleSupported, buffer(n, 1)); n = n + 1
+			params:add_le(f.CONFIG_BSS_staContext_staContext_staMac, buffer(n, 6)); n = n + 6
+			params:add_le(f.CONFIG_BSS_staContext_staContext_listenInterval, buffer(n, 2)); n = n + 2
+			params:add_le(f.CONFIG_BSS_staContext_staContext_wmmEnabled, buffer(n, 1)); n = n + 1
+			params:add_le(f.CONFIG_BSS_staContext_staContext_htCapable, buffer(n, 1)); n = n + 1
+			params:add_le(f.CONFIG_BSS_staContext_staContext_txChannelWidthSet, buffer(n, 1)); n = n + 1
+			params:add_le(f.CONFIG_BSS_staContext_staContext_rifsMode, buffer(n, 1)); n = n + 1
+			params:add_le(f.CONFIG_BSS_staContext_staContext_lsigTxopProtection, buffer(n, 1)); n = n + 1
+			params:add_le(f.CONFIG_BSS_staContext_staContext_maxAmpduSize, buffer(n, 1)); n = n + 1
+			params:add_le(f.CONFIG_BSS_staContext_staContext_maxAmpduDensity, buffer(n, 1)); n = n + 1
+			params:add_le(f.CONFIG_BSS_staContext_staContext_maxAmsduSize, buffer(n, 1)); n = n + 1
+			params:add_le(f.CONFIG_BSS_staContext_staContext_fShortGI40Mhz, buffer(n, 1)); n = n + 1
+			params:add_le(f.CONFIG_BSS_staContext_staContext_fShortGI20Mhz, buffer(n, 1)); n = n + 1
+			params:add_le(f.CONFIG_BSS_staContext_staContext_rmfEnabled, buffer(n, 1)); n = n + 1
+			params:add_le(f.CONFIG_BSS_staContext_staContext_encryptType, buffer(n, 4)); n = n + 4
+			params:add_le(f.CONFIG_BSS_staContext_staContext_action, buffer(n, 1)); n = n + 1
+			params:add_le(f.CONFIG_BSS_staContext_staContext_uAPSD, buffer(n, 1)); n = n + 1
+			params:add_le(f.CONFIG_BSS_staContext_staContext_maxSPLen, buffer(n, 1)); n = n + 1
+			params:add_le(f.CONFIG_BSS_staContext_staContext_greenFieldCapable, buffer(n, 1)); n = n + 1
+			params:add_le(f.CONFIG_BSS_staContext_staContext_mimoPS, buffer(n, 4)); n = n + 4
+			params:add_le(f.CONFIG_BSS_staContext_staContext_delayedBASupport, buffer(n, 1)); n = n + 1
+			params:add_le(f.CONFIG_BSS_staContext_staContext_us32MaxAmpduDuration, buffer(n, 1)); n = n + 1
+			params:add_le(f.CONFIG_BSS_staContext_staContext_fDsssCckMode40Mhz, buffer(n, 1)); n = n + 1
+			params:add_le(f.CONFIG_BSS_staContext_staContext_staIdx, buffer(n, 1)); n = n + 1
+			params:add_le(f.CONFIG_BSS_staContext_staContext_bssIdx, buffer(n, 1)); n = n + 1
+			params:add_le(f.CONFIG_BSS_staContext_staContext_p2pCapableSta, buffer(n, 1)); n = n + 1
+			params:add_le(f.CONFIG_BSS_staContext_staContext_reserved, buffer(n, 1)); n = n + 1
+			params:add_le(f.CONFIG_BSS_staContext_staContext_supportedRates, buffer(n, 58)); n = n + 58
+
 		elseif (msg_type == 18) then
 			-- delete bss
 			params:add(f.sta_index, buffer(n, 1)); n = n + 1
@@ -166,6 +286,21 @@ function wcn36xx.dissector(inbuffer, pinfo, tree)
 			params:add_le(f.join_secondary_channel_offset, buffer(n, 4)); n = n + 4
 			params:add_le(f.join_link_state, buffer(n, 4)); n = n + 4
 			params:add(f.join_max_tx_power, buffer(n, 1)); n = n + 1
+		elseif (msg_type == 24) then
+			-- SET_BSSKEY_REQ
+			params:add_le(f.SET_BSSKEY_REQ_bssIdx, buffer(n, 1)); n = n + 1
+			params:add_le(f.SET_BSSKEY_REQ_encType, buffer(n, 4)); n = n + 4
+			params:add_le(f.SET_BSSKEY_REQ_numKeys, buffer(n, 1)); n = n + 1
+			params:add_le(f.SET_BSSKEY_REQ_key, buffer(n, 228)); n = n + 228
+			params:add_le(f.SET_BSSKEY_REQ_singleTidRc, buffer(n, 1)); n = n + 1
+		elseif (msg_type == 26) then
+			-- SET_STAKEY_REQ
+			params:add_le(f.SET_STAKEY_REQ_staIdx, buffer(n, 2)); n = n + 2
+			params:add_le(f.SET_STAKEY_REQ_encType, buffer(n, 4)); n = n + 4
+			params:add_le(f.SET_STAKEY_REQ_wepType, buffer(n, 4)); n = n + 4
+			params:add_le(f.SET_STAKEY_REQ_defWEPIdx, buffer(n, 1)); n = n + 1
+			params:add_le(f.SET_STAKEY_REQ_key, buffer(n, 228)); n = n + 228
+			params:add_le(f.SET_STAKEY_REQ_singleTidRc, buffer(n, 1)); n = n + 1
 		elseif (msg_type == 28) then
 			-- remove bss key
 			params:add(f.bss_index, buffer(n, 1)); n = n + 1
@@ -234,6 +369,33 @@ function wcn36xx.dissector(inbuffer, pinfo, tree)
 			params:add_le(f.add_ba_session_timeout, buffer(n, 2)); n = n + 2
 			params:add_le(f.add_ba_session_ssn, buffer(n, 2)); n = n + 2
 			params:add(f.add_ba_session_direction, buffer(n, 1)); n = n + 1
+		elseif (msg_type == 61) then
+			-- UPDATE_BEACON_REQ
+			params:add_le(f.UPDATE_BEACON_REQ_bssIdx, buffer(n, 1)); n = n + 1
+			params:add_le(f.UPDATE_BEACON_REQ_fShortPreamble, buffer(n, 1)); n = n + 1
+			params:add_le(f.UPDATE_BEACON_REQ_fShortSlotTime, buffer(n, 1)); n = n + 1
+			params:add_le(f.UPDATE_BEACON_REQ_beaconInterval, buffer(n, 2)); n = n + 2
+			params:add_le(f.UPDATE_BEACON_REQ_llaCoexist, buffer(n, 1)); n = n + 1
+			params:add_le(f.UPDATE_BEACON_REQ_llbCoexist, buffer(n, 1)); n = n + 1
+			params:add_le(f.UPDATE_BEACON_REQ_llgCoexist, buffer(n, 1)); n = n + 1
+			params:add_le(f.UPDATE_BEACON_REQ_ht20MhzCoexist, buffer(n, 1)); n = n + 1
+			params:add_le(f.UPDATE_BEACON_REQ_llnNonGFCoexist, buffer(n, 1)); n = n + 1
+			params:add_le(f.UPDATE_BEACON_REQ_fLsigTXOPProtectionFullSupport, buffer(n, 1)); n = n + 1
+			params:add_le(f.UPDATE_BEACON_REQ_fRIFSMode, buffer(n, 1)); n = n + 1
+			params:add_le(f.UPDATE_BEACON_REQ_paramChangeBitmap, buffer(n, 2)); n = n + 2
+		elseif (msg_type == 63) then
+			-- SEND_BEACON_REQ
+			params:add_le(f.SEND_BEACON_REQ_beaconLength, buffer(n, 4)); n = n + 4
+			params:add_le(f.SEND_BEACON_REQ_beacon, buffer(n, 384)); n = n + 384
+			params:add_le(f.SEND_BEACON_REQ_bssId, buffer(n, 6)); n = n + 6
+			params:add_le(f.SEND_BEACON_REQ_timIeOffset, buffer(n, 4)); n = n + 4
+			params:add_le(f.SEND_BEACON_REQ_p2pIeOffset, buffer(n, 2)); n = n + 2
+		elseif (msg_type == 68) then
+			-- UPDATE_PROBE_RSP_TEMPLATE_REQ
+			params:add_le(f.UPDATE_PROBE_RSP_TEMPLATE_REQ_pProbeRespTemplate, buffer(n, 384)); n = n + 384
+			params:add_le(f.UPDATE_PROBE_RSP_TEMPLATE_REQ_probeRespTemplateLen, buffer(n, 4)); n = n + 4
+			params:add_le(f.UPDATE_PROBE_RSP_TEMPLATE_REQ_ucProxyProbeReqValidIEBmap, buffer(n, 32)); n = n + 32
+			params:add_le(f.UPDATE_PROBE_RSP_TEMPLATE_REQ_bssId, buffer(n, 6)); n = n + 6
 		elseif (msg_type == 78) then
 			-- enter bmps
 			params:add(f.bss_index, buffer(n, 1)); n = n + 1
@@ -375,6 +537,30 @@ function wcn36xx.dissector(inbuffer, pinfo, tree)
 				params:add(f.start_rsp_fw_version, buffer(n, 1)); n = n + 1
 				params:add(f.start_rsp_fw_minor, buffer(n, 1)); n = n + 1
 				params:add(f.start_rsp_fw_major, buffer(n, 1)); n = n + 1
+			elseif (msg_type == 17) then
+				-- CONFIG_BSS_RSP
+				status = 0
+				params:add_le(f.CONFIG_BSS_RSP_status, buffer(n, 4)); n = n + 4
+				params:add_le(f.CONFIG_BSS_RSP_bssIdx, buffer(n, 1)); n = n + 1
+				params:add_le(f.CONFIG_BSS_RSP_dpuDescIndx, buffer(n, 1)); n = n + 1
+				params:add_le(f.CONFIG_BSS_RSP_ucastDpuSignature, buffer(n, 1)); n = n + 1
+				params:add_le(f.CONFIG_BSS_RSP_bcastDpuDescIndx, buffer(n, 1)); n = n + 1
+				params:add_le(f.CONFIG_BSS_RSP_bcastDpuSignature, buffer(n, 1)); n = n + 1
+				params:add_le(f.CONFIG_BSS_RSP_mgmtDpuDescIndx, buffer(n, 1)); n = n + 1
+				params:add_le(f.CONFIG_BSS_RSP_mgmtDpuSignature, buffer(n, 1)); n = n + 1
+				params:add_le(f.CONFIG_BSS_RSP_bssStaIdx, buffer(n, 1)); n = n + 1
+				params:add_le(f.CONFIG_BSS_RSP_bssSelfStaIdx, buffer(n, 1)); n = n + 1
+				params:add_le(f.CONFIG_BSS_RSP_bssBcastStaIdx, buffer(n, 1)); n = n + 1
+				params:add_le(f.CONFIG_BSS_RSP_staMac, buffer(n, 6)); n = n + 6
+				params:add_le(f.CONFIG_BSS_RSP_txMgmtPower, buffer(n, 1)); n = n + 1
+			elseif (msg_type == 47) then
+				-- GET_STATS_RSP
+				status = 0
+				params:add_le(f.GET_STATS_RSP_status, buffer(n, 4)); n = n + 4
+				params:add_le(f.GET_STATS_RSP_staId, buffer(n, 4)); n = n + 4
+				params:add_le(f.GET_STATS_RSP_statsMask, buffer(n, 4)); n = n + 4
+				params:add_le(f.GET_STATS_RSP_msgType, buffer(n, 2)); n = n + 2
+				params:add_le(f.GET_STATS_RSP_msgLen, buffer(n, 2)); n = n + 2
 			elseif (msg_type == 60) then
 				-- trigger ba
 				params:add_le(f.bssid, buffer(n, 6)); n = n + 6
@@ -396,7 +582,12 @@ function wcn36xx.dissector(inbuffer, pinfo, tree)
 				-- start oem data
 				params:add(f.start_oem_data_data, buffer(n))
 				status = 0
+			elseif (msg_type == 152) then
+				status = 0
+			elseif (msg_type == 167) then
+				status = 0
 			elseif (msg_type == 176) then
+				--WLAN_HAL_SET_POWER_PARAMS_RSP
 				status = 0
 			elseif (msg_type == 140) then
 				-- enable radar
@@ -1030,3 +1221,177 @@ f.tl_flush_ac_sta_id = ProtoField.uint8("wcn36xx.tl_flush_ac_sta_id", "sta_id")
 f.set_max_tx_power_rsp_power = ProtoField.uint8("wcn36xx.set_max_tx_power_rsp_power", "power")
 
 f.trigger_ba_rsp_candidate_cnt = ProtoField.uint16("wcn36xx.trigger_ba_rsp_candidate_cnt", "candidate_cnt")
+
+f.CONFIG_STA_REQ_bssId = ProtoField.ether("wcn36xx.CONFIG_STA_REQ_bssId", "bssId")
+f.CONFIG_STA_REQ_assocId = ProtoField.uint16("wcn36xx.CONFIG_STA_REQ_assocId", "assocId")
+f.CONFIG_STA_REQ_staType = ProtoField.uint8("wcn36xx.CONFIG_STA_REQ_staType", "staType")
+f.CONFIG_STA_REQ_shortPreambleSupported = ProtoField.uint8("wcn36xx.CONFIG_STA_REQ_shortPreambleSupported", "shortPreambleSupported")
+f.CONFIG_STA_REQ_staMac = ProtoField.ether("wcn36xx.CONFIG_STA_REQ_staMac", "staMac")
+f.CONFIG_STA_REQ_listenInterval = ProtoField.uint16("wcn36xx.CONFIG_STA_REQ_listenInterval", "listenInterval")
+f.CONFIG_STA_REQ_wmmEnabled = ProtoField.uint8("wcn36xx.CONFIG_STA_REQ_wmmEnabled", "wmmEnabled")
+f.CONFIG_STA_REQ_htCapable = ProtoField.uint8("wcn36xx.CONFIG_STA_REQ_htCapable", "htCapable")
+f.CONFIG_STA_REQ_txChannelWidthSet = ProtoField.uint8("wcn36xx.CONFIG_STA_REQ_txChannelWidthSet", "txChannelWidthSet")
+f.CONFIG_STA_REQ_rifsMode = ProtoField.uint8("wcn36xx.CONFIG_STA_REQ_rifsMode", "rifsMode")
+f.CONFIG_STA_REQ_lsigTxopProtection = ProtoField.uint8("wcn36xx.CONFIG_STA_REQ_lsigTxopProtection", "lsigTxopProtection")
+f.CONFIG_STA_REQ_maxAmpduSize = ProtoField.uint8("wcn36xx.CONFIG_STA_REQ_maxAmpduSize", "maxAmpduSize")
+f.CONFIG_STA_REQ_maxAmpduDensity = ProtoField.uint8("wcn36xx.CONFIG_STA_REQ_maxAmpduDensity", "maxAmpduDensity")
+f.CONFIG_STA_REQ_maxAmsduSize = ProtoField.uint8("wcn36xx.CONFIG_STA_REQ_maxAmsduSize", "maxAmsduSize")
+f.CONFIG_STA_REQ_fShortGI40Mhz = ProtoField.uint8("wcn36xx.CONFIG_STA_REQ_fShortGI40Mhz", "fShortGI40Mhz")
+f.CONFIG_STA_REQ_fShortGI20Mhz = ProtoField.uint8("wcn36xx.CONFIG_STA_REQ_fShortGI20Mhz", "fShortGI20Mhz")
+f.CONFIG_STA_REQ_rmfEnabled = ProtoField.uint8("wcn36xx.CONFIG_STA_REQ_rmfEnabled", "rmfEnabled")
+f.CONFIG_STA_REQ_encryptType = ProtoField.uint32("wcn36xx.CONFIG_STA_REQ_encryptType", "encryptType")
+f.CONFIG_STA_REQ_action = ProtoField.uint8("wcn36xx.CONFIG_STA_REQ_action", "action")
+f.CONFIG_STA_REQ_uAPSD = ProtoField.uint8("wcn36xx.CONFIG_STA_REQ_uAPSD", "uAPSD")
+f.CONFIG_STA_REQ_maxSPLen = ProtoField.uint8("wcn36xx.CONFIG_STA_REQ_maxSPLen", "maxSPLen")
+f.CONFIG_STA_REQ_greenFieldCapable = ProtoField.uint8("wcn36xx.CONFIG_STA_REQ_greenFieldCapable", "greenFieldCapable")
+f.CONFIG_STA_REQ_mimoPS = ProtoField.uint32("wcn36xx.CONFIG_STA_REQ_mimoPS", "mimoPS")
+f.CONFIG_STA_REQ_delayedBASupport = ProtoField.uint8("wcn36xx.CONFIG_STA_REQ_delayedBASupport", "delayedBASupport")
+f.CONFIG_STA_REQ_us32MaxAmpduDuration = ProtoField.uint8("wcn36xx.CONFIG_STA_REQ_us32MaxAmpduDuration", "us32MaxAmpduDuration")
+f.CONFIG_STA_REQ_fDsssCckMode40Mhz = ProtoField.uint8("wcn36xx.CONFIG_STA_REQ_fDsssCckMode40Mhz", "fDsssCckMode40Mhz")
+f.CONFIG_STA_REQ_staIdx = ProtoField.uint8("wcn36xx.CONFIG_STA_REQ_staIdx", "staIdx")
+f.CONFIG_STA_REQ_bssIdx = ProtoField.uint8("wcn36xx.CONFIG_STA_REQ_bssIdx", "bssIdx")
+f.CONFIG_STA_REQ_p2pCapableSta = ProtoField.uint8("wcn36xx.CONFIG_STA_REQ_p2pCapableSta", "p2pCapableSta")
+f.CONFIG_STA_REQ_reserved = ProtoField.uint8("wcn36xx.CONFIG_STA_REQ_reserved", "reserved")
+f.CONFIG_STA_REQ_supportedRates = ProtoField.bytes("wcn36xx.CONFIG_STA_REQ_supportedRates", "supportedRates")
+
+f.CONFIG_BSS_bssId = ProtoField.ether("wcn36xx.CONFIG_BSS_bssId", "bssId")
+f.CONFIG_BSS_selfMacAddr = ProtoField.ether("wcn36xx.CONFIG_BSS_selfMacAddr", "selfMacAddr")
+f.CONFIG_BSS_bssType = ProtoField.uint32("wcn36xx.CONFIG_BSS_bssType", "bssType")
+f.CONFIG_BSS_operMode = ProtoField.uint8("wcn36xx.CONFIG_BSS_operMode", "operMode")
+f.CONFIG_BSS_nwType = ProtoField.uint32("wcn36xx.CONFIG_BSS_nwType", "nwType")
+f.CONFIG_BSS_shortSlotTimeSupported = ProtoField.uint8("wcn36xx.CONFIG_BSS_shortSlotTimeSupported", "shortSlotTimeSupported")
+f.CONFIG_BSS_llaCoexist = ProtoField.uint8("wcn36xx.CONFIG_BSS_llaCoexist", "llaCoexist")
+f.CONFIG_BSS_llbCoexist = ProtoField.uint8("wcn36xx.CONFIG_BSS_llbCoexist", "llbCoexist")
+f.CONFIG_BSS_llgCoexist = ProtoField.uint8("wcn36xx.CONFIG_BSS_llgCoexist", "llgCoexist")
+f.CONFIG_BSS_ht20Coexist = ProtoField.uint8("wcn36xx.CONFIG_BSS_ht20Coexist", "ht20Coexist")
+f.CONFIG_BSS_llnNonGFCoexist = ProtoField.uint8("wcn36xx.CONFIG_BSS_llnNonGFCoexist", "llnNonGFCoexist")
+f.CONFIG_BSS_fLsigTXOPProtectionFullSupport = ProtoField.uint8("wcn36xx.CONFIG_BSS_fLsigTXOPProtectionFullSupport", "fLsigTXOPProtectionFullSupport")
+f.CONFIG_BSS_fRIFSMode = ProtoField.uint8("wcn36xx.CONFIG_BSS_fRIFSMode", "fRIFSMode")
+f.CONFIG_BSS_beaconInterval = ProtoField.uint16("wcn36xx.CONFIG_BSS_beaconInterval", "beaconInterval")
+f.CONFIG_BSS_dtimPeriod = ProtoField.uint8("wcn36xx.CONFIG_BSS_dtimPeriod", "dtimPeriod")
+f.CONFIG_BSS_txChannelWidthSet = ProtoField.uint8("wcn36xx.CONFIG_BSS_txChannelWidthSet", "txChannelWidthSet")
+f.CONFIG_BSS_currentOperChannel = ProtoField.uint8("wcn36xx.CONFIG_BSS_currentOperChannel", "currentOperChannel")
+f.CONFIG_BSS_currentExtChannel = ProtoField.uint8("wcn36xx.CONFIG_BSS_currentExtChannel", "currentExtChannel")
+f.CONFIG_BSS_reserved = ProtoField.uint8("wcn36xx.CONFIG_BSS_reserved", "reserved")
+f.CONFIG_BSS_ssId = ProtoField.bytes("wcn36xx.CONFIG_BSS_ssId", "ssId")
+f.CONFIG_BSS_action = ProtoField.uint8("wcn36xx.CONFIG_BSS_action", "action")
+f.CONFIG_BSS_rateSet = ProtoField.bytes("wcn36xx.CONFIG_BSS_rateSet", "rateSet")
+f.CONFIG_BSS_htCapable = ProtoField.uint8("wcn36xx.CONFIG_BSS_htCapable", "htCapable")
+f.CONFIG_BSS_obssProtEnabled = ProtoField.uint8("wcn36xx.CONFIG_BSS_obssProtEnabled", "obssProtEnabled")
+f.CONFIG_BSS_rmfEnabled = ProtoField.uint8("wcn36xx.CONFIG_BSS_rmfEnabled", "rmfEnabled")
+f.CONFIG_BSS_htOperMode = ProtoField.uint32("wcn36xx.CONFIG_BSS_htOperMode", "htOperMode")
+f.CONFIG_BSS_dualCTSProtection = ProtoField.uint8("wcn36xx.CONFIG_BSS_dualCTSProtection", "dualCTSProtection")
+f.CONFIG_BSS_ucMaxProbeRespRetryLimit = ProtoField.uint8("wcn36xx.CONFIG_BSS_ucMaxProbeRespRetryLimit", "ucMaxProbeRespRetryLimit")
+f.CONFIG_BSS_bHiddenSSIDEn = ProtoField.uint8("wcn36xx.CONFIG_BSS_bHiddenSSIDEn", "bHiddenSSIDEn")
+f.CONFIG_BSS_bProxyProbeRespEn = ProtoField.uint8("wcn36xx.CONFIG_BSS_bProxyProbeRespEn", "bProxyProbeRespEn")
+f.CONFIG_BSS_edcaParamsValid = ProtoField.uint8("wcn36xx.CONFIG_BSS_edcaParamsValid", "edcaParamsValid")
+f.CONFIG_BSS_acbe = ProtoField.uint32("wcn36xx.CONFIG_BSS_acbe", "acbe")
+f.CONFIG_BSS_acbk = ProtoField.uint32("wcn36xx.CONFIG_BSS_acbk", "acbk")
+f.CONFIG_BSS_acvi = ProtoField.uint32("wcn36xx.CONFIG_BSS_acvi", "acvi")
+f.CONFIG_BSS_acvo = ProtoField.uint32("wcn36xx.CONFIG_BSS_acvo", "acvo")
+f.CONFIG_BSS_extSetStaKeyParamValid = ProtoField.uint8("wcn36xx.CONFIG_BSS_extSetStaKeyParamValid", "extSetStaKeyParamValid")
+f.CONFIG_BSS_extSetStaKeyParam = ProtoField.bytes("wcn36xx.CONFIG_BSS_extSetStaKeyParam", "extSetStaKeyParam")
+f.CONFIG_BSS_halPersona = ProtoField.uint8("wcn36xx.CONFIG_BSS_halPersona", "halPersona")
+f.CONFIG_BSS_bSpectrumMgtEnable = ProtoField.uint8("wcn36xx.CONFIG_BSS_bSpectrumMgtEnable", "bSpectrumMgtEnable")
+f.CONFIG_BSS_txMgmtPower = ProtoField.uint8("wcn36xx.CONFIG_BSS_txMgmtPower", "txMgmtPower")
+f.CONFIG_BSS_maxTxPower = ProtoField.uint8("wcn36xx.CONFIG_BSS_maxTxPower", "maxTxPower")
+f.CONFIG_BSS_staContext_staContext_bssId = ProtoField.ether("wcn36xx.CONFIG_BSS_staContext_staContext_bssId", "staContext_bssId")
+f.CONFIG_BSS_staContext_staContext_assocId = ProtoField.uint16("wcn36xx.CONFIG_BSS_staContext_staContext_assocId", "staContext_assocId")
+f.CONFIG_BSS_staContext_staContext_staType = ProtoField.uint8("wcn36xx.CONFIG_BSS_staContext_staContext_staType", "staContext_staType")
+f.CONFIG_BSS_staContext_staContext_shortPreambleSupported = ProtoField.uint8("wcn36xx.CONFIG_BSS_staContext_staContext_shortPreambleSupported", "staContext_shortPreambleSupported")
+f.CONFIG_BSS_staContext_staContext_staMac = ProtoField.ether("wcn36xx.CONFIG_BSS_staContext_staContext_staMac", "staContext_staMac")
+f.CONFIG_BSS_staContext_staContext_listenInterval = ProtoField.uint16("wcn36xx.CONFIG_BSS_staContext_staContext_listenInterval", "staContext_listenInterval")
+f.CONFIG_BSS_staContext_staContext_wmmEnabled = ProtoField.uint8("wcn36xx.CONFIG_BSS_staContext_staContext_wmmEnabled", "staContext_wmmEnabled")
+f.CONFIG_BSS_staContext_staContext_htCapable = ProtoField.uint8("wcn36xx.CONFIG_BSS_staContext_staContext_htCapable", "staContext_htCapable")
+f.CONFIG_BSS_staContext_staContext_txChannelWidthSet = ProtoField.uint8("wcn36xx.CONFIG_BSS_staContext_staContext_txChannelWidthSet", "staContext_txChannelWidthSet")
+f.CONFIG_BSS_staContext_staContext_rifsMode = ProtoField.uint8("wcn36xx.CONFIG_BSS_staContext_staContext_rifsMode", "staContext_rifsMode")
+f.CONFIG_BSS_staContext_staContext_lsigTxopProtection = ProtoField.uint8("wcn36xx.CONFIG_BSS_staContext_staContext_lsigTxopProtection", "staContext_lsigTxopProtection")
+f.CONFIG_BSS_staContext_staContext_maxAmpduSize = ProtoField.uint8("wcn36xx.CONFIG_BSS_staContext_staContext_maxAmpduSize", "staContext_maxAmpduSize")
+f.CONFIG_BSS_staContext_staContext_maxAmpduDensity = ProtoField.uint8("wcn36xx.CONFIG_BSS_staContext_staContext_maxAmpduDensity", "staContext_maxAmpduDensity")
+f.CONFIG_BSS_staContext_staContext_maxAmsduSize = ProtoField.uint8("wcn36xx.CONFIG_BSS_staContext_staContext_maxAmsduSize", "staContext_maxAmsduSize")
+f.CONFIG_BSS_staContext_staContext_fShortGI40Mhz = ProtoField.uint8("wcn36xx.CONFIG_BSS_staContext_staContext_fShortGI40Mhz", "staContext_fShortGI40Mhz")
+f.CONFIG_BSS_staContext_staContext_fShortGI20Mhz = ProtoField.uint8("wcn36xx.CONFIG_BSS_staContext_staContext_fShortGI20Mhz", "staContext_fShortGI20Mhz")
+f.CONFIG_BSS_staContext_staContext_rmfEnabled = ProtoField.uint8("wcn36xx.CONFIG_BSS_staContext_staContext_rmfEnabled", "staContext_rmfEnabled")
+f.CONFIG_BSS_staContext_staContext_encryptType = ProtoField.uint32("wcn36xx.CONFIG_BSS_staContext_staContext_encryptType", "staContext_encryptType")
+f.CONFIG_BSS_staContext_staContext_action = ProtoField.uint8("wcn36xx.CONFIG_BSS_staContext_staContext_action", "staContext_action")
+f.CONFIG_BSS_staContext_staContext_uAPSD = ProtoField.uint8("wcn36xx.CONFIG_BSS_staContext_staContext_uAPSD", "staContext_uAPSD")
+f.CONFIG_BSS_staContext_staContext_maxSPLen = ProtoField.uint8("wcn36xx.CONFIG_BSS_staContext_staContext_maxSPLen", "staContext_maxSPLen")
+f.CONFIG_BSS_staContext_staContext_greenFieldCapable = ProtoField.uint8("wcn36xx.CONFIG_BSS_staContext_staContext_greenFieldCapable", "staContext_greenFieldCapable")
+f.CONFIG_BSS_staContext_staContext_mimoPS = ProtoField.uint32("wcn36xx.CONFIG_BSS_staContext_staContext_mimoPS", "staContext_mimoPS")
+f.CONFIG_BSS_staContext_staContext_delayedBASupport = ProtoField.uint8("wcn36xx.CONFIG_BSS_staContext_staContext_delayedBASupport", "staContext_delayedBASupport")
+f.CONFIG_BSS_staContext_staContext_us32MaxAmpduDuration = ProtoField.uint8("wcn36xx.CONFIG_BSS_staContext_staContext_us32MaxAmpduDuration", "staContext_us32MaxAmpduDuration")
+f.CONFIG_BSS_staContext_staContext_fDsssCckMode40Mhz = ProtoField.uint8("wcn36xx.CONFIG_BSS_staContext_staContext_fDsssCckMode40Mhz", "staContext_fDsssCckMode40Mhz")
+f.CONFIG_BSS_staContext_staContext_staIdx = ProtoField.uint8("wcn36xx.CONFIG_BSS_staContext_staContext_staIdx", "staContext_staIdx")
+f.CONFIG_BSS_staContext_staContext_bssIdx = ProtoField.uint8("wcn36xx.CONFIG_BSS_staContext_staContext_bssIdx", "staContext_bssIdx")
+f.CONFIG_BSS_staContext_staContext_p2pCapableSta = ProtoField.uint8("wcn36xx.CONFIG_BSS_staContext_staContext_p2pCapableSta", "staContext_p2pCapableSta")
+f.CONFIG_BSS_staContext_staContext_reserved = ProtoField.uint8("wcn36xx.CONFIG_BSS_staContext_staContext_reserved", "staContext_reserved")
+f.CONFIG_BSS_staContext_staContext_supportedRates = ProtoField.bytes("wcn36xx.CONFIG_BSS_staContext_staContext_supportedRates", "staContext_supportedRates")
+
+
+f.SEND_BEACON_REQ_beaconLength = ProtoField.uint32("wcn36xx.SEND_BEACON_REQ_beaconLength", "beaconLength")
+f.SEND_BEACON_REQ_beacon = ProtoField.bytes("wcn36xx.SEND_BEACON_REQ_beacon", "beacon")
+f.SEND_BEACON_REQ_bssId = ProtoField.ether("wcn36xx.SEND_BEACON_REQ_bssId", "bssId")
+f.SEND_BEACON_REQ_timIeOffset = ProtoField.uint32("wcn36xx.SEND_BEACON_REQ_timIeOffset", "timIeOffset")
+f.SEND_BEACON_REQ_p2pIeOffset = ProtoField.uint16("wcn36xx.SEND_BEACON_REQ_p2pIeOffset", "p2pIeOffset")
+
+f.UPDATE_PROBE_RSP_TEMPLATE_REQ_pProbeRespTemplate = ProtoField.bytes("wcn36xx.UPDATE_PROBE_RSP_TEMPLATE_REQ_pProbeRespTemplate", "pProbeRespTemplate")
+f.UPDATE_PROBE_RSP_TEMPLATE_REQ_probeRespTemplateLen = ProtoField.uint32("wcn36xx.UPDATE_PROBE_RSP_TEMPLATE_REQ_probeRespTemplateLen", "probeRespTemplateLen")
+f.UPDATE_PROBE_RSP_TEMPLATE_REQ_ucProxyProbeReqValidIEBmap = ProtoField.bytes("wcn36xx.UPDATE_PROBE_RSP_TEMPLATE_REQ_ucProxyProbeReqValidIEBmap", "ucProxyProbeReqValidIEBmap")
+f.UPDATE_PROBE_RSP_TEMPLATE_REQ_bssId = ProtoField.ether("wcn36xx.UPDATE_PROBE_RSP_TEMPLATE_REQ_bssId", "bssId")
+
+f.UPDATE_BEACON_REQ_bssIdx = ProtoField.uint8("wcn36xx.UPDATE_BEACON_REQ_bssIdx", "bssIdx")
+f.UPDATE_BEACON_REQ_fShortPreamble = ProtoField.uint8("wcn36xx.UPDATE_BEACON_REQ_fShortPreamble", "fShortPreamble")
+f.UPDATE_BEACON_REQ_fShortSlotTime = ProtoField.uint8("wcn36xx.UPDATE_BEACON_REQ_fShortSlotTime", "fShortSlotTime")
+f.UPDATE_BEACON_REQ_beaconInterval = ProtoField.uint16("wcn36xx.UPDATE_BEACON_REQ_beaconInterval", "beaconInterval")
+f.UPDATE_BEACON_REQ_llaCoexist = ProtoField.uint8("wcn36xx.UPDATE_BEACON_REQ_llaCoexist", "llaCoexist")
+f.UPDATE_BEACON_REQ_llbCoexist = ProtoField.uint8("wcn36xx.UPDATE_BEACON_REQ_llbCoexist", "llbCoexist")
+f.UPDATE_BEACON_REQ_llgCoexist = ProtoField.uint8("wcn36xx.UPDATE_BEACON_REQ_llgCoexist", "llgCoexist")
+f.UPDATE_BEACON_REQ_ht20MhzCoexist = ProtoField.uint8("wcn36xx.UPDATE_BEACON_REQ_ht20MhzCoexist", "ht20MhzCoexist")
+f.UPDATE_BEACON_REQ_llnNonGFCoexist = ProtoField.uint8("wcn36xx.UPDATE_BEACON_REQ_llnNonGFCoexist", "llnNonGFCoexist")
+f.UPDATE_BEACON_REQ_fLsigTXOPProtectionFullSupport = ProtoField.uint8("wcn36xx.UPDATE_BEACON_REQ_fLsigTXOPProtectionFullSupport", "fLsigTXOPProtectionFullSupport")
+f.UPDATE_BEACON_REQ_fRIFSMode = ProtoField.uint8("wcn36xx.UPDATE_BEACON_REQ_fRIFSMode", "fRIFSMode")
+f.UPDATE_BEACON_REQ_paramChangeBitmap = ProtoField.uint16("wcn36xx.UPDATE_BEACON_REQ_paramChangeBitmap", "paramChangeBitmap")
+
+f.SET_STAKEY_REQ_staIdx = ProtoField.uint16("wcn36xx.SET_STAKEY_REQ_staIdx", "staIdx")
+f.SET_STAKEY_REQ_encType = ProtoField.uint32("wcn36xx.SET_STAKEY_REQ_encType", "encType")
+f.SET_STAKEY_REQ_wepType = ProtoField.uint32("wcn36xx.SET_STAKEY_REQ_wepType", "wepType")
+f.SET_STAKEY_REQ_defWEPIdx = ProtoField.uint8("wcn36xx.SET_STAKEY_REQ_defWEPIdx", "defWEPIdx")
+f.SET_STAKEY_REQ_key = ProtoField.bytes("wcn36xx.SET_STAKEY_REQ_key", "key")
+f.SET_STAKEY_REQ_singleTidRc = ProtoField.uint8("wcn36xx.SET_STAKEY_REQ_singleTidRc", "singleTidRc")
+
+f.FINISH_SCAN_REQ_scanMode = ProtoField.uint32("wcn36xx.FINISH_SCAN_REQ_scanMode", "scanMode")
+f.FINISH_SCAN_REQ_currentOperChannel = ProtoField.uint8("wcn36xx.FINISH_SCAN_REQ_currentOperChannel", "currentOperChannel")
+f.FINISH_SCAN_REQ_cbState = ProtoField.uint32("wcn36xx.FINISH_SCAN_REQ_cbState", "cbState")
+f.FINISH_SCAN_REQ_bssid = ProtoField.ether("wcn36xx.FINISH_SCAN_REQ_bssid", "bssid")
+f.FINISH_SCAN_REQ_notifyBss = ProtoField.uint8("wcn36xx.FINISH_SCAN_REQ_notifyBss", "notifyBss")
+f.FINISH_SCAN_REQ_frameType = ProtoField.uint8("wcn36xx.FINISH_SCAN_REQ_frameType", "frameType")
+f.FINISH_SCAN_REQ_frameLength = ProtoField.uint8("wcn36xx.FINISH_SCAN_REQ_frameLength", "frameLength")
+f.FINISH_SCAN_REQ_macMgmtHdr = ProtoField.bytes("wcn36xx.FINISH_SCAN_REQ_macMgmtHdr", "macMgmtHdr")
+f.FINISH_SCAN_REQ_scanEntry = ProtoField.bytes("wcn36xx.FINISH_SCAN_REQ_scanEntry", "scanEntry")
+
+f.CONFIG_BSS_RSP_status = ProtoField.uint32("wcn36xx.CONFIG_BSS_RSP_status", "status")
+f.CONFIG_BSS_RSP_bssIdx = ProtoField.uint8("wcn36xx.CONFIG_BSS_RSP_bssIdx", "bssIdx")
+f.CONFIG_BSS_RSP_dpuDescIndx = ProtoField.uint8("wcn36xx.CONFIG_BSS_RSP_dpuDescIndx", "dpuDescIndx")
+f.CONFIG_BSS_RSP_ucastDpuSignature = ProtoField.uint8("wcn36xx.CONFIG_BSS_RSP_ucastDpuSignature", "ucastDpuSignature")
+f.CONFIG_BSS_RSP_bcastDpuDescIndx = ProtoField.uint8("wcn36xx.CONFIG_BSS_RSP_bcastDpuDescIndx", "bcastDpuDescIndx")
+f.CONFIG_BSS_RSP_bcastDpuSignature = ProtoField.uint8("wcn36xx.CONFIG_BSS_RSP_bcastDpuSignature", "bcastDpuSignature")
+f.CONFIG_BSS_RSP_mgmtDpuDescIndx = ProtoField.uint8("wcn36xx.CONFIG_BSS_RSP_mgmtDpuDescIndx", "mgmtDpuDescIndx")
+f.CONFIG_BSS_RSP_mgmtDpuSignature = ProtoField.uint8("wcn36xx.CONFIG_BSS_RSP_mgmtDpuSignature", "mgmtDpuSignature")
+f.CONFIG_BSS_RSP_bssStaIdx = ProtoField.uint8("wcn36xx.CONFIG_BSS_RSP_bssStaIdx", "bssStaIdx")
+f.CONFIG_BSS_RSP_bssSelfStaIdx = ProtoField.uint8("wcn36xx.CONFIG_BSS_RSP_bssSelfStaIdx", "bssSelfStaIdx")
+f.CONFIG_BSS_RSP_bssBcastStaIdx = ProtoField.uint8("wcn36xx.CONFIG_BSS_RSP_bssBcastStaIdx", "bssBcastStaIdx")
+f.CONFIG_BSS_RSP_staMac = ProtoField.ether("wcn36xx.CONFIG_BSS_RSP_staMac", "staMac")
+f.CONFIG_BSS_RSP_txMgmtPower = ProtoField.uint8("wcn36xx.CONFIG_BSS_RSP_txMgmtPower", "txMgmtPower")
+
+f.SET_BSSKEY_REQ_bssIdx = ProtoField.uint8("wcn36xx.SET_BSSKEY_REQ_bssIdx", "bssIdx")
+f.SET_BSSKEY_REQ_encType = ProtoField.uint32("wcn36xx.SET_BSSKEY_REQ_encType", "encType")
+f.SET_BSSKEY_REQ_numKeys = ProtoField.uint8("wcn36xx.SET_BSSKEY_REQ_numKeys", "numKeys")
+f.SET_BSSKEY_REQ_key = ProtoField.bytes("wcn36xx.SET_BSSKEY_REQ_key", "key")
+f.SET_BSSKEY_REQ_singleTidRc = ProtoField.uint8("wcn36xx.SET_BSSKEY_REQ_singleTidRc", "singleTidRc")
+
+f.GET_STATS_RSP_status = ProtoField.uint32("wcn36xx.GET_STATS_RSP_status", "status")
+f.GET_STATS_RSP_staId = ProtoField.uint32("wcn36xx.GET_STATS_RSP_staId", "staId")
+f.GET_STATS_RSP_statsMask = ProtoField.uint32("wcn36xx.GET_STATS_RSP_statsMask", "statsMask")
+f.GET_STATS_RSP_msgType = ProtoField.uint16("wcn36xx.GET_STATS_RSP_msgType", "msgType")
+f.GET_STATS_RSP_msgLen = ProtoField.uint16("wcn36xx.GET_STATS_RSP_msgLen", "msgLen")
+
