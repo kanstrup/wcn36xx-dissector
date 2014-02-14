@@ -29,6 +29,8 @@ local filter_cmp_type_strings = {}
 local del_ba_direction_strings = {}
 local ani_ed_type_strings = {}
 local ani_wep_type_strings = {}
+local bss_type_strings = {}
+local nw_type_strings = {}
 
 -- Firmware version
 local fw_major = 0
@@ -1041,6 +1043,20 @@ ani_ed_type_strings[7] = "NOT_IMPLEMENTED"
 ani_wep_type_strings[0] = "WEP_STATIC"
 ani_wep_type_strings[1] = "WEP_DYNAMIC"
 
+bss_type_strings[0] = "INFRASTRUCTURE_MODE"
+bss_type_strings[1] = "INFRA_AP_MODE"
+bss_type_strings[2] = "IBSS_MODE"
+bss_type_strings[3] = "BTAMP_STA_MODE"
+bss_type_strings[4] = "BTAMP_AP_MODE"
+bss_type_strings[5] = "AUTO_MODE"
+bss_type_strings[6] = "DONOT_USE"
+
+nw_type_strings[0] = "11A"
+nw_type_strings[1] = "11B"
+nw_type_strings[2] = "11G"
+nw_type_strings[3] = "11N"
+nw_type_strings[4] = "DONOT_USE"
+
 -- Protocol fields
 f.msg_type = ProtoField.uint16("wcn36xx.msg_type", "msg_type", base.DEC, msg_type_strings)
 f.msg_version = ProtoField.uint16("wcn36xx.msg_version", "msg_version")
@@ -1256,9 +1272,9 @@ f.CONFIG_STA_REQ_supportedRates = ProtoField.bytes("wcn36xx.CONFIG_STA_REQ_suppo
 
 f.CONFIG_BSS_bssId = ProtoField.ether("wcn36xx.CONFIG_BSS_bssId", "bssId")
 f.CONFIG_BSS_selfMacAddr = ProtoField.ether("wcn36xx.CONFIG_BSS_selfMacAddr", "selfMacAddr")
-f.CONFIG_BSS_bssType = ProtoField.uint32("wcn36xx.CONFIG_BSS_bssType", "bssType")
+f.CONFIG_BSS_bssType = ProtoField.uint32("wcn36xx.CONFIG_BSS_bssType", "bssType", base.DEC, bss_type_strings)
 f.CONFIG_BSS_operMode = ProtoField.uint8("wcn36xx.CONFIG_BSS_operMode", "operMode")
-f.CONFIG_BSS_nwType = ProtoField.uint32("wcn36xx.CONFIG_BSS_nwType", "nwType")
+f.CONFIG_BSS_nwType = ProtoField.uint32("wcn36xx.CONFIG_BSS_nwType", "nwType", base.DEC, nw_type_strings)
 f.CONFIG_BSS_shortSlotTimeSupported = ProtoField.uint8("wcn36xx.CONFIG_BSS_shortSlotTimeSupported", "shortSlotTimeSupported")
 f.CONFIG_BSS_llaCoexist = ProtoField.uint8("wcn36xx.CONFIG_BSS_llaCoexist", "llaCoexist")
 f.CONFIG_BSS_llbCoexist = ProtoField.uint8("wcn36xx.CONFIG_BSS_llbCoexist", "llbCoexist")
