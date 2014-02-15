@@ -700,6 +700,13 @@ function wcn36xx.dissector(inbuffer, pinfo, tree)
 				-- start oem data
 				params:add(f.start_oem_data_data, buffer(n))
 				status = 0
+			elseif (msg_type == 126) then
+				-- ADD_STA_SELF_RSP
+				status = buffer(n, 4):le_uint()
+				params:add_le(f.ADD_STA_SELF_RSP_status, buffer(n, 4)); n = n + 4
+				params:add_le(f.ADD_STA_SELF_RSP_selfStaIdx, buffer(n, 1)); n = n + 1
+				params:add_le(f.ADD_STA_SELF_RSP_dpuIdx, buffer(n, 1)); n = n + 1
+				params:add_le(f.ADD_STA_SELF_RSP_dpuSignature, buffer(n, 1)); n = n + 1
 			elseif (msg_type == 152) then
 				status = 0
 			elseif (msg_type == 167) then
@@ -1638,4 +1645,9 @@ f.GET_STATS_RSP_staId = ProtoField.uint32("wcn36xx.GET_STATS_RSP_staId", "staId"
 f.GET_STATS_RSP_statsMask = ProtoField.uint32("wcn36xx.GET_STATS_RSP_statsMask", "statsMask")
 f.GET_STATS_RSP_msgType = ProtoField.uint16("wcn36xx.GET_STATS_RSP_msgType", "msgType")
 f.GET_STATS_RSP_msgLen = ProtoField.uint16("wcn36xx.GET_STATS_RSP_msgLen", "msgLen")
+
+f.ADD_STA_SELF_RSP_status = ProtoField.uint32("wcn36xx.ADD_STA_SELF_RSP_status", "status")
+f.ADD_STA_SELF_RSP_selfStaIdx = ProtoField.uint8("wcn36xx.ADD_STA_SELF_RSP_selfStaIdx", "selfStaIdx")
+f.ADD_STA_SELF_RSP_dpuIdx = ProtoField.uint8("wcn36xx.ADD_STA_SELF_RSP_dpuIdx", "dpuIdx")
+f.ADD_STA_SELF_RSP_dpuSignature = ProtoField.uint8("wcn36xx.ADD_STA_SELF_RSP_dpuSignature", "dpuSignature")
 
