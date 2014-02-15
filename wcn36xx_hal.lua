@@ -585,6 +585,10 @@ function wcn36xx.dissector(inbuffer, pinfo, tree)
 			-- add sta self
 			params:add_le(f.add_sta_self_addr, buffer(n, 6)); n = n + 6
 			params:add_le(f.add_sta_self_status, buffer(n, 4)); n = n + 4
+		elseif (msg_type == 127) then
+			-- DEL_STA_SELF_REQ
+			status = 0;
+			params:add_le(f.DEL_STA_SELF_REQ_selfMacAddr, buffer(n, 6)); n = n + 6
 		elseif (msg_type == 151) then
 			-- update scan param
 			params:add(f.scan_dot11d_enabled, buffer(n, 1)); n = n + 1
@@ -707,6 +711,11 @@ function wcn36xx.dissector(inbuffer, pinfo, tree)
 				params:add_le(f.ADD_STA_SELF_RSP_selfStaIdx, buffer(n, 1)); n = n + 1
 				params:add_le(f.ADD_STA_SELF_RSP_dpuIdx, buffer(n, 1)); n = n + 1
 				params:add_le(f.ADD_STA_SELF_RSP_dpuSignature, buffer(n, 1)); n = n + 1
+			elseif (msg_type == 128) then
+				-- DEL_STA_SELF_RSP
+				status = buffer(n, 4):le_uint()
+				params:add_le(f.DEL_STA_SELF_RSP_status, buffer(n, 4)); n = n + 4
+				params:add_le(f.DEL_STA_SELF_RSP_selfMacAddr, buffer(n, 6)); n = n + 6
 			elseif (msg_type == 152) then
 				status = 0
 			elseif (msg_type == 167) then
@@ -1651,3 +1660,7 @@ f.ADD_STA_SELF_RSP_selfStaIdx = ProtoField.uint8("wcn36xx.ADD_STA_SELF_RSP_selfS
 f.ADD_STA_SELF_RSP_dpuIdx = ProtoField.uint8("wcn36xx.ADD_STA_SELF_RSP_dpuIdx", "dpuIdx")
 f.ADD_STA_SELF_RSP_dpuSignature = ProtoField.uint8("wcn36xx.ADD_STA_SELF_RSP_dpuSignature", "dpuSignature")
 
+f.DEL_STA_SELF_REQ_selfMacAddr = ProtoField.ether("wcn36xx.DEL_STA_SELF_REQ_selfMacAddr", "selfMacAddr")
+
+f.DEL_STA_SELF_RSP_status = ProtoField.uint32("wcn36xx.DEL_STA_SELF_RSP_status", "status")
+f.DEL_STA_SELF_RSP_selfMacAddr = ProtoField.ether("wcn36xx.DEL_STA_SELF_RSP_selfMacAddr", "selfMacAddr")
