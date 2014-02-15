@@ -683,6 +683,17 @@ function wcn36xx.dissector(inbuffer, pinfo, tree)
 				params:add_le(f.GET_STATS_RSP_statsMask, buffer(n, 4)); n = n + 4
 				params:add_le(f.GET_STATS_RSP_msgType, buffer(n, 2)); n = n + 2
 				params:add_le(f.GET_STATS_RSP_msgLen, buffer(n, 2)); n = n + 2
+			elseif (msg_type == 58) then
+				-- ADD_BA_SESSION_RSP
+				status = buffer(n, 4):le_uint()
+				params:add_le(f.ADD_BA_SESSION_RSP_status, buffer(n, 4)); n = n + 4
+				params:add_le(f.ADD_BA_SESSION_RSP_baDialogToken, buffer(n, 1)); n = n + 1
+				params:add_le(f.ADD_BA_SESSION_RSP_baTID, buffer(n, 1)); n = n + 1
+				params:add_le(f.ADD_BA_SESSION_RSP_baBufferSize, buffer(n, 1)); n = n + 1
+				params:add_le(f.ADD_BA_SESSION_RSP_baSessionID, buffer(n, 1)); n = n + 1
+				params:add_le(f.ADD_BA_SESSION_RSP_winSize, buffer(n, 1)); n = n + 1
+				params:add_le(f.ADD_BA_SESSION_RSP_STAID, buffer(n, 1)); n = n + 1
+				params:add_le(f.ADD_BA_SESSION_RSP_SSN, buffer(n, 2)); n = n + 2
 			elseif (msg_type == 60) then
 				-- trigger ba
 				params:add_le(f.bssid, buffer(n, 6)); n = n + 6
@@ -1664,3 +1675,13 @@ f.DEL_STA_SELF_REQ_selfMacAddr = ProtoField.ether("wcn36xx.DEL_STA_SELF_REQ_self
 
 f.DEL_STA_SELF_RSP_status = ProtoField.uint32("wcn36xx.DEL_STA_SELF_RSP_status", "status")
 f.DEL_STA_SELF_RSP_selfMacAddr = ProtoField.ether("wcn36xx.DEL_STA_SELF_RSP_selfMacAddr", "selfMacAddr")
+
+f.ADD_BA_SESSION_RSP_status = ProtoField.uint32("wcn36xx.ADD_BA_SESSION_RSP_status", "status")
+f.ADD_BA_SESSION_RSP_baDialogToken = ProtoField.uint8("wcn36xx.ADD_BA_SESSION_RSP_baDialogToken", "baDialogToken")
+f.ADD_BA_SESSION_RSP_baTID = ProtoField.uint8("wcn36xx.ADD_BA_SESSION_RSP_baTID", "baTID")
+f.ADD_BA_SESSION_RSP_baBufferSize = ProtoField.uint8("wcn36xx.ADD_BA_SESSION_RSP_baBufferSize", "baBufferSize")
+f.ADD_BA_SESSION_RSP_baSessionID = ProtoField.uint8("wcn36xx.ADD_BA_SESSION_RSP_baSessionID", "baSessionID")
+f.ADD_BA_SESSION_RSP_winSize = ProtoField.uint8("wcn36xx.ADD_BA_SESSION_RSP_winSize", "winSize")
+f.ADD_BA_SESSION_RSP_STAID = ProtoField.uint8("wcn36xx.ADD_BA_SESSION_RSP_STAID", "STAID")
+f.ADD_BA_SESSION_RSP_SSN = ProtoField.uint16("wcn36xx.ADD_BA_SESSION_RSP_SSN", "SSN")
+
