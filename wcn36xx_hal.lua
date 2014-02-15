@@ -487,6 +487,10 @@ function wcn36xx.dissector(inbuffer, pinfo, tree)
 			params:add_le(f.add_ba_session_timeout, buffer(n, 2)); n = n + 2
 			params:add_le(f.add_ba_session_ssn, buffer(n, 2)); n = n + 2
 			params:add(f.add_ba_session_direction, buffer(n, 1)); n = n + 1
+		elseif (msg_type == 59) then
+			-- TRIGGER_BA_REQ
+			params:add_le(f.TRIGGER_BA_REQ_baSessionID, buffer(n, 1)); n = n + 1
+			params:add_le(f.TRIGGER_BA_REQ_baCandidateCnt, buffer(n, 2)); n = n + 2
 		elseif (msg_type == 61) then
 			-- UPDATE_BEACON_REQ
 			params:add_le(f.UPDATE_BEACON_REQ_bssIdx, buffer(n, 1)); n = n + 1
@@ -1684,4 +1688,7 @@ f.ADD_BA_SESSION_RSP_baSessionID = ProtoField.uint8("wcn36xx.ADD_BA_SESSION_RSP_
 f.ADD_BA_SESSION_RSP_winSize = ProtoField.uint8("wcn36xx.ADD_BA_SESSION_RSP_winSize", "winSize")
 f.ADD_BA_SESSION_RSP_STAID = ProtoField.uint8("wcn36xx.ADD_BA_SESSION_RSP_STAID", "STAID")
 f.ADD_BA_SESSION_RSP_SSN = ProtoField.uint16("wcn36xx.ADD_BA_SESSION_RSP_SSN", "SSN")
+
+f.TRIGGER_BA_REQ_baSessionID = ProtoField.uint8("wcn36xx.TRIGGER_BA_REQ_baSessionID", "baSessionID")
+f.TRIGGER_BA_REQ_baCandidateCnt = ProtoField.uint16("wcn36xx.TRIGGER_BA_REQ_baCandidateCnt", "baCandidateCnt")
 
