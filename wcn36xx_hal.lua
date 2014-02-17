@@ -543,6 +543,10 @@ function wcn36xx.dissector(inbuffer, pinfo, tree)
 			-- exit bmps
 			params:add(f.exit_bmps_send_data_null, buffer(n, 1)); n = n + 1
 			params:add(f.bss_index, buffer(n, 1)); n = n + 1
+		elseif (msg_type == 83) then
+			-- CONFIGURE_RXP_FILTER_REQ
+			params:add_le(f.CONFIGURE_RXP_FILTER_REQ_setMcstBcstFilterSetting, buffer(n, 1)); n = n + 1
+			params:add_le(f.CONFIGURE_RXP_FILTER_REQ_setMcstBcstFilter, buffer(n, 1)); n = n + 1
 		elseif (msg_type == 84) then
 			-- add beacon filter
 			params:add_le(f.beacon_filter_capability_info, buffer(n, 2)); n = n + 2
@@ -1267,6 +1271,9 @@ f.nv_frag_number = ProtoField.uint16("wcn36xx.nv_frag_number", "frag_number", ba
 f.nv_last_fragment = ProtoField.bool("wcn36xx.nv_last_fragment", "last_fragment")
 f.nv_img_buffer_size = ProtoField.uint32("wcn36xx.nv_img_buffer_size", "nv_img_buffer_size", base.DEC)
 f.nv_buffer = ProtoField.bytes("wcn36xx.nv_buffer", "nv_buffer")
+
+f.CONFIGURE_RXP_FILTER_REQ_setMcstBcstFilterSetting = ProtoField.uint8("wcn36xx.CONFIGURE_RXP_FILTER_REQ_setMcstBcstFilterSetting", "setMcstBcstFilterSetting")
+f.CONFIGURE_RXP_FILTER_REQ_setMcstBcstFilter = ProtoField.uint8("wcn36xx.CONFIGURE_RXP_FILTER_REQ_setMcstBcstFilter", "setMcstBcstFilter")
 
 f.beacon_filter_capability_info = ProtoField.uint16("wcn36xx.beacon_filter_capability_info", "capability_info", base.HEX)
 f.beacon_filter_capability_mask = ProtoField.uint16("wcn36xx.beacon_filter_capability_mask", "capability_mask", base.HEX)
