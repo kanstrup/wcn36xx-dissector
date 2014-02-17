@@ -670,9 +670,22 @@ function wcn36xx.dissector(inbuffer, pinfo, tree)
 				params:add(f.start_rsp_fw_version, buffer(n, 1)); n = n + 1
 				params:add(f.start_rsp_fw_minor, buffer(n, 1)); n = n + 1
 				params:add(f.start_rsp_fw_major, buffer(n, 1)); n = n + 1
+			elseif (msg_type == 13) then
+				-- CONFIG_STA_RSP
+				status = buffer(n, 4):le_uint()
+				params:add_le(f.CONFIG_STA_RSP_status, buffer(n, 4)); n = n + 4
+				params:add_le(f.CONFIG_STA_RSP_staIdx, buffer(n, 1)); n = n + 1
+				params:add_le(f.CONFIG_STA_RSP_bssIdx, buffer(n, 1)); n = n + 1
+				params:add_le(f.CONFIG_STA_RSP_dpuIndex, buffer(n, 1)); n = n + 1
+				params:add_le(f.CONFIG_STA_RSP_bcastDpuIndex, buffer(n, 1)); n = n + 1
+				params:add_le(f.CONFIG_STA_RSP_bcastMgmtDpuIdx, buffer(n, 1)); n = n + 1
+				params:add_le(f.CONFIG_STA_RSP_ucUcastSig, buffer(n, 1)); n = n + 1
+				params:add_le(f.CONFIG_STA_RSP_ucBcastSig, buffer(n, 1)); n = n + 1
+				params:add_le(f.CONFIG_STA_RSP_ucMgmtSig, buffer(n, 1)); n = n + 1
+				params:add_le(f.CONFIG_STA_RSP_p2pCapableSta, buffer(n, 1)); n = n + 1
 			elseif (msg_type == 17) then
 				-- CONFIG_BSS_RSP
-				status = 0
+				status = buffer(n, 4):le_uint()
 				params:add_le(f.rsp_status, buffer(n, 4)); n = n + 4
 				params:add_le(f.CONFIG_BSS_RSP_bssIdx, buffer(n, 1)); n = n + 1
 				params:add_le(f.CONFIG_BSS_RSP_dpuDescIndx, buffer(n, 1)); n = n + 1
@@ -832,7 +845,7 @@ msg_type_strings[33] = "ADD_TS_RSP"
 msg_type_strings[34] = "DEL_TS_REQ"
 msg_type_strings[35] = "DEL_TS_RSP"
 msg_type_strings[36] = "UPD_EDCA_PARAMS_REQ"
-msg_type_strings[37] = "UPD_EDCA_PARAMS_RSO"
+msg_type_strings[37] = "UPD_EDCA_PARAMS_RSP"
 msg_type_strings[38] = "ADD_BA_REQ"
 msg_type_strings[39] = "ADD_BA_RSP"
 msg_type_strings[40] = "DEL_BA_REQ"
@@ -1713,4 +1726,15 @@ f.GET_ROAM_RSSI_REQ_staId = ProtoField.uint32("wcn36xx.GET_ROAM_RSSI_REQ_staId",
 
 f.GET_ROAM_RSSI_RSP_staId = ProtoField.uint8("wcn36xx.GET_ROAM_RSSI_RSP_staId", "staId")
 f.GET_ROAM_RSSI_RSP_rssi = ProtoField.uint8("wcn36xx.GET_ROAM_RSSI_RSP_rssi", "rssi")
+
+f.CONFIG_STA_RSP_status = ProtoField.uint32("wcn36xx.CONFIG_STA_RSP_status", "status")
+f.CONFIG_STA_RSP_staIdx = ProtoField.uint8("wcn36xx.CONFIG_STA_RSP_staIdx", "staIdx")
+f.CONFIG_STA_RSP_bssIdx = ProtoField.uint8("wcn36xx.CONFIG_STA_RSP_bssIdx", "bssIdx")
+f.CONFIG_STA_RSP_dpuIndex = ProtoField.uint8("wcn36xx.CONFIG_STA_RSP_dpuIndex", "dpuIndex")
+f.CONFIG_STA_RSP_bcastDpuIndex = ProtoField.uint8("wcn36xx.CONFIG_STA_RSP_bcastDpuIndex", "bcastDpuIndex")
+f.CONFIG_STA_RSP_bcastMgmtDpuIdx = ProtoField.uint8("wcn36xx.CONFIG_STA_RSP_bcastMgmtDpuIdx", "bcastMgmtDpuIdx")
+f.CONFIG_STA_RSP_ucUcastSig = ProtoField.uint8("wcn36xx.CONFIG_STA_RSP_ucUcastSig", "ucUcastSig")
+f.CONFIG_STA_RSP_ucBcastSig = ProtoField.uint8("wcn36xx.CONFIG_STA_RSP_ucBcastSig", "ucBcastSig")
+f.CONFIG_STA_RSP_ucMgmtSig = ProtoField.uint8("wcn36xx.CONFIG_STA_RSP_ucMgmtSig", "ucMgmtSig")
+f.CONFIG_STA_RSP_p2pCapableSta = ProtoField.uint8("wcn36xx.CONFIG_STA_RSP_p2pCapableSta", "p2pCapableSta")
 
