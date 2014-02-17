@@ -36,6 +36,7 @@ local nw_type_strings = {}
 local sta_type_strings = {}
 local tx_channel_width_set_strings = {}
 local stop_reason_strings = {}
+local bt_amp_event_type_strings = {}
 
 -- Firmware version
 local fw_major = 0
@@ -526,6 +527,9 @@ function wcn36xx.dissector(inbuffer, pinfo, tree)
 			params:add_le(f.UPDATE_PROBE_RSP_TEMPLATE_REQ_probeRespTemplateLen, buffer(n, 4)); n = n + 4
 			params:add_le(f.UPDATE_PROBE_RSP_TEMPLATE_REQ_ucProxyProbeReqValidIEBmap, buffer(n, 32)); n = n + 32
 			params:add_le(f.UPDATE_PROBE_RSP_TEMPLATE_REQ_bssId, buffer(n, 6)); n = n + 6
+		elseif (msg_type == 72) then
+			-- SIGNAL_BTAMP_EVENT_REQ
+			params:add_le(f.SIGNAL_BTAMP_EVENT_REQ_btAmpEventType, buffer(n, 4)); n = n + 4
 		elseif (msg_type == 78) then
 			-- enter bmps
 			params:add(f.bss_index, buffer(n, 1)); n = n + 1
@@ -1232,6 +1236,10 @@ stop_reason_strings[0] = "SYS_RESET"
 stop_reason_strings[1] = "DEEP_SLEEP"
 stop_reason_strings[2] = "RF_KILL"
 
+bt_amp_event_type_strings[0] = "START"
+bt_amp_event_type_strings[1] = "STOP"
+bt_amp_event_type_strings[2] = "TERMINATED"
+
 -- Protocol fields
 f.msg_type = ProtoField.uint16("wcn36xx.msg_type", "msg_type", base.DEC, msg_type_strings)
 f.msg_version = ProtoField.uint16("wcn36xx.msg_version", "msg_version")
@@ -1288,6 +1296,8 @@ f.STOP_REQ_reason = ProtoField.uint32("wcn36xx.STOP_REQ_reason", "reason", base.
 
 f.add_sta_self_addr = ProtoField.ether("wcn36xx.add_sta_self_addr", "addr")
 f.add_sta_self_status = ProtoField.uint32("wcn36xx.add_sta_self_status", "status", base.HEX)
+
+f.SIGNAL_BTAMP_EVENT_REQ_btAmpEventType = ProtoField.uint32("wcn36xx.SIGNAL_BTAMP_EVENT_REQ_btAmpEventType", "btAmpEventType", base.DEC, bt_amp_event_type_strings)
 
 f.enter_bmps_tbtt = ProtoField.uint64("wcn36xx.enter_bmps_tbtt", "tbtt", base.HEX)
 f.enter_bmps_dtim_count = ProtoField.uint8("wcn36xx.enter_bmps_dtim_count", "dtim_count")
