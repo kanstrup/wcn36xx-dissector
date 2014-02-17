@@ -37,6 +37,8 @@ local sta_type_strings = {}
 local tx_channel_width_set_strings = {}
 local stop_reason_strings = {}
 local bt_amp_event_type_strings = {}
+local thermal_mit_mode_strings = {}
+local thermal_mit_level_strings = {}
 
 -- Firmware version
 local fw_major = 0
@@ -696,6 +698,10 @@ function wcn36xx.dissector(inbuffer, pinfo, tree)
 			params:add_le(f.set_power_params_bcast_mcast_filter, buffer(n, 4)); n = n + 4
 			params:add_le(f.set_power_params_enable_bet, buffer(n, 4)); n = n + 4
 			params:add_le(f.set_power_params_bet_interval, buffer(n, 4)); n = n + 4
+		elseif (msg_type == 178) then
+			-- SET_THERMAL_MITIGATION_REQ
+			params:add_le(f.SET_THERMAL_MITIGATION_REQ_thermalMitMode, buffer(n, 4)); n = n + 4
+			params:add_le(f.SET_THERMAL_MITIGATION_REQ_thermalMitLevel, buffer(n, 4)); n = n + 4
 		elseif (msg_type == 185) then
 			-- GET_ROAM_RSSI_REQ
 			params:add_le(f.GET_ROAM_RSSI_REQ_staId, buffer(n, 4)); n = n + 4
@@ -1288,6 +1294,16 @@ bt_amp_event_type_strings[0] = "START"
 bt_amp_event_type_strings[1] = "STOP"
 bt_amp_event_type_strings[2] = "TERMINATED"
 
+thermal_mit_mode_strings[0] = "MODE_0"
+thermal_mit_mode_strings[1] = "MODE_1"
+thermal_mit_mode_strings[2] = "MODE_2"
+
+thermal_mit_level_strings[0] = "LEVEL_0"
+thermal_mit_level_strings[1] = "LEVEL_1"
+thermal_mit_level_strings[2] = "LEVEL_2"
+thermal_mit_level_strings[3] = "LEVEL_3"
+thermal_mit_level_strings[4] = "LEVEL_4"
+
 -- Protocol fields
 f.msg_type = ProtoField.uint16("wcn36xx.msg_type", "msg_type", base.DEC, msg_type_strings)
 f.msg_version = ProtoField.uint16("wcn36xx.msg_version", "msg_version")
@@ -1808,6 +1824,9 @@ f.ADD_BA_SESSION_RSP_SSN = ProtoField.uint16("wcn36xx.ADD_BA_SESSION_RSP_SSN", "
 
 f.TRIGGER_BA_REQ_baSessionID = ProtoField.uint8("wcn36xx.TRIGGER_BA_REQ_baSessionID", "baSessionID")
 f.TRIGGER_BA_REQ_baCandidateCnt = ProtoField.uint16("wcn36xx.TRIGGER_BA_REQ_baCandidateCnt", "baCandidateCnt")
+
+f.SET_THERMAL_MITIGATION_REQ_thermalMitMode = ProtoField.uint32("wcn36xx.SET_THERMAL_MITIGATION_REQ_thermalMitMode", "thermalMitMode", base.DEC, thermal_mit_mode_strings)
+f.SET_THERMAL_MITIGATION_REQ_thermalMitLevel = ProtoField.uint32("wcn36xx.SET_THERMAL_MITIGATION_REQ_thermalMitLevel", "thermalMitLevel", base.DEC, thermal_mit_level_strings)
 
 f.GET_ROAM_RSSI_REQ_staId = ProtoField.uint32("wcn36xx.GET_ROAM_RSSI_REQ_staId", "staId")
 
