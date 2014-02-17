@@ -719,7 +719,7 @@ function wcn36xx.dissector(inbuffer, pinfo, tree)
 				params:add(f.start_rsp_fw_major, buffer(n, 1)); n = n + 1
 			elseif (msg_type == 17) then
 				-- CONFIG_BSS_RSP
-				status = 0
+				status = buffer(n, 4):le_uint()
 				params:add_le(f.rsp_status, buffer(n, 4)); n = n + 4
 				params:add_le(f.CONFIG_BSS_RSP_bssIdx, buffer(n, 1)); n = n + 1
 				params:add_le(f.CONFIG_BSS_RSP_dpuDescIndx, buffer(n, 1)); n = n + 1
