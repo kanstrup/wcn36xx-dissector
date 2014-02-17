@@ -35,6 +35,7 @@ local ht_oper_mode_strings = {}
 local nw_type_strings = {}
 local sta_type_strings = {}
 local tx_channel_width_set_strings = {}
+local stop_reason_strings = {}
 
 -- Firmware version
 local fw_major = 0
@@ -133,6 +134,9 @@ function wcn36xx.dissector(inbuffer, pinfo, tree)
 			       (start_len > (n - 8))) do
 				n = n + parse_cfg(buffer(n):tvb(), pinfo, params)
 			end
+		elseif (msg_type == 2) then
+			-- STOP_REQ
+			params:add_le(f.STOP_REQ_reason, buffer(n, 4)); n = n + 4
 		elseif (msg_type == 4) then
 			-- init scan
 			params:add_le(f.init_scan_mode, buffer(n, 4)); n = n + 4
@@ -1224,6 +1228,10 @@ sta_type_strings[3] = "BCAST"
 tx_channel_width_set_strings[0] = "20MHZ ONLY"
 tx_channel_width_set_strings[1] = "20/40MHZ"
 
+stop_reason_strings[0] = "SYS_RESET"
+stop_reason_strings[1] = "DEEP_SLEEP"
+stop_reason_strings[2] = "RF_KILL"
+
 -- Protocol fields
 f.msg_type = ProtoField.uint16("wcn36xx.msg_type", "msg_type", base.DEC, msg_type_strings)
 f.msg_version = ProtoField.uint16("wcn36xx.msg_version", "msg_version")
@@ -1275,6 +1283,8 @@ f.cfg_value = ProtoField.uint32("wcn36xx.cfg_value", "value")
 
 f.start_driver_type = ProtoField.uint32("wcn36xx.start_driver_type", "type", base.DEC, msg_type_strings)
 f.start_len = ProtoField.uint32("wcn36xx.start_len", "len")
+
+f.STOP_REQ_reason = ProtoField.uint32("wcn36xx.STOP_REQ_reason", "reason", base.DEC, stop_reason_strings)
 
 f.add_sta_self_addr = ProtoField.ether("wcn36xx.add_sta_self_addr", "addr")
 f.add_sta_self_status = ProtoField.uint32("wcn36xx.add_sta_self_status", "status", base.HEX)
