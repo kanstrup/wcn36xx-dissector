@@ -696,6 +696,9 @@ function wcn36xx.dissector(inbuffer, pinfo, tree)
 			params:add_le(f.set_power_params_bcast_mcast_filter, buffer(n, 4)); n = n + 4
 			params:add_le(f.set_power_params_enable_bet, buffer(n, 4)); n = n + 4
 			params:add_le(f.set_power_params_bet_interval, buffer(n, 4)); n = n + 4
+		elseif (msg_type == 185) then
+			-- GET_ROAM_RSSI_REQ
+			params:add_le(f.GET_ROAM_RSSI_REQ_staId, buffer(n, 4)); n = n + 4
 		elseif ((msg_type < 191) and
 			(string.find(msg_type_strings[msg_type], "RSP") ~= nil)) then
 			-- parse responses
@@ -794,6 +797,12 @@ function wcn36xx.dissector(inbuffer, pinfo, tree)
 				params:add_le(f.bssid, buffer(n, 6)); n = n + 6
 				status = buffer(n, 4):le_uint()
 				params:add_le(f.rsp_status, buffer(n, 4)); n = n + 4
+		    elseif (msg_type == 186) then
+			    -- GET_ROAM_RSSI_RSP
+				status = buffer(n, 4):le_uint()
+			    params:add_le(f.rsp_status, buffer(n, 4)); n = n + 4
+			    params:add_le(f.GET_ROAM_RSSI_RSP_staId, buffer(n, 1)); n = n + 1
+			    params:add_le(f.GET_ROAM_RSSI_RSP_rssi, buffer(n, 1)); n = n + 1
 			else
 				-- all others
 				status = buffer(n, 4):le_uint()
@@ -1804,4 +1813,9 @@ f.ADD_BA_SESSION_RSP_SSN = ProtoField.uint16("wcn36xx.ADD_BA_SESSION_RSP_SSN", "
 
 f.TRIGGER_BA_REQ_baSessionID = ProtoField.uint8("wcn36xx.TRIGGER_BA_REQ_baSessionID", "baSessionID")
 f.TRIGGER_BA_REQ_baCandidateCnt = ProtoField.uint16("wcn36xx.TRIGGER_BA_REQ_baCandidateCnt", "baCandidateCnt")
+
+f.GET_ROAM_RSSI_REQ_staId = ProtoField.uint32("wcn36xx.GET_ROAM_RSSI_REQ_staId", "staId")
+
+f.GET_ROAM_RSSI_RSP_staId = ProtoField.uint8("wcn36xx.GET_ROAM_RSSI_RSP_staId", "staId")
+f.GET_ROAM_RSSI_RSP_rssi = ProtoField.uint8("wcn36xx.GET_ROAM_RSSI_RSP_rssi", "rssi")
 
