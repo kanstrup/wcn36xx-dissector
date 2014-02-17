@@ -566,6 +566,21 @@ function wcn36xx.dissector(inbuffer, pinfo, tree)
 				elements:add(f.beacon_filter_bitmask, buffer(n, 1)); n = n + 1
 				elements:add(f.beacon_filter_ref, buffer(n, 1)); n = n + 1
 			end
+		elseif (msg_type == 86) then
+			-- ADD_WOWL_BCAST_PTRN
+			params:add_le(f.ADD_WOWL_BCAST_PTRN_ucPatternId, buffer(n, 1)); n = n + 1
+			params:add_le(f.ADD_WOWL_BCAST_PTRN_ucPatternByteOffset, buffer(n, 1)); n = n + 1
+			params:add_le(f.ADD_WOWL_BCAST_PTRN_ucPatternSize, buffer(n, 1)); n = n + 1
+			params:add_le(f.ADD_WOWL_BCAST_PTRN_ucPattern, buffer(n, 128)); n = n + 128
+			params:add_le(f.ADD_WOWL_BCAST_PTRN_ucPatternMaskSize, buffer(n, 1)); n = n + 1
+			params:add_le(f.ADD_WOWL_BCAST_PTRN_ucPatternMask, buffer(n, 128)); n = n + 128
+			params:add_le(f.ADD_WOWL_BCAST_PTRN_ucPatternExt, buffer(n, 128)); n = n + 128
+			params:add_le(f.ADD_WOWL_BCAST_PTRN_ucPatternMaskExt, buffer(n, 128)); n = n + 128
+			params:add_le(f.ADD_WOWL_BCAST_PTRN_bssIdx, buffer(n, 1)); n = n + 1
+		elseif (msg_type == 87) then
+			-- DEL_WOWL_BCAST_PTRN
+			params:add_le(f.DEL_WOWL_BCAST_PTRN_ucPatternId, buffer(n, 1)); n = n + 1
+			params:add_le(f.DEL_WOWL_BCAST_PTRN_bssIdx, buffer(n, 1)); n = n + 1
 		elseif (msg_type == 90) then
 			-- host offload
 			local type = buffer(n, 1):uint()
@@ -1330,6 +1345,19 @@ f.add_ba_reorder_on_chip = ProtoField.uint8("wcn36xx.add_ba_reorder_on_chip", "r
 
 f.del_ba_sta_id = ProtoField.uint16("wcn36xx.del_ba_sta_id", "sta_id")
 f.del_ba_direction = ProtoField.uint8("wcn36xx.del_ba_direction", "direction", base.DEC, del_ba_direction_strings)
+
+f.ADD_WOWL_BCAST_PTRN_ucPatternId = ProtoField.uint8("wcn36xx.ADD_WOWL_BCAST_PTRN_ucPatternId", "ucPatternId")
+f.ADD_WOWL_BCAST_PTRN_ucPatternByteOffset = ProtoField.uint8("wcn36xx.ADD_WOWL_BCAST_PTRN_ucPatternByteOffset", "ucPatternByteOffset")
+f.ADD_WOWL_BCAST_PTRN_ucPatternSize = ProtoField.uint8("wcn36xx.ADD_WOWL_BCAST_PTRN_ucPatternSize", "ucPatternSize")
+f.ADD_WOWL_BCAST_PTRN_ucPattern = ProtoField.bytes("wcn36xx.ADD_WOWL_BCAST_PTRN_ucPattern", "ucPattern")
+f.ADD_WOWL_BCAST_PTRN_ucPatternMaskSize = ProtoField.uint8("wcn36xx.ADD_WOWL_BCAST_PTRN_ucPatternMaskSize", "ucPatternMaskSize")
+f.ADD_WOWL_BCAST_PTRN_ucPatternMask = ProtoField.bytes("wcn36xx.ADD_WOWL_BCAST_PTRN_ucPatternMask", "ucPatternMask")
+f.ADD_WOWL_BCAST_PTRN_ucPatternExt = ProtoField.bytes("wcn36xx.ADD_WOWL_BCAST_PTRN_ucPatternExt", "ucPatternExt")
+f.ADD_WOWL_BCAST_PTRN_ucPatternMaskExt = ProtoField.bytes("wcn36xx.ADD_WOWL_BCAST_PTRN_ucPatternMaskExt", "ucPatternMaskExt")
+f.ADD_WOWL_BCAST_PTRN_bssIdx = ProtoField.uint8("wcn36xx.ADD_WOWL_BCAST_PTRN_bssIdx", "bssIdx")
+
+f.DEL_WOWL_BCAST_PTRN_ucPatternId = ProtoField.uint8("wcn36xx.DEL_WOWL_BCAST_PTRN_ucPatternId", "ucPatternId")
+f.DEL_WOWL_BCAST_PTRN_bssIdx = ProtoField.uint8("wcn36xx.DEL_WOWL_BCAST_PTRN_bssIdx", "bssIdx")
 
 f.host_offload_type = ProtoField.uint8("wcn36xx.host_offload_type", "type", base.DEC, offload_type_strings)
 f.host_offload_enable = ProtoField.bool("wcn36xx.host_offload_enable", "enable")
