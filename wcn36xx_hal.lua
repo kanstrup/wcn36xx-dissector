@@ -581,6 +581,26 @@ function wcn36xx.dissector(inbuffer, pinfo, tree)
 			-- DEL_WOWL_BCAST_PTRN
 			params:add_le(f.DEL_WOWL_BCAST_PTRN_ucPatternId, buffer(n, 1)); n = n + 1
 			params:add_le(f.DEL_WOWL_BCAST_PTRN_bssIdx, buffer(n, 1)); n = n + 1
+		elseif (msg_type == 88) then
+			-- ENTER_WOWL_REQ
+			params:add_le(f.ENTER_WOWL_REQ_ucMagicPktEnable, buffer(n, 1)); n = n + 1
+			params:add_le(f.ENTER_WOWL_REQ_magicPtrn, buffer(n, 6)); n = n + 6
+			params:add_le(f.ENTER_WOWL_REQ_ucPatternFilteringEnable, buffer(n, 1)); n = n + 1
+			params:add_le(f.ENTER_WOWL_REQ_ucUcastPatternFilteringEnable, buffer(n, 1)); n = n + 1
+			params:add_le(f.ENTER_WOWL_REQ_ucWowChnlSwitchRcv, buffer(n, 1)); n = n + 1
+			params:add_le(f.ENTER_WOWL_REQ_ucWowDeauthRcv, buffer(n, 1)); n = n + 1
+			params:add_le(f.ENTER_WOWL_REQ_ucWowDisassocRcv, buffer(n, 1)); n = n + 1
+			params:add_le(f.ENTER_WOWL_REQ_ucWowMaxMissedBeacons, buffer(n, 1)); n = n + 1
+			params:add_le(f.ENTER_WOWL_REQ_ucWowMaxSleepUsec, buffer(n, 1)); n = n + 1
+			params:add_le(f.ENTER_WOWL_REQ_ucWoWEAPIDRequestEnable, buffer(n, 1)); n = n + 1
+			params:add_le(f.ENTER_WOWL_REQ_ucWoWEAPOL4WayEnable, buffer(n, 1)); n = n + 1
+			params:add_le(f.ENTER_WOWL_REQ_ucWowNetScanOffloadMatch, buffer(n, 1)); n = n + 1
+			params:add_le(f.ENTER_WOWL_REQ_ucWowGTKRekeyError, buffer(n, 1)); n = n + 1
+			params:add_le(f.ENTER_WOWL_REQ_ucWoWBSSConnLoss, buffer(n, 1)); n = n + 1
+			params:add_le(f.ENTER_WOWL_REQ_bssIdx, buffer(n, 1)); n = n + 1
+		elseif (msg_type == 89) then
+			-- EXIT_WOWL_REQ
+			params:add_le(f.EXIT_WOWL_REQ_bssIdx, buffer(n, 1)); n = n + 1
 		elseif (msg_type == 90) then
 			-- host offload
 			local type = buffer(n, 1):uint()
@@ -1358,6 +1378,24 @@ f.ADD_WOWL_BCAST_PTRN_bssIdx = ProtoField.uint8("wcn36xx.ADD_WOWL_BCAST_PTRN_bss
 
 f.DEL_WOWL_BCAST_PTRN_ucPatternId = ProtoField.uint8("wcn36xx.DEL_WOWL_BCAST_PTRN_ucPatternId", "ucPatternId")
 f.DEL_WOWL_BCAST_PTRN_bssIdx = ProtoField.uint8("wcn36xx.DEL_WOWL_BCAST_PTRN_bssIdx", "bssIdx")
+
+f.ENTER_WOWL_REQ_ucMagicPktEnable = ProtoField.uint8("wcn36xx.ENTER_WOWL_REQ_ucMagicPktEnable", "ucMagicPktEnable")
+f.ENTER_WOWL_REQ_magicPtrn = ProtoField.ether("wcn36xx.ENTER_WOWL_REQ_magicPtrn", "magicPtrn")
+f.ENTER_WOWL_REQ_ucPatternFilteringEnable = ProtoField.uint8("wcn36xx.ENTER_WOWL_REQ_ucPatternFilteringEnable", "ucPatternFilteringEnable")
+f.ENTER_WOWL_REQ_ucUcastPatternFilteringEnable = ProtoField.uint8("wcn36xx.ENTER_WOWL_REQ_ucUcastPatternFilteringEnable", "ucUcastPatternFilteringEnable")
+f.ENTER_WOWL_REQ_ucWowChnlSwitchRcv = ProtoField.uint8("wcn36xx.ENTER_WOWL_REQ_ucWowChnlSwitchRcv", "ucWowChnlSwitchRcv")
+f.ENTER_WOWL_REQ_ucWowDeauthRcv = ProtoField.uint8("wcn36xx.ENTER_WOWL_REQ_ucWowDeauthRcv", "ucWowDeauthRcv")
+f.ENTER_WOWL_REQ_ucWowDisassocRcv = ProtoField.uint8("wcn36xx.ENTER_WOWL_REQ_ucWowDisassocRcv", "ucWowDisassocRcv")
+f.ENTER_WOWL_REQ_ucWowMaxMissedBeacons = ProtoField.uint8("wcn36xx.ENTER_WOWL_REQ_ucWowMaxMissedBeacons", "ucWowMaxMissedBeacons")
+f.ENTER_WOWL_REQ_ucWowMaxSleepUsec = ProtoField.uint8("wcn36xx.ENTER_WOWL_REQ_ucWowMaxSleepUsec", "ucWowMaxSleepUsec")
+f.ENTER_WOWL_REQ_ucWoWEAPIDRequestEnable = ProtoField.uint8("wcn36xx.ENTER_WOWL_REQ_ucWoWEAPIDRequestEnable", "ucWoWEAPIDRequestEnable")
+f.ENTER_WOWL_REQ_ucWoWEAPOL4WayEnable = ProtoField.uint8("wcn36xx.ENTER_WOWL_REQ_ucWoWEAPOL4WayEnable", "ucWoWEAPOL4WayEnable")
+f.ENTER_WOWL_REQ_ucWowNetScanOffloadMatch = ProtoField.uint8("wcn36xx.ENTER_WOWL_REQ_ucWowNetScanOffloadMatch", "ucWowNetScanOffloadMatch")
+f.ENTER_WOWL_REQ_ucWowGTKRekeyError = ProtoField.uint8("wcn36xx.ENTER_WOWL_REQ_ucWowGTKRekeyError", "ucWowGTKRekeyError")
+f.ENTER_WOWL_REQ_ucWoWBSSConnLoss = ProtoField.uint8("wcn36xx.ENTER_WOWL_REQ_ucWoWBSSConnLoss", "ucWoWBSSConnLoss")
+f.ENTER_WOWL_REQ_bssIdx = ProtoField.uint8("wcn36xx.ENTER_WOWL_REQ_bssIdx", "bssIdx")
+
+f.EXIT_WOWL_REQ_bssIdx = ProtoField.uint8("wcn36xx.EXIT_WOWL_REQ_bssIdx", "bssIdx")
 
 f.host_offload_type = ProtoField.uint8("wcn36xx.host_offload_type", "type", base.DEC, offload_type_strings)
 f.host_offload_enable = ProtoField.bool("wcn36xx.host_offload_enable", "enable")
