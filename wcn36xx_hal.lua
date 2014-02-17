@@ -188,7 +188,7 @@ function wcn36xx.dissector(inbuffer, pinfo, tree)
 
 	header:add_le(f.msg_type, buffer(n, 2)); n = n + 2
 	header:add_le(f.msg_version, buffer(n, 2)); n = n + 2
-	header:add_le(f.len, buffer(n, 4)); n = n +  4
+	header:add_le(f.len, buffer(n, 4)); n = n + 4
 
 	local msg_type_str
 	if msg_type_strings[msg_type] ~= nil then
@@ -208,7 +208,7 @@ function wcn36xx.dissector(inbuffer, pinfo, tree)
 			local start_len = buffer(n, 4):le_uint()
 			params:add_le(f.start_len, buffer(n, 4)); n = n + 4
 			while ((buffer:len() > n) and
-			       (start_len > (n - 8))) do
+				(start_len > (n - 8))) do
 				n = n + parse_cfg(buffer(n):tvb(), pinfo, params)
 			end
 		elseif (msg_type == 2) then
@@ -750,12 +750,12 @@ function wcn36xx.dissector(inbuffer, pinfo, tree)
 				params:add_le(f.bssid, buffer(n, 6)); n = n + 6
 				status = buffer(n, 4):le_uint()
 				params:add_le(f.rsp_status, buffer(n, 4)); n = n + 4
-		    elseif (msg_type == 186) then
-			    -- GET_ROAM_RSSI_RSP
+			elseif (msg_type == 186) then
+				-- GET_ROAM_RSSI_RSP
 				status = buffer(n, 4):le_uint()
-			    params:add_le(f.rsp_status, buffer(n, 4)); n = n + 4
-			    params:add_le(f.GET_ROAM_RSSI_RSP_staId, buffer(n, 1)); n = n + 1
-			    params:add_le(f.GET_ROAM_RSSI_RSP_rssi, buffer(n, 1)); n = n + 1
+				params:add_le(f.rsp_status, buffer(n, 4)); n = n + 4
+				params:add_le(f.GET_ROAM_RSSI_RSP_staId, buffer(n, 1)); n = n + 1
+				params:add_le(f.GET_ROAM_RSSI_RSP_rssi, buffer(n, 1)); n = n + 1
 			else
 				-- all others
 				status = buffer(n, 4):le_uint()
@@ -785,9 +785,9 @@ function get_fw_version()
 	if (fw_major == 0) then
 		version = 0
 	elseif (not (fw_major == 1 and
-		     fw_minor == 4 and
-		     fw_version == 1 and
-		     fw_revision == 2)) then
+		fw_minor == 4 and
+		fw_version == 1 and
+		fw_revision == 2)) then
 		version = 1
 	else
 		version = 2
@@ -1266,7 +1266,7 @@ f.ani_ed_enc_type = ProtoField.uint32("wcn36xx.ani_ed_enc_type", "enc_type", bas
 f.scan_channel = ProtoField.uint8("wcn36xx.scan_channel", "scan_channel")
 f.scan_dot11d_enabled = ProtoField.bool("wcn36xx.scan_dot11d_enabled", "dot11d_enabled")
 f.scan_dot11d_resolved = ProtoField.bool("wcn36xx.scan_dot11d_resolved", "dot11d_resolved")
-f.scan_channel_count  = ProtoField.uint8("wcn36xx.scan_channel_count", "channel_count", base.DEC)
+f.scan_channel_count = ProtoField.uint8("wcn36xx.scan_channel_count", "channel_count", base.DEC)
 f.scan_channels_i = ProtoField.uint8("wcn36xx.scan_channel", "scan_channel", base.DEC)
 f.scan_active_min_ch_time = ProtoField.uint16("wcn36xx.scan_active_min_ch_time", "scan_active_min_ch_time", base.DEC)
 f.scan_active_max_ch_time = ProtoField.uint16("wcn36xx.scan_active_max_ch_time", "scan_active_max_ch_time", base.DEC)
