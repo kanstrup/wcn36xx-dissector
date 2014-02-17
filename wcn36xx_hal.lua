@@ -720,7 +720,7 @@ function wcn36xx.dissector(inbuffer, pinfo, tree)
 			elseif (msg_type == 17) then
 				-- CONFIG_BSS_RSP
 				status = 0
-				params:add_le(f.CONFIG_BSS_RSP_status, buffer(n, 4)); n = n + 4
+				params:add_le(f.rsp_status, buffer(n, 4)); n = n + 4
 				params:add_le(f.CONFIG_BSS_RSP_bssIdx, buffer(n, 1)); n = n + 1
 				params:add_le(f.CONFIG_BSS_RSP_dpuDescIndx, buffer(n, 1)); n = n + 1
 				params:add_le(f.CONFIG_BSS_RSP_ucastDpuSignature, buffer(n, 1)); n = n + 1
@@ -736,7 +736,7 @@ function wcn36xx.dissector(inbuffer, pinfo, tree)
 			elseif (msg_type == 47) then
 				-- GET_STATS_RSP
 				status = 0
-				params:add_le(f.GET_STATS_RSP_status, buffer(n, 4)); n = n + 4
+				params:add_le(f.rsp_status, buffer(n, 4)); n = n + 4
 				params:add_le(f.GET_STATS_RSP_staId, buffer(n, 4)); n = n + 4
 				params:add_le(f.GET_STATS_RSP_statsMask, buffer(n, 4)); n = n + 4
 				params:add_le(f.GET_STATS_RSP_msgType, buffer(n, 2)); n = n + 2
@@ -744,7 +744,7 @@ function wcn36xx.dissector(inbuffer, pinfo, tree)
 			elseif (msg_type == 58) then
 				-- ADD_BA_SESSION_RSP
 				status = buffer(n, 4):le_uint()
-				params:add_le(f.ADD_BA_SESSION_RSP_status, buffer(n, 4)); n = n + 4
+				params:add_le(f.rsp_status, buffer(n, 4)); n = n + 4
 				params:add_le(f.ADD_BA_SESSION_RSP_baDialogToken, buffer(n, 1)); n = n + 1
 				params:add_le(f.ADD_BA_SESSION_RSP_baTID, buffer(n, 1)); n = n + 1
 				params:add_le(f.ADD_BA_SESSION_RSP_baBufferSize, buffer(n, 1)); n = n + 1
@@ -776,14 +776,14 @@ function wcn36xx.dissector(inbuffer, pinfo, tree)
 			elseif (msg_type == 126) then
 				-- ADD_STA_SELF_RSP
 				status = buffer(n, 4):le_uint()
-				params:add_le(f.ADD_STA_SELF_RSP_status, buffer(n, 4)); n = n + 4
+				params:add_le(f.rsp_status, buffer(n, 4)); n = n + 4
 				params:add_le(f.ADD_STA_SELF_RSP_selfStaIdx, buffer(n, 1)); n = n + 1
 				params:add_le(f.ADD_STA_SELF_RSP_dpuIdx, buffer(n, 1)); n = n + 1
 				params:add_le(f.ADD_STA_SELF_RSP_dpuSignature, buffer(n, 1)); n = n + 1
 			elseif (msg_type == 128) then
 				-- DEL_STA_SELF_RSP
 				status = buffer(n, 4):le_uint()
-				params:add_le(f.DEL_STA_SELF_RSP_status, buffer(n, 4)); n = n + 4
+				params:add_le(f.rsp_status, buffer(n, 4)); n = n + 4
 				params:add_le(f.DEL_STA_SELF_RSP_selfMacAddr, buffer(n, 6)); n = n + 6
 			elseif (msg_type == 152) then
 				status = 0
@@ -1766,7 +1766,6 @@ f.FINISH_SCAN_REQ_frameLength = ProtoField.uint8("wcn36xx.FINISH_SCAN_REQ_frameL
 f.FINISH_SCAN_REQ_macMgmtHdr = ProtoField.bytes("wcn36xx.FINISH_SCAN_REQ_macMgmtHdr", "macMgmtHdr")
 f.FINISH_SCAN_REQ_scanEntry = ProtoField.bytes("wcn36xx.FINISH_SCAN_REQ_scanEntry", "scanEntry")
 
-f.CONFIG_BSS_RSP_status = ProtoField.uint32("wcn36xx.CONFIG_BSS_RSP_status", "status")
 f.CONFIG_BSS_RSP_bssIdx = ProtoField.uint8("wcn36xx.CONFIG_BSS_RSP_bssIdx", "bssIdx")
 f.CONFIG_BSS_RSP_dpuDescIndx = ProtoField.uint8("wcn36xx.CONFIG_BSS_RSP_dpuDescIndx", "dpuDescIndx")
 f.CONFIG_BSS_RSP_ucastDpuSignature = ProtoField.uint8("wcn36xx.CONFIG_BSS_RSP_ucastDpuSignature", "ucastDpuSignature")
@@ -1786,23 +1785,19 @@ f.SET_BSSKEY_REQ_numKeys = ProtoField.uint8("wcn36xx.SET_BSSKEY_REQ_numKeys", "n
 f.SET_BSSKEY_REQ_key = ProtoField.bytes("wcn36xx.SET_BSSKEY_REQ_key", "key")
 f.SET_BSSKEY_REQ_singleTidRc = ProtoField.uint8("wcn36xx.SET_BSSKEY_REQ_singleTidRc", "singleTidRc")
 
-f.GET_STATS_RSP_status = ProtoField.uint32("wcn36xx.GET_STATS_RSP_status", "status")
 f.GET_STATS_RSP_staId = ProtoField.uint32("wcn36xx.GET_STATS_RSP_staId", "staId")
 f.GET_STATS_RSP_statsMask = ProtoField.uint32("wcn36xx.GET_STATS_RSP_statsMask", "statsMask")
 f.GET_STATS_RSP_msgType = ProtoField.uint16("wcn36xx.GET_STATS_RSP_msgType", "msgType")
 f.GET_STATS_RSP_msgLen = ProtoField.uint16("wcn36xx.GET_STATS_RSP_msgLen", "msgLen")
 
-f.ADD_STA_SELF_RSP_status = ProtoField.uint32("wcn36xx.ADD_STA_SELF_RSP_status", "status")
 f.ADD_STA_SELF_RSP_selfStaIdx = ProtoField.uint8("wcn36xx.ADD_STA_SELF_RSP_selfStaIdx", "selfStaIdx")
 f.ADD_STA_SELF_RSP_dpuIdx = ProtoField.uint8("wcn36xx.ADD_STA_SELF_RSP_dpuIdx", "dpuIdx")
 f.ADD_STA_SELF_RSP_dpuSignature = ProtoField.uint8("wcn36xx.ADD_STA_SELF_RSP_dpuSignature", "dpuSignature")
 
 f.DEL_STA_SELF_REQ_selfMacAddr = ProtoField.ether("wcn36xx.DEL_STA_SELF_REQ_selfMacAddr", "selfMacAddr")
 
-f.DEL_STA_SELF_RSP_status = ProtoField.uint32("wcn36xx.DEL_STA_SELF_RSP_status", "status")
 f.DEL_STA_SELF_RSP_selfMacAddr = ProtoField.ether("wcn36xx.DEL_STA_SELF_RSP_selfMacAddr", "selfMacAddr")
 
-f.ADD_BA_SESSION_RSP_status = ProtoField.uint32("wcn36xx.ADD_BA_SESSION_RSP_status", "status")
 f.ADD_BA_SESSION_RSP_baDialogToken = ProtoField.uint8("wcn36xx.ADD_BA_SESSION_RSP_baDialogToken", "baDialogToken")
 f.ADD_BA_SESSION_RSP_baTID = ProtoField.uint8("wcn36xx.ADD_BA_SESSION_RSP_baTID", "baTID")
 f.ADD_BA_SESSION_RSP_baBufferSize = ProtoField.uint8("wcn36xx.ADD_BA_SESSION_RSP_baBufferSize", "baBufferSize")
