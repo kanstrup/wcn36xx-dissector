@@ -159,6 +159,13 @@ function parse_config_sta(buffer, pinfo, tree)
 	return n
 end
 
+function parse_update_edca(buffer, pinfo, tree)
+	local n = 0
+	tree:add_le(f.EDCA_PARAM_RECORD_aci, buffer(n, 1)); n = n + 1
+	tree:add_le(f.EDCA_PARAM_RECORD_cw, buffer(n, 1)); n = n + 1
+	tree:add_le(f.EDCA_PARAM_RECORD_txoplimit, buffer(n, 2)); n = n + 2
+	return n
+end
 
 function wcn36xx.dissector(inbuffer, pinfo, tree)
 	local n = 0
@@ -389,6 +396,18 @@ function wcn36xx.dissector(inbuffer, pinfo, tree)
 			params:add_le(f.ani_ed_enc_type, buffer(n, 4)); n = n + 4
 			params:add(f.rmv_stakey_key_id, buffer(n, 1)); n = n + 1
 			params:add(f.rmv_stakey_unicast, buffer(n, 1)); n = n + 1
+		elseif (msg_type == 36) then
+			-- UPD_EDCA_PARAMS_REQ
+			params:add_le(f.UPD_EDCA_PARAMS_REQ_bssIdx, buffer(n, 2)); n = n + 2
+			local e = params:add(buffer(n, 4), "acbe")
+			n = n + parse_update_edca(buffer(n, 4):tvb(), pinfo, e)
+			e = params:add(buffer(n, 4), "acbk")
+			n = n + parse_update_edca(buffer(n, 4):tvb(), pinfo, e)
+			e = params:add(buffer(n, 4), "acvi")
+			n = n + parse_update_edca(buffer(n, 4):tvb(), pinfo, e)
+			e = params:add(buffer(n, 4), "acvo")
+			n = n + parse_update_edca(buffer(n, 4):tvb(), pinfo, e)
+
 		elseif (msg_type == 38) then
 			-- add ba
 			params:add(f.add_ba_session_id, buffer(n, 1)); n = n + 1
@@ -618,7 +637,9 @@ function wcn36xx.dissector(inbuffer, pinfo, tree)
 			for i = 1,addr_count do
 				params:add_le(f.multicast_list_address, buffer(n, 6)); n = n + 6
 			end
-			params:add(f.bss_index, buffer(n, 1)); n = n + 1
+			local unused = cmd_len - n - 1
+			params:add(f.multicast_list_unused, buffer(n, unused)); n = n + unused
+			params:add(f.bss_index, buffer(n, 1)) n = n + 1
 		elseif (msg_type == 159) then
 			-- rcv packet filter
 			params:add(f.rcv_packet_filter_id, buffer(n, 1)); n = n + 1
@@ -1408,6 +1429,7 @@ f.set_rssi_threshold_t3neg = ProtoField.bool("wcn36xx.set_rssi_threshold_t3ned",
 f.multicast_list_data_offset = ProtoField.uint8("wcn36xx.multicast_list_data_offset", "data_offset")
 f.multicast_list_addr_count = ProtoField.uint32("wcn36xx.multicast_list_addr_count", "addr_count")
 f.multicast_list_address = ProtoField.ether("wcn36xx.multicast_list_address", "address")
+f.multicast_list_unused = ProtoField.bytes("wcn36xx.multicast_list_unused", "unused")
 
 f.rcv_packet_filter_id = ProtoField.uint8("wcn36xx.rcv_packet_filter_id", "id")
 f.rcv_packet_filter_type = ProtoField.uint8("wcn36xx.rcv_packet_filter_type", "type", base.HEX, filter_type_strings)
@@ -1737,4 +1759,10 @@ f.CONFIG_STA_RSP_ucUcastSig = ProtoField.uint8("wcn36xx.CONFIG_STA_RSP_ucUcastSi
 f.CONFIG_STA_RSP_ucBcastSig = ProtoField.uint8("wcn36xx.CONFIG_STA_RSP_ucBcastSig", "ucBcastSig")
 f.CONFIG_STA_RSP_ucMgmtSig = ProtoField.uint8("wcn36xx.CONFIG_STA_RSP_ucMgmtSig", "ucMgmtSig")
 f.CONFIG_STA_RSP_p2pCapableSta = ProtoField.uint8("wcn36xx.CONFIG_STA_RSP_p2pCapableSta", "p2pCapableSta")
+
+f.UPD_EDCA_PARAMS_REQ_bssIdx = ProtoField.uint16("wcn36xx.UPD_EDCA_PARAMS_REQ_bssIdx", "bssIdx")
+
+f.EDCA_PARAM_RECORD_aci = ProtoField.uint8("wcn36xx.EDCA_PARAM_RECORD_aci", "aci", base.HEX)
+f.EDCA_PARAM_RECORD_cw = ProtoField.uint8("wcn36xx.EDCA_PARAM_RECORD_cw", "cw", base.HEX)
+f.EDCA_PARAM_RECORD_txoplimit = ProtoField.uint8("wcn36xx.EDCA_PARAM_RECORD_txoplimit", "txoplimit")
 
