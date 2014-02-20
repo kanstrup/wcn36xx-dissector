@@ -637,7 +637,9 @@ function wcn36xx.dissector(inbuffer, pinfo, tree)
 			for i = 1,addr_count do
 				params:add_le(f.multicast_list_address, buffer(n, 6)); n = n + 6
 			end
-			params:add(f.bss_index, buffer(n, 1)); n = n + 1
+			local unused = cmd_len - n - 1
+			params:add(f.multicast_list_unused, buffer(n, unused)); n = n + unused
+			params:add(f.bss_index, buffer(n, 1)) n = n + 1
 		elseif (msg_type == 159) then
 			-- rcv packet filter
 			params:add(f.rcv_packet_filter_id, buffer(n, 1)); n = n + 1
@@ -1427,6 +1429,7 @@ f.set_rssi_threshold_t3neg = ProtoField.bool("wcn36xx.set_rssi_threshold_t3ned",
 f.multicast_list_data_offset = ProtoField.uint8("wcn36xx.multicast_list_data_offset", "data_offset")
 f.multicast_list_addr_count = ProtoField.uint32("wcn36xx.multicast_list_addr_count", "addr_count")
 f.multicast_list_address = ProtoField.ether("wcn36xx.multicast_list_address", "address")
+f.multicast_list_unused = ProtoField.bytes("wcn36xx.multicast_list_unused", "unused")
 
 f.rcv_packet_filter_id = ProtoField.uint8("wcn36xx.rcv_packet_filter_id", "id")
 f.rcv_packet_filter_type = ProtoField.uint8("wcn36xx.rcv_packet_filter_type", "type", base.HEX, filter_type_strings)
