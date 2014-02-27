@@ -14,6 +14,7 @@
 -- along with this program; if not, write to the Free Software
 -- Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
+local bit = require("bit")
 local wcn36xx = Proto("wcn36xx", "wcn36xx HAL dissector")
 local f = wcn36xx.fields
 local msg_type_strings = {}
@@ -161,8 +162,24 @@ end
 
 function parse_update_edca(buffer, pinfo, tree)
 	local n = 0
-	tree:add_le(f.EDCA_PARAM_RECORD_aci, buffer(n, 1)); n = n + 1
-	tree:add_le(f.EDCA_PARAM_RECORD_cw, buffer(n, 1)); n = n + 1
+
+	local aci = buffer(n, 1):uint()
+	local aci_aifsn = bit.rshift(bit.band(aci, 0xF0), 4)
+	local aci_acm = bit.rshift(bit.band(aci, 0x8), 3)
+	local aci_aci = bit.rshift(bit.band(aci, 0x6), 1)
+
+	tree:add_le(f.EDCA_PARAM_RECORD_aci_aifsn, buffer(n,1), aci_aifsn)
+	tree:add_le(f.EDCA_PARAM_RECORD_aci_acm, buffer(n,1), aci_acm)
+	tree:add_le(f.EDCA_PARAM_RECORD_aci_aci, buffer(n,1), aci_aci)
+	n = n + 1
+
+	local cw = buffer(n, 1):uint()
+	local cw_max = bit.band(cw, 0x0F)
+	local cw_min = bit.rshift(bit.band(cw, 0xF0), 4)
+	tree:add_le(f.EDCA_PARAM_RECORD_cw_max, buffer(n,1), cw_max)
+	tree:add_le(f.EDCA_PARAM_RECORD_cw_min, buffer(n,1), cw_min)
+	n = n + 1
+
 	tree:add_le(f.EDCA_PARAM_RECORD_txoplimit, buffer(n, 2)); n = n + 2
 	return n
 end
@@ -1762,7 +1779,11 @@ f.CONFIG_STA_RSP_p2pCapableSta = ProtoField.uint8("wcn36xx.CONFIG_STA_RSP_p2pCap
 
 f.UPD_EDCA_PARAMS_REQ_bssIdx = ProtoField.uint16("wcn36xx.UPD_EDCA_PARAMS_REQ_bssIdx", "bssIdx")
 
-f.EDCA_PARAM_RECORD_aci = ProtoField.uint8("wcn36xx.EDCA_PARAM_RECORD_aci", "aci", base.HEX)
-f.EDCA_PARAM_RECORD_cw = ProtoField.uint8("wcn36xx.EDCA_PARAM_RECORD_cw", "cw", base.HEX)
+f.EDCA_PARAM_RECORD_aci_aifsn = ProtoField.uint8("wcn36xx.EDCA_PARAM_RECORD_aci_aifsn", "aci_aifsn")
+f.EDCA_PARAM_RECORD_aci_acm = ProtoField.bool("wcn36xx.EDCA_PARAM_RECORD_aci_acm", "aci_acm")
+f.EDCA_PARAM_RECORD_aci_aci = ProtoField.uint8("wcn36xx.EDCA_PARAM_RECORD_aci_aci", "aci_aci")
+
+f.EDCA_PARAM_RECORD_cw_max = ProtoField.uint8("wcn36xx.EDCA_PARAM_RECORD_cw_max", "cw_max")
+f.EDCA_PARAM_RECORD_cw_min = ProtoField.uint8("wcn36xx.EDCA_PARAM_RECORD_cw_min", "cw_min")
 f.EDCA_PARAM_RECORD_txoplimit = ProtoField.uint8("wcn36xx.EDCA_PARAM_RECORD_txoplimit", "txoplimit")
 
