@@ -34,3 +34,8 @@ including actual frame data, complete with timestamps.
 1) Patch prima driver with <pre>0001-Trace-communication-between-host-and-wcn.patch</pre>
 2) Capture kernel log <pre>adb shell cat /proc/kmsg | tee dump.txt</pre>
 3) Convert to pcap: <pre>cat dump.txt | grep primad | perl -pe 's/.{4}(.{12}).{20}(.+)/$1 $2/' | text2pcap -q -t "%s." -l 105 - dump.pcap</pre>
+
+
+Example dumps
+-------------
+The examples folder contains some dumps takes from a patched prima driver
