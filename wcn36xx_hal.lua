@@ -687,6 +687,10 @@ function wcn36xx.dissector(inbuffer, pinfo, tree)
 			-- SET_THERMAL_MITIGATION_REQ
 			params:add_le(f.SET_THERMAL_MITIGATION_REQ_thermalMitMode, buffer(n, 4)); n = n + 4
 			params:add_le(f.SET_THERMAL_MITIGATION_REQ_thermalMitLevel, buffer(n, 4)); n = n + 4
+		elseif (msg_type == 182) then
+			-- UPDATE_VHT_OP_MODE_REQ
+			params:add_le(f.UPDATE_VHT_OP_MODE_REQ_opMode, buffer(n, 2)); n = n + 2
+			params:add_le(f.UPDATE_VHT_OP_MODE_REQ_staId, buffer(n, 2)); n = n + 2
 		elseif (msg_type == 185) then
 			-- GET_ROAM_RSSI_REQ
 			params:add_le(f.GET_ROAM_RSSI_REQ_staId, buffer(n, 4)); n = n + 4
@@ -1786,4 +1790,7 @@ f.EDCA_PARAM_RECORD_aci_aci = ProtoField.uint8("wcn36xx.EDCA_PARAM_RECORD_aci_ac
 f.EDCA_PARAM_RECORD_cw_max = ProtoField.uint8("wcn36xx.EDCA_PARAM_RECORD_cw_max", "cw_max")
 f.EDCA_PARAM_RECORD_cw_min = ProtoField.uint8("wcn36xx.EDCA_PARAM_RECORD_cw_min", "cw_min")
 f.EDCA_PARAM_RECORD_txoplimit = ProtoField.uint8("wcn36xx.EDCA_PARAM_RECORD_txoplimit", "txoplimit")
+
+f.UPDATE_VHT_OP_MODE_REQ_opMode = ProtoField.uint16("wcn36xx.UPDATE_VHT_OP_MODE_REQ_opMode", "opMode")
+f.UPDATE_VHT_OP_MODE_REQ_staId = ProtoField.uint16("wcn36xx.UPDATE_VHT_OP_MODE_REQ_staId", "staId")
 
