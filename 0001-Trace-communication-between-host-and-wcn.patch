@@ -1,0 +1,426 @@
+From 83c2b0b926322447a032d54507a0b13942443cd8 Mon Sep 17 00:00:00 2001
+From: Pontus Fuchs <pontus.fuchs@gmail.com>
+Date: Thu, 12 Dec 2013 21:32:13 +0100
+Subject: [PATCH] Trace communication between host and wcn.
+
+The traces contains hex dumps of the following:
+
+HAL messages, TXBDs, TX Data, RXBDs, RX Data.
+
+Messages and BDs are prefixed with a fake 802.11 header. This allows
+you to convert it all into one pcap using the following command:
+
+cat dmesg.txt | grep "TXBD\|RXBD\|TXDT\|RXDT\|HAL >>>\|SMD <<<" | text2pcap -q -l 105 - dump.pcap
+
+Change-Id: I225758c66e25a7347aa252e24eb2b6bcd04786d2
+---
+ CORE/DXE/src/wlan_qct_dxe.c             |  41 ++++++
+ CORE/WDI/CP/src/wlan_qct_wdi.c          | 230 +++++++++++++++++++++++++++++++-
+ CORE/WDI/CP/src/wlan_qct_wdi_dp.c       |   6 +
+ CORE/WDI/TRP/DTS/src/wlan_qct_wdi_dts.c |  18 +++
+ CORE/WDI/WPAL/src/wlan_qct_pal_device.c |   2 +
+ 5 files changed, 296 insertions(+), 1 deletion(-)
+
+diff --git a/CORE/DXE/src/wlan_qct_dxe.c b/CORE/DXE/src/wlan_qct_dxe.c
+index 738d9c2..d14f119 100644
+--- a/CORE/DXE/src/wlan_qct_dxe.c
++++ b/CORE/DXE/src/wlan_qct_dxe.c
+@@ -79,12 +79,15 @@ when           who        what, where, why
+  * Include Files
+  * -------------------------------------------------------------------------*/
+ #include "wlan_qct_dxe.h"
++#include "vos_packet.h"
+ #include "wlan_qct_dxe_i.h"
+ #include "wlan_qct_pal_device.h"
+ #ifdef FEATURE_R33D
+ #include "wlan_qct_pal_bus.h"
+ #endif /* FEATURE_R33D */
+ 
++#include "wlan_qct_wdi_bd.h"
++
+ /*----------------------------------------------------------------------------
+  * Local Definitions
+  * -------------------------------------------------------------------------*/
+@@ -3022,6 +3025,44 @@ static wpt_status dxeTXPushFrame
+       {
+          currentDesc->descCtrl.ctrl = channelEntry->extraConfig.cw_ctrl_write_valid;
+       }
++      printk("dxeTXPushFrame: descriptor\n");
++      print_hex_dump(KERN_DEBUG, "TXDE ",
++	          DUMP_PREFIX_OFFSET, 32, 1,
++	          (char*)currentDesc, sizeof(WLANDXE_DescType), false);
++
++
++
++      {
++        char buf[0x22+sizeof(WDI_TxBdType)];
++        /* This is an 802.11 header with ethertype 3662 */
++        const char hdr[] ={0x88,0x01,0x00,0x00,0x01,0x01,0x01,0x01,0x01,0x01,0x01,0x01,0x01,0x01,0x01,0x01,
++                           0xff,0xff,0xff,0xff,0xff,0x00,0x00,0x00,0x00,0x00,0xaa,0xaa,0x03,0x00,0x00,0x00,0x36,0x62};
++
++        printk("dxeTXPushFrame: bd\n");
++        memcpy(buf, hdr, 0x22);
++        memcpy(buf + 0x22, palPacket->pBD, sizeof(WDI_TxBdType));
++        print_hex_dump(KERN_DEBUG, "TXBD ",
++                      DUMP_PREFIX_OFFSET, 32, 1,
++                      buf, sizeof(buf), false);
++       }
++
++      {
++        u8 *buf = ((vos_pkt_t *)palPacket)->pSkb->data;
++        bool enc;
++        enc = buf[1] & 0x40;
++
++        /* remove protected bit when dumping since the frame is not really encrypted yet*/
++        if (enc)
++          buf[1] ^= 0x40;
++        printk("dxeTXPushFrame: skb\n");
++        print_hex_dump(KERN_DEBUG, "TXDT ",
++                       DUMP_PREFIX_OFFSET, 32, 1,
++                       buf, ((vos_pkt_t *)palPacket)->pSkb->len, false);
++
++        if (enc)
++          buf[1] ^= 0x40;
++
++      }
+ 
+       /* Update statistics */
+       channelEntry->numFragmentCurrentChain++;
+diff --git a/CORE/WDI/CP/src/wlan_qct_wdi.c b/CORE/WDI/CP/src/wlan_qct_wdi.c
+index 75dabc6..b5b857d 100644
+--- a/CORE/WDI/CP/src/wlan_qct_wdi.c
++++ b/CORE/WDI/CP/src/wlan_qct_wdi.c
+@@ -104,6 +104,212 @@
+ 
+ #include "pttMsgApi.h"
+ 
++#define C2S(x) case x: return #x;
++
++static const char *cmd2name(int cmd)
++{
++	switch (cmd) {
++	C2S(WLAN_HAL_START_REQ)
++	C2S(WLAN_HAL_START_RSP)
++	C2S(WLAN_HAL_STOP_REQ)
++	C2S(WLAN_HAL_STOP_RSP)
++	C2S(WLAN_HAL_INIT_SCAN_REQ)
++	C2S(WLAN_HAL_INIT_SCAN_RSP)
++	C2S(WLAN_HAL_START_SCAN_REQ)
++	C2S(WLAN_HAL_START_SCAN_RSP)
++	C2S(WLAN_HAL_END_SCAN_REQ)
++	C2S(WLAN_HAL_END_SCAN_RSP)
++	C2S(WLAN_HAL_FINISH_SCAN_REQ)
++	C2S(WLAN_HAL_FINISH_SCAN_RSP)
++	C2S(WLAN_HAL_CONFIG_STA_REQ)
++	C2S(WLAN_HAL_CONFIG_STA_RSP)
++	C2S(WLAN_HAL_DELETE_STA_REQ)
++	C2S(WLAN_HAL_DELETE_STA_RSP)
++	C2S(WLAN_HAL_CONFIG_BSS_REQ)
++	C2S(WLAN_HAL_CONFIG_BSS_RSP)
++	C2S(WLAN_HAL_DELETE_BSS_REQ)
++	C2S(WLAN_HAL_DELETE_BSS_RSP)
++	C2S(WLAN_HAL_JOIN_REQ)
++	C2S(WLAN_HAL_JOIN_RSP)
++	C2S(WLAN_HAL_POST_ASSOC_REQ)
++	C2S(WLAN_HAL_POST_ASSOC_RSP)
++	C2S(WLAN_HAL_SET_BSSKEY_REQ)
++	C2S(WLAN_HAL_SET_BSSKEY_RSP)
++	C2S(WLAN_HAL_SET_STAKEY_REQ)
++	C2S(WLAN_HAL_SET_STAKEY_RSP)
++	C2S(WLAN_HAL_RMV_BSSKEY_REQ)
++	C2S(WLAN_HAL_RMV_BSSKEY_RSP)
++	C2S(WLAN_HAL_RMV_STAKEY_REQ)
++	C2S(WLAN_HAL_RMV_STAKEY_RSP)
++	C2S(WLAN_HAL_ADD_TS_REQ)
++	C2S(WLAN_HAL_ADD_TS_RSP)
++	C2S(WLAN_HAL_DEL_TS_REQ)
++	C2S(WLAN_HAL_DEL_TS_RSP)
++	C2S(WLAN_HAL_UPD_EDCA_PARAMS_REQ)
++	C2S(WLAN_HAL_UPD_EDCA_PARAMS_RSP)
++	C2S(WLAN_HAL_ADD_BA_REQ)
++	C2S(WLAN_HAL_ADD_BA_RSP)
++	C2S(WLAN_HAL_DEL_BA_REQ)
++	C2S(WLAN_HAL_DEL_BA_RSP)
++	C2S(WLAN_HAL_CH_SWITCH_REQ)
++	C2S(WLAN_HAL_CH_SWITCH_RSP)
++	C2S(WLAN_HAL_SET_LINK_ST_REQ)
++	C2S(WLAN_HAL_SET_LINK_ST_RSP)
++	C2S(WLAN_HAL_GET_STATS_REQ)
++	C2S(WLAN_HAL_GET_STATS_RSP)
++	C2S(WLAN_HAL_UPDATE_CFG_REQ)
++	C2S(WLAN_HAL_UPDATE_CFG_RSP)
++	C2S(WLAN_HAL_MISSED_BEACON_IND)
++	C2S(WLAN_HAL_UNKNOWN_ADDR2_FRAME_RX_IND)
++	C2S(WLAN_HAL_MIC_FAILURE_IND)
++	C2S(WLAN_HAL_FATAL_ERROR_IND)
++	C2S(WLAN_HAL_SET_KEYDONE_MSG)
++	C2S(WLAN_HAL_DOWNLOAD_NV_REQ)
++	C2S(WLAN_HAL_DOWNLOAD_NV_RSP)
++	C2S(WLAN_HAL_ADD_BA_SESSION_REQ)
++	C2S(WLAN_HAL_ADD_BA_SESSION_RSP)
++	C2S(WLAN_HAL_TRIGGER_BA_REQ)
++	C2S(WLAN_HAL_TRIGGER_BA_RSP)
++	C2S(WLAN_HAL_UPDATE_BEACON_REQ)
++	C2S(WLAN_HAL_UPDATE_BEACON_RSP)
++	C2S(WLAN_HAL_SEND_BEACON_REQ)
++	C2S(WLAN_HAL_SEND_BEACON_RSP)
++	C2S(WLAN_HAL_SET_BCASTKEY_REQ)
++	C2S(WLAN_HAL_SET_BCASTKEY_RSP)
++	C2S(WLAN_HAL_DELETE_STA_CONTEXT_IND)
++	C2S(WLAN_HAL_UPDATE_PROBE_RSP_TEMPLATE_REQ)
++	C2S(WLAN_HAL_UPDATE_PROBE_RSP_TEMPLATE_RSP)
++	C2S(WLAN_HAL_PROCESS_PTT_REQ)
++	C2S(WLAN_HAL_PROCESS_PTT_RSP)
++	C2S(WLAN_HAL_SIGNAL_BTAMP_EVENT_REQ)
++	C2S(WLAN_HAL_SIGNAL_BTAMP_EVENT_RSP)
++	C2S(WLAN_HAL_TL_HAL_FLUSH_AC_REQ)
++	C2S(WLAN_HAL_TL_HAL_FLUSH_AC_RSP)
++	C2S(WLAN_HAL_ENTER_IMPS_REQ)
++	C2S(WLAN_HAL_EXIT_IMPS_REQ)
++	C2S(WLAN_HAL_ENTER_BMPS_REQ)
++	C2S(WLAN_HAL_EXIT_BMPS_REQ)
++	C2S(WLAN_HAL_ENTER_UAPSD_REQ)
++	C2S(WLAN_HAL_EXIT_UAPSD_REQ)
++	C2S(WLAN_HAL_UPDATE_UAPSD_PARAM_REQ)
++	C2S(WLAN_HAL_CONFIGURE_RXP_FILTER_REQ)
++	C2S(WLAN_HAL_ADD_BCN_FILTER_REQ)
++	C2S(WLAN_HAL_REM_BCN_FILTER_REQ)
++	C2S(WLAN_HAL_ADD_WOWL_BCAST_PTRN)
++	C2S(WLAN_HAL_DEL_WOWL_BCAST_PTRN)
++	C2S(WLAN_HAL_ENTER_WOWL_REQ)
++	C2S(WLAN_HAL_EXIT_WOWL_REQ)
++	C2S(WLAN_HAL_HOST_OFFLOAD_REQ)
++	C2S(WLAN_HAL_SET_RSSI_THRESH_REQ)
++	C2S(WLAN_HAL_GET_RSSI_REQ)
++	C2S(WLAN_HAL_SET_UAPSD_AC_PARAMS_REQ)
++	C2S(WLAN_HAL_CONFIGURE_APPS_CPU_WAKEUP_STATE_REQ)
++	C2S(WLAN_HAL_ENTER_IMPS_RSP)
++	C2S(WLAN_HAL_EXIT_IMPS_RSP)
++	C2S(WLAN_HAL_ENTER_BMPS_RSP)
++	C2S(WLAN_HAL_EXIT_BMPS_RSP)
++	C2S(WLAN_HAL_ENTER_UAPSD_RSP)
++	C2S(WLAN_HAL_EXIT_UAPSD_RSP)
++	C2S(WLAN_HAL_SET_UAPSD_AC_PARAMS_RSP)
++	C2S(WLAN_HAL_UPDATE_UAPSD_PARAM_RSP)
++	C2S(WLAN_HAL_CONFIGURE_RXP_FILTER_RSP)
++	C2S(WLAN_HAL_ADD_BCN_FILTER_RSP)
++	C2S(WLAN_HAL_REM_BCN_FILTER_RSP)
++	C2S(WLAN_HAL_SET_RSSI_THRESH_RSP)
++	C2S(WLAN_HAL_HOST_OFFLOAD_RSP)
++	C2S(WLAN_HAL_ADD_WOWL_BCAST_PTRN_RSP)
++	C2S(WLAN_HAL_DEL_WOWL_BCAST_PTRN_RSP)
++	C2S(WLAN_HAL_ENTER_WOWL_RSP)
++	C2S(WLAN_HAL_EXIT_WOWL_RSP)
++	C2S(WLAN_HAL_RSSI_NOTIFICATION_IND)
++	C2S(WLAN_HAL_GET_RSSI_RSP)
++	C2S(WLAN_HAL_CONFIGURE_APPS_CPU_WAKEUP_STATE_RSP)
++	C2S(WLAN_HAL_SET_MAX_TX_POWER_REQ)
++	C2S(WLAN_HAL_SET_MAX_TX_POWER_RSP)
++	C2S(WLAN_HAL_AGGR_ADD_TS_REQ)
++	C2S(WLAN_HAL_AGGR_ADD_TS_RSP)
++	C2S(WLAN_HAL_SET_P2P_GONOA_REQ)
++	C2S(WLAN_HAL_SET_P2P_GONOA_RSP)
++	C2S(WLAN_HAL_DUMP_COMMAND_REQ)
++	C2S(WLAN_HAL_DUMP_COMMAND_RSP)
++	C2S(WLAN_HAL_START_OEM_DATA_REQ)
++	C2S(WLAN_HAL_START_OEM_DATA_RSP)
++	C2S(WLAN_HAL_ADD_STA_SELF_REQ)
++	C2S(WLAN_HAL_ADD_STA_SELF_RSP)
++	C2S(WLAN_HAL_DEL_STA_SELF_REQ)
++	C2S(WLAN_HAL_DEL_STA_SELF_RSP)
++	C2S(WLAN_HAL_COEX_IND)
++	C2S(WLAN_HAL_OTA_TX_COMPL_IND)
++	C2S(WLAN_HAL_HOST_SUSPEND_IND)
++	C2S(WLAN_HAL_HOST_RESUME_REQ)
++	C2S(WLAN_HAL_HOST_RESUME_RSP)
++	C2S(WLAN_HAL_SET_TX_POWER_REQ)
++	C2S(WLAN_HAL_SET_TX_POWER_RSP)
++	C2S(WLAN_HAL_GET_TX_POWER_REQ)
++	C2S(WLAN_HAL_GET_TX_POWER_RSP)
++	C2S(WLAN_HAL_P2P_NOA_ATTR_IND)
++	C2S(WLAN_HAL_ENABLE_RADAR_DETECT_REQ)
++	C2S(WLAN_HAL_ENABLE_RADAR_DETECT_RSP)
++	C2S(WLAN_HAL_GET_TPC_REPORT_REQ)
++	C2S(WLAN_HAL_GET_TPC_REPORT_RSP)
++	C2S(WLAN_HAL_RADAR_DETECT_IND)
++	C2S(WLAN_HAL_RADAR_DETECT_INTR_IND)
++	C2S(WLAN_HAL_KEEP_ALIVE_REQ)
++	C2S(WLAN_HAL_KEEP_ALIVE_RSP)
++	C2S(WLAN_HAL_SET_PREF_NETWORK_REQ)
++	C2S(WLAN_HAL_SET_PREF_NETWORK_RSP)
++	C2S(WLAN_HAL_SET_RSSI_FILTER_REQ)
++	C2S(WLAN_HAL_SET_RSSI_FILTER_RSP)
++	C2S(WLAN_HAL_UPDATE_SCAN_PARAM_REQ)
++	C2S(WLAN_HAL_UPDATE_SCAN_PARAM_RSP)
++	C2S(WLAN_HAL_PREF_NETW_FOUND_IND)
++	C2S(WLAN_HAL_SET_TX_PER_TRACKING_REQ)
++	C2S(WLAN_HAL_SET_TX_PER_TRACKING_RSP)
++	C2S(WLAN_HAL_TX_PER_HIT_IND)
++	C2S(WLAN_HAL_8023_MULTICAST_LIST_REQ)
++	C2S(WLAN_HAL_8023_MULTICAST_LIST_RSP)
++	C2S(WLAN_HAL_SET_PACKET_FILTER_REQ)
++	C2S(WLAN_HAL_SET_PACKET_FILTER_RSP)
++	C2S(WLAN_HAL_PACKET_FILTER_MATCH_COUNT_REQ)
++	C2S(WLAN_HAL_PACKET_FILTER_MATCH_COUNT_RSP)
++	C2S(WLAN_HAL_CLEAR_PACKET_FILTER_REQ)
++	C2S(WLAN_HAL_CLEAR_PACKET_FILTER_RSP)
++	C2S(WLAN_HAL_INIT_SCAN_CON_REQ)
++	C2S(WLAN_HAL_SET_POWER_PARAMS_REQ)
++	C2S(WLAN_HAL_SET_POWER_PARAMS_RSP)
++	C2S(WLAN_HAL_TSM_STATS_REQ)
++	C2S(WLAN_HAL_TSM_STATS_RSP)
++	C2S(WLAN_HAL_WAKE_REASON_IND)
++	C2S(WLAN_HAL_GTK_OFFLOAD_REQ)
++	C2S(WLAN_HAL_GTK_OFFLOAD_RSP)
++	C2S(WLAN_HAL_GTK_OFFLOAD_GETINFO_REQ)
++	C2S(WLAN_HAL_GTK_OFFLOAD_GETINFO_RSP)
++	C2S(WLAN_HAL_FEATURE_CAPS_EXCHANGE_REQ)
++	C2S(WLAN_HAL_FEATURE_CAPS_EXCHANGE_RSP)
++	C2S(WLAN_HAL_EXCLUDE_UNENCRYPTED_IND)
++	C2S(WLAN_HAL_SET_THERMAL_MITIGATION_REQ)
++	C2S(WLAN_HAL_SET_THERMAL_MITIGATION_RSP)
++	C2S(WLAN_HAL_UPDATE_VHT_OP_MODE_REQ)
++	C2S(WLAN_HAL_UPDATE_VHT_OP_MODE_RSP)
++	C2S(WLAN_HAL_P2P_NOA_START_IND)
++	C2S(WLAN_HAL_GET_ROAM_RSSI_REQ)
++	C2S(WLAN_HAL_GET_ROAM_RSSI_RSP)
++	C2S(WLAN_HAL_CLASS_B_STATS_IND)
++	C2S(WLAN_HAL_DEL_BA_IND)
++	C2S(WLAN_HAL_DHCP_START_IND)
++	C2S(WLAN_HAL_DHCP_STOP_IND)
++	}
++	return "UNKNOWN";
++}
++
++/* This is an 802.11 header with ethertype 3660 */
++const char dump_hdr_f[] = {0x88,0x01,0x00,0x00,0x01,0x01,0x01,0x01,0x01,0x01,0xff,0xff,0xff,0xff,0xff,0x00,
++                         0x01,0x01,0x01,0x01,0x01,0x01,0x00,0x00,0x00,0x00,0xaa,0xaa,0x03,0x00,0x00,0x00,0x36,0x60};
++const char dump_hdr_t[] = {0x88,0x01,0x00,0x00,0x01,0x01,0x01,0x01,0x01,0x01,0x01,0x01,0x01,0x01,0x01,0x01,
++                         0xff,0xff,0xff,0xff,0xff,0x00,0x00,0x00,0x00,0x00,0xaa,0xaa,0x03,0x00,0x00,0x00,0x36,0x60};
++
++u8 dump_buf[8192];
++
+ /*===========================================================================
+    WLAN DAL Control Path Internal Data Definitions and Declarations
+  ===========================================================================*/
+@@ -19802,6 +20008,15 @@ WDI_RXMsgCTSCB
+ 
+   pHalMsgHeader = (tHalMsgHeader *)pMsg;
+ 
++  printk("WDI_RXMsgCTSCB cmd %s (%d)", cmd2name(pHalMsgHeader->msgType), pHalMsgHeader->msgType);
++
++  memcpy(dump_buf, dump_hdr_f, 0x22);
++  memcpy(dump_buf + 0x22, (char*) pMsg, uLen);
++
++  print_hex_dump(KERN_DEBUG, "  prima: SMD <<< ",
++                 DUMP_PREFIX_OFFSET, 32, 1,
++	         dump_buf, uLen + 0x22, false);
++
+   if ( uLen != pHalMsgHeader->msgLen )
+   {
+     WPAL_TRACE(eWLAN_MODULE_DAL_CTRL, eWLAN_PAL_TRACE_LEVEL_ERROR,
+@@ -20031,6 +20246,19 @@ WDI_SendMsg
+   pWDICtx->pfncRspCB           = pRspCb;
+   pWDICtx->wdiExpectedResponse = wdiExpectedResponse;
+ 
++  {
++      wpt_uint16 cmd = *((wpt_uint16*) pSendBuffer);
++      printk("WDI_SendMsg: cmd %s (%d)", cmd2name(cmd), cmd);
++  }
++
++
++  memcpy(dump_buf, dump_hdr_t, 0x22);
++  memcpy(dump_buf + 0x22, (char*) pSendBuffer, usSendSize);
++
++  print_hex_dump(KERN_DEBUG, "  prima: HAL >>> ",
++          DUMP_PREFIX_OFFSET, 32, 1,
++          dump_buf, usSendSize+0x22, false);
++
+    /*-----------------------------------------------------------------------
+      Call the CTS to send this message over - free message afterwards
+      - notify transport failure
+@@ -25997,7 +26225,7 @@ WDI_ProcessFeatureCapsExchangeReq
+      return WDI_STATUS_E_FAILURE; 
+   }
+ 
+-  WPAL_TRACE( eWLAN_MODULE_DAL_CTRL,  eWLAN_PAL_TRACE_LEVEL_INFO,
++  WPAL_TRACE( eWLAN_MODULE_DAL_CTRL,  eWLAN_PAL_TRACE_LEVEL_ERROR,
+        "Host Caps - %x %x %x %x\n",
+       ((tWlanFeatCaps *)pEventData->pEventData)->featCaps[0],
+       ((tWlanFeatCaps *)pEventData->pEventData)->featCaps[1],
+diff --git a/CORE/WDI/CP/src/wlan_qct_wdi_dp.c b/CORE/WDI/CP/src/wlan_qct_wdi_dp.c
+index 6e21572..200b567 100644
+--- a/CORE/WDI/CP/src/wlan_qct_wdi_dp.c
++++ b/CORE/WDI/CP/src/wlan_qct_wdi_dp.c
+@@ -913,6 +913,12 @@ WDI_FillTxBd
+        format (Big endian)
+      * All BD fields need to be swaped here
+      ------------------------------------------------------------------------*/
++      printk("WDI_FillTxBd: printing BD\n");
++      print_hex_dump(KERN_DEBUG, "TXDB ",
++	          DUMP_PREFIX_OFFSET, 32, 1,
++	          (char*)pBd, WDI_TX_BD_HEADER_SIZE, false);
++      printk("\n");
++
+     WDI_SwapTxBd((wpt_uint8 *)pBd); 
+ 
+ #ifdef WLAN_PERF
+diff --git a/CORE/WDI/TRP/DTS/src/wlan_qct_wdi_dts.c b/CORE/WDI/TRP/DTS/src/wlan_qct_wdi_dts.c
+index 040996f..20ecaa5 100644
+--- a/CORE/WDI/TRP/DTS/src/wlan_qct_wdi_dts.c
++++ b/CORE/WDI/TRP/DTS/src/wlan_qct_wdi_dts.c
+@@ -526,6 +526,20 @@ wpt_status WDTS_RxPacket (void *pContext, wpt_packet *pFrame, WDTS_ChannelType c
+     return eWLAN_PAL_STATUS_E_FAILURE;
+   }
+   WDI_SwapRxBd(pBDHeader);
++  printk("WDTS_RxPacket:\n");
++
++  {
++    char buf[0x22+WDI_RX_BD_HEADER_SIZE];
++    /* This is an 802.11 header with ethertype 3661 */
++    const char hdr[] = {0x88,0x01,0x00,0x00,0x01,0x01,0x01,0x01,0x01,0x01,0xff,0xff,0xff,0xff,0xff,0x00,
++                        0x01,0x01,0x01,0x01,0x01,0x01,0x00,0x00,0x00,0x00,0xaa,0xaa,0x03,0x00,0x00,0x00,0x36,0x61};
++
++     memcpy(buf, hdr, 0x22);
++     memcpy(buf + 0x22, (char*)pBDHeader, WDI_RX_BD_HEADER_SIZE);
++     print_hex_dump(KERN_DEBUG, "RXBD ",
++	            DUMP_PREFIX_OFFSET, 32, 1,
++	            buf, sizeof(buf), false);
++  }
+ 
+   ucMPDUHOffset = (wpt_uint8)WDI_RX_BD_GET_MPDU_H_OFFSET(pBDHeader);
+   usMPDUDOffset = (wpt_uint16)WDI_RX_BD_GET_MPDU_D_OFFSET(pBDHeader);
+@@ -533,6 +547,10 @@ wpt_status WDTS_RxPacket (void *pContext, wpt_packet *pFrame, WDTS_ChannelType c
+   ucMPDUHLen    = (wpt_uint8)WDI_RX_BD_GET_MPDU_H_LEN(pBDHeader);
+   ucTid         = (wpt_uint8)WDI_RX_BD_GET_TID(pBDHeader);
+ 
++  print_hex_dump(KERN_DEBUG, "RXDT ",
++	        DUMP_PREFIX_OFFSET, 32, 1,
++               (char*)pBDHeader+ucMPDUHOffset, usMPDULen, false);
++
+   /*------------------------------------------------------------------------
+     Gather AMSDU information 
+     ------------------------------------------------------------------------*/
+diff --git a/CORE/WDI/WPAL/src/wlan_qct_pal_device.c b/CORE/WDI/WPAL/src/wlan_qct_pal_device.c
+index eb0f43a..cde4005 100644
+--- a/CORE/WDI/WPAL/src/wlan_qct_pal_device.c
++++ b/CORE/WDI/WPAL/src/wlan_qct_pal_device.c
+@@ -485,6 +485,7 @@ wpt_status wpalWriteRegister
+       return eWLAN_PAL_STATUS_E_INVAL;
+    }
+ 
++   printk("wpalWriteRegister: add=%08xx, data=%08xx\n", (int)address, (int)data);
+    wmb();
+    writel_relaxed(data, gpEnv->mmio + (address - WCNSS_BASE_ADDRESS));
+ 
+@@ -530,6 +531,7 @@ wpt_status wpalReadRegister
+    }
+ 
+    *data = readl_relaxed(gpEnv->mmio + (address - WCNSS_BASE_ADDRESS));
++   printk("wpalReadRegister:  add=%08x, data=%08x\n", (int)address, (int)*data);
+    rmb();
+ 
+    return eWLAN_PAL_STATUS_SUCCESS;
+-- 
+1.8.2.2
+
