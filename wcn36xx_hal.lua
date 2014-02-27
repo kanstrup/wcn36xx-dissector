@@ -278,6 +278,11 @@ function wcn36xx.dissector(inbuffer, pinfo, tree)
 			local channel = buffer(n, 1); n = n + 1
 			pinfo.cols.info:append(", channel "..channel:uint())
 			params:add(f.scan_channel, channel)
+		elseif (msg_type == 7) then
+			-- START_SCAN_RSP
+			params:add_le(f.START_SCAN_RSP_status, buffer(n, 4)); n = n + 4
+			params:add_le(f.START_SCAN_RSP_startTSF, buffer(n, 8)); n = n + 8
+			params:add_le(f.START_SCAN_RSP_txMgmtPower, buffer(n, 1)); n = n + 1
 		elseif (msg_type == 10) then
 			-- FINISH_SCAN_REQ
 			params:add_le(f.FINISH_SCAN_REQ_scanMode, buffer(n, 4)); n = n + 4
@@ -1972,3 +1977,6 @@ f.UPDATE_VHT_OP_MODE_REQ_staId = ProtoField.uint16("wcn36xx.UPDATE_VHT_OP_MODE_R
 
 f.FW_CAP = ProtoField.uint8("wcn36xx.fw_cap", "fw_cap", base.DEC, fw_caps_strings)
 
+f.START_SCAN_RSP_status = ProtoField.uint32("wcn36xx.START_SCAN_RSP_status", "status")
+f.START_SCAN_RSP_startTSF = ProtoField.uint64("wcn36xx.START_SCAN_RSP_startTSF", "startTSF")
+f.START_SCAN_RSP_txMgmtPower = ProtoField.uint8("wcn36xx.START_SCAN_RSP_txMgmtPower", "txMgmtPower")
