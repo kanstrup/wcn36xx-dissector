@@ -1,4 +1,4 @@
-From 83c2b0b926322447a032d54507a0b13942443cd8 Mon Sep 17 00:00:00 2001
+From ff2859679e6a3e186c1256472b97c773c5574273 Mon Sep 17 00:00:00 2001
 From: Pontus Fuchs <pontus.fuchs@gmail.com>
 Date: Thu, 12 Dec 2013 21:32:13 +0100
 Subject: [PATCH] Trace communication between host and wcn.
@@ -16,13 +16,12 @@ Change-Id: I225758c66e25a7347aa252e24eb2b6bcd04786d2
 ---
  CORE/DXE/src/wlan_qct_dxe.c             |  41 ++++++
  CORE/WDI/CP/src/wlan_qct_wdi.c          | 230 +++++++++++++++++++++++++++++++-
- CORE/WDI/CP/src/wlan_qct_wdi_dp.c       |   6 +
  CORE/WDI/TRP/DTS/src/wlan_qct_wdi_dts.c |  18 +++
  CORE/WDI/WPAL/src/wlan_qct_pal_device.c |   2 +
- 5 files changed, 296 insertions(+), 1 deletion(-)
+ 4 files changed, 290 insertions(+), 1 deletion(-)
 
 diff --git a/CORE/DXE/src/wlan_qct_dxe.c b/CORE/DXE/src/wlan_qct_dxe.c
-index 738d9c2..d14f119 100644
+index 738d9c2..0bd8520 100644
 --- a/CORE/DXE/src/wlan_qct_dxe.c
 +++ b/CORE/DXE/src/wlan_qct_dxe.c
 @@ -79,12 +79,15 @@ when           who        what, where, why
@@ -61,7 +60,7 @@ index 738d9c2..d14f119 100644
 +        printk("dxeTXPushFrame: bd\n");
 +        memcpy(buf, hdr, 0x22);
 +        memcpy(buf + 0x22, palPacket->pBD, sizeof(WDI_TxBdType));
-+        print_hex_dump(KERN_DEBUG, "TXBD ",
++        print_hex_dump(KERN_DEBUG, "primad: TXBD >>> ",
 +                      DUMP_PREFIX_OFFSET, 32, 1,
 +                      buf, sizeof(buf), false);
 +       }
@@ -75,7 +74,7 @@ index 738d9c2..d14f119 100644
 +        if (enc)
 +          buf[1] ^= 0x40;
 +        printk("dxeTXPushFrame: skb\n");
-+        print_hex_dump(KERN_DEBUG, "TXDT ",
++        print_hex_dump(KERN_DEBUG, "primad: TXDT >>> ",
 +                       DUMP_PREFIX_OFFSET, 32, 1,
 +                       buf, ((vos_pkt_t *)palPacket)->pSkb->len, false);
 +
@@ -87,7 +86,7 @@ index 738d9c2..d14f119 100644
        /* Update statistics */
        channelEntry->numFragmentCurrentChain++;
 diff --git a/CORE/WDI/CP/src/wlan_qct_wdi.c b/CORE/WDI/CP/src/wlan_qct_wdi.c
-index 75dabc6..b5b857d 100644
+index 75dabc6..7a718a7 100644
 --- a/CORE/WDI/CP/src/wlan_qct_wdi.c
 +++ b/CORE/WDI/CP/src/wlan_qct_wdi.c
 @@ -104,6 +104,212 @@
@@ -312,7 +311,7 @@ index 75dabc6..b5b857d 100644
 +  memcpy(dump_buf, dump_hdr_f, 0x22);
 +  memcpy(dump_buf + 0x22, (char*) pMsg, uLen);
 +
-+  print_hex_dump(KERN_DEBUG, "  prima: SMD <<< ",
++  print_hex_dump(KERN_DEBUG, "primad:  SMD <<< ",
 +                 DUMP_PREFIX_OFFSET, 32, 1,
 +	         dump_buf, uLen + 0x22, false);
 +
@@ -332,7 +331,7 @@ index 75dabc6..b5b857d 100644
 +  memcpy(dump_buf, dump_hdr_t, 0x22);
 +  memcpy(dump_buf + 0x22, (char*) pSendBuffer, usSendSize);
 +
-+  print_hex_dump(KERN_DEBUG, "  prima: HAL >>> ",
++  print_hex_dump(KERN_DEBUG, "primad:  HAL >>> ",
 +          DUMP_PREFIX_OFFSET, 32, 1,
 +          dump_buf, usSendSize+0x22, false);
 +
@@ -348,25 +347,8 @@ index 75dabc6..b5b857d 100644
         "Host Caps - %x %x %x %x\n",
        ((tWlanFeatCaps *)pEventData->pEventData)->featCaps[0],
        ((tWlanFeatCaps *)pEventData->pEventData)->featCaps[1],
-diff --git a/CORE/WDI/CP/src/wlan_qct_wdi_dp.c b/CORE/WDI/CP/src/wlan_qct_wdi_dp.c
-index 6e21572..200b567 100644
---- a/CORE/WDI/CP/src/wlan_qct_wdi_dp.c
-+++ b/CORE/WDI/CP/src/wlan_qct_wdi_dp.c
-@@ -913,6 +913,12 @@ WDI_FillTxBd
-        format (Big endian)
-      * All BD fields need to be swaped here
-      ------------------------------------------------------------------------*/
-+      printk("WDI_FillTxBd: printing BD\n");
-+      print_hex_dump(KERN_DEBUG, "TXDB ",
-+	          DUMP_PREFIX_OFFSET, 32, 1,
-+	          (char*)pBd, WDI_TX_BD_HEADER_SIZE, false);
-+      printk("\n");
-+
-     WDI_SwapTxBd((wpt_uint8 *)pBd); 
- 
- #ifdef WLAN_PERF
 diff --git a/CORE/WDI/TRP/DTS/src/wlan_qct_wdi_dts.c b/CORE/WDI/TRP/DTS/src/wlan_qct_wdi_dts.c
-index 040996f..20ecaa5 100644
+index 040996f..490c114 100644
 --- a/CORE/WDI/TRP/DTS/src/wlan_qct_wdi_dts.c
 +++ b/CORE/WDI/TRP/DTS/src/wlan_qct_wdi_dts.c
 @@ -526,6 +526,20 @@ wpt_status WDTS_RxPacket (void *pContext, wpt_packet *pFrame, WDTS_ChannelType c
@@ -383,7 +365,7 @@ index 040996f..20ecaa5 100644
 +
 +     memcpy(buf, hdr, 0x22);
 +     memcpy(buf + 0x22, (char*)pBDHeader, WDI_RX_BD_HEADER_SIZE);
-+     print_hex_dump(KERN_DEBUG, "RXBD ",
++     print_hex_dump(KERN_DEBUG, "primad: RXBD <<< ",
 +	            DUMP_PREFIX_OFFSET, 32, 1,
 +	            buf, sizeof(buf), false);
 +  }
@@ -394,7 +376,7 @@ index 040996f..20ecaa5 100644
    ucMPDUHLen    = (wpt_uint8)WDI_RX_BD_GET_MPDU_H_LEN(pBDHeader);
    ucTid         = (wpt_uint8)WDI_RX_BD_GET_TID(pBDHeader);
  
-+  print_hex_dump(KERN_DEBUG, "RXDT ",
++  print_hex_dump(KERN_DEBUG, "primad: RXDT <<< ",
 +	        DUMP_PREFIX_OFFSET, 32, 1,
 +               (char*)pBDHeader+ucMPDUHOffset, usMPDULen, false);
 +
