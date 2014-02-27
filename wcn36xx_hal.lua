@@ -40,6 +40,7 @@ local stop_reason_strings = {}
 local bt_amp_event_type_strings = {}
 local thermal_mit_mode_strings = {}
 local thermal_mit_level_strings = {}
+local fw_caps_strings = {}
 
 -- Firmware version
 local fw_major = 0
@@ -182,6 +183,20 @@ function parse_update_edca(buffer, pinfo, tree)
 
 	tree:add_le(f.EDCA_PARAM_RECORD_txoplimit, buffer(n, 2)); n = n + 2
 	return n
+end
+
+function parse_caps_bits(buffer, pinfo, tree)
+	for i = 0,127 do
+		local by = math.floor(i / 8)
+		local bi = (i % 8)
+		local b = buffer(by,1):uint()
+
+		if (bit.band(b, bit.lshift(1, bi)) > 0) then
+			tree:add(f.FW_CAP, buffer(by, 1), i);
+		end
+
+	end
+	return 16
 end
 
 function wcn36xx.dissector(inbuffer, pinfo, tree)
@@ -683,6 +698,10 @@ function wcn36xx.dissector(inbuffer, pinfo, tree)
 			params:add_le(f.set_power_params_bcast_mcast_filter, buffer(n, 4)); n = n + 4
 			params:add_le(f.set_power_params_enable_bet, buffer(n, 4)); n = n + 4
 			params:add_le(f.set_power_params_bet_interval, buffer(n, 4)); n = n + 4
+		elseif (msg_type == 175) then
+			-- FEATURE_CAPS_EXCHANGE_REQ
+			local caps = params:add(buffer(n, 16), "caps")
+			n = n + parse_caps_bits(buffer(n, 16):tvb(), pinfo, caps)
 		elseif (msg_type == 178) then
 			-- SET_THERMAL_MITIGATION_REQ
 			params:add_le(f.SET_THERMAL_MITIGATION_REQ_thermalMitMode, buffer(n, 4)); n = n + 4
@@ -798,7 +817,9 @@ function wcn36xx.dissector(inbuffer, pinfo, tree)
 			elseif (msg_type == 167) then
 				status = 0
 			elseif (msg_type == 176) then
-				--WLAN_HAL_SET_POWER_PARAMS_RSP
+				-- FEATURE_CAPS_EXCHANGE_RSP
+				local caps = params:add(buffer(n, 16), "caps")
+				n = n + parse_caps_bits(buffer(n, 16):tvb(), pinfo, caps)
 				status = 0
 			elseif (msg_type == 140) then
 				-- enable radar
@@ -1306,6 +1327,38 @@ thermal_mit_level_strings[2] = "LEVEL_2"
 thermal_mit_level_strings[3] = "LEVEL_3"
 thermal_mit_level_strings[4] = "LEVEL_4"
 
+fw_caps_strings[0]  = "MCC"
+fw_caps_strings[1]  = "P2P"
+fw_caps_strings[2]  = "DOT11AC"
+fw_caps_strings[3]  = "SLM_SESSIONIZATION"
+fw_caps_strings[4]  = "DOT11AC_OPMODE"
+fw_caps_strings[5]  = "SAP32STA"
+fw_caps_strings[6]  = "TDLS"
+fw_caps_strings[7]  = "P2P_GO_NOA_DECOUPLE_INIT_SCAN"
+fw_caps_strings[8]  = "WLANACTIVE_OFFLOAD"
+fw_caps_strings[9]  = "BEACON_OFFLOAD"
+fw_caps_strings[10] = "SCAN_OFFLOAD"
+fw_caps_strings[11] = "ROAM_OFFLOAD"
+fw_caps_strings[12] = "BCN_MISS_OFFLOAD"
+fw_caps_strings[13] = "STA_POWERSAVE"
+fw_caps_strings[14] = "STA_ADVANCED_PWRSAVE"
+fw_caps_strings[15] = "AP_UAPSD"
+fw_caps_strings[16] = "AP_DFS"
+fw_caps_strings[17] = "BLOCKACK"
+fw_caps_strings[18] = "PHY_ERR"
+fw_caps_strings[19] = "BCN_FILTER"
+fw_caps_strings[20] = "RTT"
+fw_caps_strings[21] = "RATECTRL"
+fw_caps_strings[22] = "WOW"
+fw_caps_strings[23] = "WLAN_ROAM_SCAN_OFFLOAD"
+fw_caps_strings[24] = "SPECULATIVE_PS_POLL"
+fw_caps_strings[25] = "SCAN_SCH"
+fw_caps_strings[26] = "IBSS_HEARTBEAT_OFFLOAD"
+fw_caps_strings[27] = "WLAN_SCAN_OFFLOAD"
+fw_caps_strings[28] = "WLAN_PERIODIC_TX_PTRN"
+fw_caps_strings[29] = "ADVANCE_TDLS"
+fw_caps_strings[30] = "BATCH_SCAN"
+
 -- Protocol fields
 f.msg_type = ProtoField.uint16("wcn36xx.msg_type", "msg_type", base.DEC, msg_type_strings)
 f.msg_version = ProtoField.uint16("wcn36xx.msg_version", "msg_version")
@@ -1793,4 +1846,6 @@ f.EDCA_PARAM_RECORD_txoplimit = ProtoField.uint8("wcn36xx.EDCA_PARAM_RECORD_txop
 
 f.UPDATE_VHT_OP_MODE_REQ_opMode = ProtoField.uint16("wcn36xx.UPDATE_VHT_OP_MODE_REQ_opMode", "opMode")
 f.UPDATE_VHT_OP_MODE_REQ_staId = ProtoField.uint16("wcn36xx.UPDATE_VHT_OP_MODE_REQ_staId", "staId")
+
+f.FW_CAP = ProtoField.uint8("wcn36xx.fw_cap", "fw_cap", base.DEC, fw_caps_strings)
 
