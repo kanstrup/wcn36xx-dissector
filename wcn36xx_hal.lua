@@ -274,8 +274,8 @@ function wcn36xx.dissector(inbuffer, pinfo, tree)
 		elseif ((msg_type == 6) or
 			(msg_type == 8)) then
 			-- start/end scan
-			local channel = buffer(n, 1):uint(); n = n + 1
-			pinfo.cols.info:append(", channel "..channel)
+			local channel = buffer(n, 1); n = n + 1
+			pinfo.cols.info:append(", channel "..channel:uint())
 			params:add(f.scan_channel, channel)
 		elseif (msg_type == 10) then
 			-- FINISH_SCAN_REQ
