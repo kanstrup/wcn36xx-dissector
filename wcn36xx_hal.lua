@@ -735,7 +735,7 @@ function wcn36xx.dissector(inbuffer, pinfo, tree)
 			elseif (msg_type == 13) then
 				-- CONFIG_STA_RSP
 				status = buffer(n, 4):le_uint()
-				params:add_le(f.CONFIG_STA_RSP_status, buffer(n, 4)); n = n + 4
+				params:add_le(f.rsp_status, buffer(n, 4)); n = n + 4
 				params:add_le(f.CONFIG_STA_RSP_staIdx, buffer(n, 1)); n = n + 1
 				params:add_le(f.CONFIG_STA_RSP_bssIdx, buffer(n, 1)); n = n + 1
 				params:add_le(f.CONFIG_STA_RSP_dpuIndex, buffer(n, 1)); n = n + 1
@@ -1927,7 +1927,6 @@ f.GET_ROAM_RSSI_REQ_staId = ProtoField.uint32("wcn36xx.GET_ROAM_RSSI_REQ_staId",
 f.GET_ROAM_RSSI_RSP_staId = ProtoField.uint8("wcn36xx.GET_ROAM_RSSI_RSP_staId", "staId")
 f.GET_ROAM_RSSI_RSP_rssi = ProtoField.uint8("wcn36xx.GET_ROAM_RSSI_RSP_rssi", "rssi")
 
-f.CONFIG_STA_RSP_status = ProtoField.uint32("wcn36xx.CONFIG_STA_RSP_status", "status")
 f.CONFIG_STA_RSP_staIdx = ProtoField.uint8("wcn36xx.CONFIG_STA_RSP_staIdx", "staIdx")
 f.CONFIG_STA_RSP_bssIdx = ProtoField.uint8("wcn36xx.CONFIG_STA_RSP_bssIdx", "bssIdx")
 f.CONFIG_STA_RSP_dpuIndex = ProtoField.uint8("wcn36xx.CONFIG_STA_RSP_dpuIndex", "dpuIndex")
