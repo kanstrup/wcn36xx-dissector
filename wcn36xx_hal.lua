@@ -720,7 +720,7 @@ function wcn36xx.dissector(inbuffer, pinfo, tree)
 			if (msg_type == 1) then
 				-- start rsp
 				status = buffer(n, 2):le_uint()
-				params:add_le(f.start_rsp_status, buffer(n, 2)); n = n + 2
+				params:add_le(f.rsp_status, buffer(n, 2)); n = n + 2
 				-- jump to fw version
 				n = n + 2
 				fw_revision = buffer(n, 1)
@@ -1625,7 +1625,6 @@ f.rmv_stakey_key_id = ProtoField.int8("wcn36xx.rmv_stakey_key_id", "key_id")
 f.rmv_stakey_unicast= ProtoField.bool("wcn36xx.rmv_stakey_unicast", "unicast")
 
 f.rsp_status = ProtoField.uint32("wcn36xx.rsp_status", "status", base.HEX)
-f.start_rsp_status = ProtoField.uint16("wcn36xx.start_rsp_status", "status", base.HEX)
 f.start_rsp_fw_major = ProtoField.uint8("wcn36xx.start_rsp_fw_major", "fw_major")
 f.start_rsp_fw_minor = ProtoField.uint8("wcn36xx.start_rsp_fw_minor", "fw_minor")
 f.start_rsp_fw_version = ProtoField.uint8("wcn36xx.start_rsp_fw_version", "fw_version")
