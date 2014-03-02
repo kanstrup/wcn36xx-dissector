@@ -1288,7 +1288,7 @@ bss_type_strings[5] = "AUTO_MODE"
 bss_type_strings[6] = "DONOT_USE"
 
 oper_mode_strings[0] = "AP"
-oper_mode_strings[0] = "STA"
+oper_mode_strings[1] = "STA"
 
 ht_oper_mode_strings[0] = "PURE"
 ht_oper_mode_strings[1] = "OVERLAY_LEGACY"
