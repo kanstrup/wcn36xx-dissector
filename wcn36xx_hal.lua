@@ -454,8 +454,8 @@ function wcn36xx.dissector(inbuffer, pinfo, tree)
 			params:add(f.del_ba_direction, buffer(n, 1)); n = n + 1
 		elseif (msg_type == 42) then
 			-- channel switch
-			local channel = buffer(n, 1):uint(); n = n + 1
-			pinfo.cols.info:append(", channel "..channel)
+			local channel = buffer(n, 1); n = n + 1
+			pinfo.cols.info:append(", channel "..channel:uint())
 			params:add(f.ch_switch_channel_number, channel)
 			params:add(f.ch_switch_local_power_constraint, buffer(n, 1)); n = n + 1
 			params:add_le(f.ch_switch_secondary_channel_offset, buffer(n, 4)); n = n + 4
