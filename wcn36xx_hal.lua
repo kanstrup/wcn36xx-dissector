@@ -41,6 +41,7 @@ local bt_amp_event_type_strings = {}
 local thermal_mit_mode_strings = {}
 local thermal_mit_level_strings = {}
 local fw_caps_strings = {}
+local rsp_status_strings = {}
 
 -- Firmware version
 local fw_major = 0
@@ -841,7 +842,13 @@ function wcn36xx.dissector(inbuffer, pinfo, tree)
 			if (status == 0) then
 				pinfo.cols.info:append(" success")
 			else
-				pinfo.cols.info:append(" failure "..status);
+				local failure_str
+				if rsp_status_strings[status] ~= nil then
+					failure_str = rsp_status_strings[status]:lower()
+				else
+					failure_str = status
+				end
+				pinfo.cols.info:append(" failed "..failure_str);
 			end
 			if (msg_type == 1) then
 				pinfo.cols.info:append(", fw_version "..fw_major.."."..fw_minor.."."..fw_version.."."..fw_revision)
@@ -1417,6 +1424,46 @@ fw_caps_strings[28] = "WLAN_PERIODIC_TX_PTRN"
 fw_caps_strings[29] = "ADVANCE_TDLS"
 fw_caps_strings[30] = "BATCH_SCAN"
 
+rsp_status_strings[0] = "SUCCESS"
+rsp_status_strings[1] = "INVAL"
+rsp_status_strings[2] = "ALREADY"
+rsp_status_strings[3] = "EMPTY"
+rsp_status_strings[4] = "FAILURE"
+rsp_status_strings[5] = "FAILURE"
+rsp_status_strings[6] = "INVALID_PARAMETER"
+rsp_status_strings[7] = "INVALID_STAIDX"
+rsp_status_strings[8] = "DPU_DESCRIPTOR_TABLE_FULL"
+rsp_status_strings[9] = "NO_INTERRUPTS"
+rsp_status_strings[10] = "INTERRUPT_PRESENT"
+rsp_status_strings[11] = "STA_TABLE_FULL"
+rsp_status_strings[12] = "DUPLICATE_STA"
+rsp_status_strings[13] = "BSSID_INVALID"
+rsp_status_strings[14] = "STA_INVALID"
+rsp_status_strings[15] = "DUPLICATE_BSSID"
+rsp_status_strings[16] = "INVALID_BSSIDX"
+rsp_status_strings[17] = "BSSID_TABLE_FULL"
+rsp_status_strings[18] = "INVALID_SIGNATURE"
+rsp_status_strings[19] = "INVALID_KEYID"
+rsp_status_strings[20] = "SET_CHAN_ALREADY_ON_REQUESTED_CHAN"
+rsp_status_strings[21] = "UMA_DESCRIPTOR_TABLE_FULL"
+rsp_status_strings[22] = "DPU_MICKEY_TABLE_FULL"
+rsp_status_strings[23] = "BA_RX_BUFFERS_FULL"
+rsp_status_strings[24] = "BA_RX_MAX_SESSIONS_REACHED"
+rsp_status_strings[25] = "BA_RX_INVALID_SESSION_ID"
+rsp_status_strings[26] = "TIMER_START_FAILED"
+rsp_status_strings[27] = "TIMER_STOP_FAILED"
+rsp_status_strings[28] = "FAILED_ALLOC"
+rsp_status_strings[29] = "NOTIFY_BSS_FAIL"
+rsp_status_strings[30] = "DEL_STA_SELF_IGNORED_REF_COUNT_NOT_ZERO"
+rsp_status_strings[31] = "ADD_STA_SELF_IGNORED_REF_COUNT_NOT_ZERO"
+rsp_status_strings[32] = "FW_SEND_MSG_FAILED"
+rsp_status_strings[33] = "BSS_DISCONN_BEACON_MISS"
+rsp_status_strings[34] = "BSS_DISCONN_DEAUTH"
+rsp_status_strings[35] = "BSS_DISCONN_DISASSOC"
+rsp_status_strings[36] = "PHY_DATA_ABORT"
+rsp_status_strings[37] = "PHY_INVALID_NV_FIELD"
+rsp_status_strings[38] = "WLAN_BOOT_TEST_FAILURE"
+
 -- Protocol fields
 f.msg_type = ProtoField.uint16("wcn36xx.msg_type", "msg_type", base.DEC, msg_type_strings)
 f.msg_version = ProtoField.uint16("wcn36xx.msg_version", "msg_version")
@@ -1624,7 +1671,7 @@ f.rmv_stakey_sta_index = ProtoField.int16("wcn36xx.rmv_stakey_sta_index", "sta_i
 f.rmv_stakey_key_id = ProtoField.int8("wcn36xx.rmv_stakey_key_id", "key_id")
 f.rmv_stakey_unicast= ProtoField.bool("wcn36xx.rmv_stakey_unicast", "unicast")
 
-f.rsp_status = ProtoField.uint32("wcn36xx.rsp_status", "status", base.HEX)
+f.rsp_status = ProtoField.uint32("wcn36xx.rsp_status", "status", base.HEX, rsp_status_strings)
 f.start_rsp_fw_major = ProtoField.uint8("wcn36xx.start_rsp_fw_major", "fw_major")
 f.start_rsp_fw_minor = ProtoField.uint8("wcn36xx.start_rsp_fw_minor", "fw_minor")
 f.start_rsp_fw_version = ProtoField.uint8("wcn36xx.start_rsp_fw_version", "fw_version")
