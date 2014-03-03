@@ -200,6 +200,16 @@ function parse_caps_bits(buffer, pinfo, tree)
 	return 16
 end
 
+function parse_stats_cnt(buffer, pinfo, tree)
+	local n = 0
+
+	tree:add_le(f.GET_STATS_RSP_summary_cnt0, buffer(n, 4)); n = n + 4
+	tree:add_le(f.GET_STATS_RSP_summary_cnt1, buffer(n, 4)); n = n + 4
+	tree:add_le(f.GET_STATS_RSP_summary_cnt2, buffer(n, 4)); n = n + 4
+	tree:add_le(f.GET_STATS_RSP_summary_cnt3, buffer(n, 4)); n = n + 4
+	return n
+end
+
 function wcn36xx.dissector(inbuffer, pinfo, tree)
 	local n = 0
 	local buffer = inbuffer
@@ -774,6 +784,46 @@ function wcn36xx.dissector(inbuffer, pinfo, tree)
 				params:add_le(f.GET_STATS_RSP_statsMask, buffer(n, 4)); n = n + 4
 				params:add_le(f.GET_STATS_RSP_msgType, buffer(n, 2)); n = n + 2
 				params:add_le(f.GET_STATS_RSP_msgLen, buffer(n, 2)); n = n + 2
+
+				-- GET_STATS_RSP_summary
+				local summary = params:add(buffer(n, 96), "Summary")
+				local e = summary:add(buffer(n, 4), "retry_cnt")
+				n = n + parse_stats_cnt(buffer(n, 16):tvb(), pinfo, e)
+				--summary:add_le(f.GET_STATS_RSP_summary_retry_cnt, buffer(n, 16)); n = n + 16
+
+				e = summary:add(buffer(n, 4), "multiple_retry_cnt")
+				n = n + parse_stats_cnt(buffer(n, 16):tvb(), pinfo, e)
+				--summary:add_le(f.GET_STATS_RSP_summary_multiple_retry_cnt, buffer(n, 16)); n = n + 16
+
+				e = summary:add(buffer(n, 4), "tx_frm_cnt")
+				n = n + parse_stats_cnt(buffer(n, 16):tvb(), pinfo, e)
+
+				-- summary:add_le(f.GET_STATS_RSP_summary_tx_frm_cnt, buffer(n, 16)); n = n + 16
+				summary:add_le(f.GET_STATS_RSP_summary_rx_frm_cnt, buffer(n, 4)); n = n + 4
+				summary:add_le(f.GET_STATS_RSP_summary_frm_dup_cnt, buffer(n, 4)); n = n + 4
+
+				--summary:add_le(f.GET_STATS_RSP_summary_fail_cnt, buffer(n, 16)); n = n + 16
+				e = summary:add(buffer(n, 4), "fail_cnt")
+				n = n + parse_stats_cnt(buffer(n, 16):tvb(), pinfo, e)
+
+				summary:add_le(f.GET_STATS_RSP_summary_rts_fail_cnt, buffer(n, 4)); n = n + 4
+				summary:add_le(f.GET_STATS_RSP_summary_ack_fail_cnt, buffer(n, 4)); n = n + 4
+				summary:add_le(f.GET_STATS_RSP_summary_rts_succ_cnt, buffer(n, 4)); n = n + 4
+				summary:add_le(f.GET_STATS_RSP_summary_rx_discard_cnt, buffer(n, 4)); n = n + 4
+				summary:add_le(f.GET_STATS_RSP_summary_rx_error_cnt, buffer(n, 4)); n = n + 4
+				summary:add_le(f.GET_STATS_RSP_summary_tx_byte_cnt, buffer(n, 4)); n = n + 4
+
+				-- GET_STATS_RSP_ClassA
+				local classA = params:add(buffer(n, 32), "ClassA")
+				classA:add_le(f.GET_STATS_RSP_classA_rx_frag_cnt, buffer(n, 4)); n = n + 4
+				classA:add_le(f.GET_STATS_RSP_classA_promiscuous_rx_frag_cnt, buffer(n, 4)); n = n + 4
+				classA:add_le(f.GET_STATS_RSP_classA_rx_input_sensitivity, buffer(n, 4)); n = n + 4
+				classA:add_le(f.GET_STATS_RSP_classA_max_pwr, buffer(n, 4)); n = n + 4
+				classA:add_le(f.GET_STATS_RSP_classA_sync_fail_cnt, buffer(n, 4)); n = n + 4
+				classA:add_le(f.GET_STATS_RSP_classA_tx_rate, buffer(n, 4)); n = n + 4
+				classA:add_le(f.GET_STATS_RSP_classA_mcs_index, buffer(n, 4)); n = n + 4
+				classA:add_le(f.GET_STATS_RSP_classA_tx_rate_flags, buffer(n, 4)); n = n + 4
+
 			elseif (msg_type == 58) then
 				-- ADD_BA_SESSION_RSP
 				status = buffer(n, 4):le_uint()
@@ -1924,6 +1974,32 @@ f.GET_STATS_RSP_staId = ProtoField.uint32("wcn36xx.GET_STATS_RSP_staId", "staId"
 f.GET_STATS_RSP_statsMask = ProtoField.uint32("wcn36xx.GET_STATS_RSP_statsMask", "statsMask")
 f.GET_STATS_RSP_msgType = ProtoField.uint16("wcn36xx.GET_STATS_RSP_msgType", "msgType")
 f.GET_STATS_RSP_msgLen = ProtoField.uint16("wcn36xx.GET_STATS_RSP_msgLen", "msgLen")
+
+f.GET_STATS_RSP_summary_cnt0 = ProtoField.uint32("wcn36xx.GET_STATS_RSP_cnt0", "cnt0")
+f.GET_STATS_RSP_summary_cnt1 = ProtoField.uint32("wcn36xx.GET_STATS_RSP_cnt1", "cnt1")
+f.GET_STATS_RSP_summary_cnt2 = ProtoField.uint32("wcn36xx.GET_STATS_RSP_cnt2", "cnt2")
+f.GET_STATS_RSP_summary_cnt3 = ProtoField.uint32("wcn36xx.GET_STATS_RSP_cnt3", "cnt3")
+f.GET_STATS_RSP_summary_retry_cnt = ProtoField.bytes("wcn36xx.GET_STATS_RSP_summary_retry_cnt", "retry_cnt")
+f.GET_STATS_RSP_summary_multiple_retry_cnt = ProtoField.bytes("wcn36xx.GET_STATS_RSP_summary_multiple_retry_cnt", "multiple_retry_cnt")
+f.GET_STATS_RSP_summary_tx_frm_cnt = ProtoField.bytes("wcn36xx.GET_STATS_RSP_summary_tx_frm_cnt", "tx_frm_cnt")
+f.GET_STATS_RSP_summary_rx_frm_cnt = ProtoField.uint32("wcn36xx.GET_STATS_RSP_summary_rx_frm_cnt", "rx_frm_cnt")
+f.GET_STATS_RSP_summary_frm_dup_cnt = ProtoField.uint32("wcn36xx.GET_STATS_RSP_summary_frm_dup_cnt", "frm_dup_cnt")
+f.GET_STATS_RSP_summary_fail_cnt = ProtoField.bytes("wcn36xx.GET_STATS_RSP_summary_fail_cnt", "fail_cnt")
+f.GET_STATS_RSP_summary_rts_fail_cnt = ProtoField.uint32("wcn36xx.GET_STATS_RSP_summary_rts_fail_cnt", "rts_fail_cnt")
+f.GET_STATS_RSP_summary_ack_fail_cnt = ProtoField.uint32("wcn36xx.GET_STATS_RSP_summary_ack_fail_cnt", "ack_fail_cnt")
+f.GET_STATS_RSP_summary_rts_succ_cnt = ProtoField.uint32("wcn36xx.GET_STATS_RSP_summary_rts_succ_cnt", "rts_succ_cnt")
+f.GET_STATS_RSP_summary_rx_discard_cnt = ProtoField.uint32("wcn36xx.GET_STATS_RSP_summary_rx_discard_cnt", "rx_discard_cnt")
+f.GET_STATS_RSP_summary_rx_error_cnt = ProtoField.uint32("wcn36xx.GET_STATS_RSP_summary_rx_error_cnt", "rx_error_cnt")
+f.GET_STATS_RSP_summary_tx_byte_cnt = ProtoField.uint32("wcn36xx.GET_STATS_RSP_summary_tx_byte_cnt", "tx_byte_cnt")
+
+f.GET_STATS_RSP_classA_rx_frag_cnt = ProtoField.uint32("wcn36xx.GET_STATS_RSP_classA_rx_frag_cnt", "rx_frag_cnt")
+f.GET_STATS_RSP_classA_promiscuous_rx_frag_cnt = ProtoField.uint32("wcn36xx.GET_STATS_RSP_classA_promiscuous_rx_frag_cnt", "promiscuous_rx_frag_cnt")
+f.GET_STATS_RSP_classA_rx_input_sensitivity = ProtoField.uint32("wcn36xx.GET_STATS_RSP_classA_rx_input_sensitivity", "rx_input_sensitivity")
+f.GET_STATS_RSP_classA_max_pwr = ProtoField.uint32("wcn36xx.GET_STATS_RSP_classA_max_pwr", "max_pwr")
+f.GET_STATS_RSP_classA_sync_fail_cnt = ProtoField.uint32("wcn36xx.GET_STATS_RSP_classA_sync_fail_cnt", "sync_fail_cnt")
+f.GET_STATS_RSP_classA_tx_rate = ProtoField.uint32("wcn36xx.GET_STATS_RSP_classA_tx_rate", "tx_rate")
+f.GET_STATS_RSP_classA_mcs_index = ProtoField.uint32("wcn36xx.GET_STATS_RSP_classA_mcs_index", "mcs_index")
+f.GET_STATS_RSP_classA_tx_rate_flags = ProtoField.uint32("wcn36xx.GET_STATS_RSP_classA_tx_rate_flags", "tx_rate_flags")
 
 f.ADD_STA_SELF_RSP_selfStaIdx = ProtoField.uint8("wcn36xx.ADD_STA_SELF_RSP_selfStaIdx", "selfStaIdx")
 f.ADD_STA_SELF_RSP_dpuIdx = ProtoField.uint8("wcn36xx.ADD_STA_SELF_RSP_dpuIdx", "dpuIdx")
