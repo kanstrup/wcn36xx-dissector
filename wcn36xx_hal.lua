@@ -1677,7 +1677,7 @@ f.set_link_st_self_mac_addr = ProtoField.ether("wcn36xx.set_link_st_self_mac_add
 f.get_stats_sta_id = ProtoField.uint32("wcn36xx.get_stats_sta_id", "sta_id", base.DEC)
 f.get_stats_stats_mask = ProtoField.uint32("wcn36xx.get_stats_stats_mask", "stats_mask", base.HEX)
 
-f.join_channel = ProtoField.uint8("wcn36xx.join_channel", "local_power_constraint")
+f.join_channel = ProtoField.uint8("wcn36xx.join_channel", "channel")
 f.join_self_sta_mac_addr = ProtoField.ether("wcn36xx.join_self_sta_mac_addr", "self_sta_mac_addr")
 f.join_local_power_constraint = ProtoField.uint8("wcn36xx.join_local_power_constraint", "local_power_constraint")
 f.join_secondary_channel_offset = ProtoField.uint32("wcn36xx.join_secondary_channel_offset", "secondary_channel_offset", base.DEC, bond_state_strings)
