@@ -1,0 +1,156 @@
+From 028bc88645b8a570b64aab1c008b78f22115eda8 Mon Sep 17 00:00:00 2001
+From: Pontus Fuchs <pontus.fuchs@gmail.com>
+Date: Mon, 3 Mar 2014 20:52:20 +0100
+Subject: [PATCH] wcnxxd: Trace communication between wcn36xx driver and prima
+
+The traces contains hex dumps of the following:
+
+HAL messages, TXBDs, TX Data, RXBDs, RX Data.
+
+Messages and BDs are prefixed with a fake 802.11 header. This allows
+you to convert it all into one pcap using the following command:
+
+cat test.txt | grep wcnxxd | perl -pe 's/.{4}(.{12}).{20}(.+)/$1 $2/' | text2pcap -q -t "%s." -l 105 - test.pcap
+---
+ dxe.c  |   27 +++++++++++++++++++++++++++
+ smd.c  |   20 ++++++++++++++++++++
+ txrx.c |   26 ++++++++++++++++++++++++++
+ 3 files changed, 73 insertions(+)
+
+diff --git a/dxe.c b/dxe.c
+index 6825ad3..4f995d4 100644
+--- a/dxe.c
++++ b/dxe.c
+@@ -628,6 +628,19 @@ int wcn36xx_dxe_tx_frame(struct wcn36xx *wcn,
+ 
+ 	wcn36xx_dbg_dump(WCN36XX_DBG_DXE_DUMP, "DESC1 >>> ",
+ 			 (char *)desc, sizeof(*desc));
++
++	{
++		char buf[0x22+sizeof(struct wcn36xx_tx_bd)];
++		/* This is an 802.11 header with ethertype 3662 */
++		const char hdr[] ={0x88,0x01,0x00,0x00,0x01,0x01,0x01,0x01,0x01,0x01,0x01,0x01,0x01,0x01,0x01,0x01,
++				   0xff,0xff,0xff,0xff,0xff,0x00,0x00,0x00,0x00,0x00,0xaa,0xaa,0x03,0x00,0x00,0x00,0x36,0x62};
++		memcpy(buf, hdr, 0x22);
++		memcpy(buf + 0x22, (char *)ctl->bd_cpu_addr, sizeof(struct wcn36xx_tx_bd));
++		print_hex_dump(KERN_DEBUG, "wcnxxd: TXBD >>>  ",
++			       DUMP_PREFIX_OFFSET, 32, 1,
++			       buf, sizeof(buf), false);
++	}
++
+ 	wcn36xx_dbg_dump(WCN36XX_DBG_DXE_DUMP,
+ 			 "BD   >>> ", (char *)ctl->bd_cpu_addr,
+ 			 sizeof(struct wcn36xx_tx_bd));
+@@ -657,6 +670,20 @@ int wcn36xx_dxe_tx_frame(struct wcn36xx *wcn,
+ 	wcn36xx_dbg_dump(WCN36XX_DBG_DXE_DUMP, "SKB   >>> ",
+ 			 (char *)ctl->skb->data, ctl->skb->len);
+ 
++
++	{
++	u8 *buf = ctl->skb->data;
++	bool enc = buf[1] & 0x40;
++
++	/* remove protected bit when dumping since the frame is not really encrypted yet */
++	if (enc)
++		buf[1] ^= 0x40;
++	print_hex_dump(KERN_DEBUG, "wcnxxd TXDT >>> ", DUMP_PREFIX_OFFSET, 32, 1,
++			 buf, ctl->skb->len, false);
++	if (enc)
++		buf[1] ^= 0x40;
++	}
++	
+ 	/* Move the head of the ring to the next empty descriptor */
+ 	 ch->head_blk_ctl = ctl->next;
+ 
+diff --git a/smd.c b/smd.c
+index 1301f4c..f3d1558 100644
+--- a/smd.c
++++ b/smd.c
+@@ -22,6 +22,14 @@
+ #include <linux/bitops.h>
+ #include "smd.h"
+ 
++/* This is an 802.11 header with ethertype 3660 */
++const char dump_hdr_f[] = {0x88,0x01,0x00,0x00,0x01,0x01,0x01,0x01,0x01,0x01,0xff,0xff,0xff,0xff,0xff,0x00,
++                         0x01,0x01,0x01,0x01,0x01,0x01,0x00,0x00,0x00,0x00,0xaa,0xaa,0x03,0x00,0x00,0x00,0x36,0x60};
++const char dump_hdr_t[] = {0x88,0x01,0x00,0x00,0x01,0x01,0x01,0x01,0x01,0x01,0x01,0x01,0x01,0x01,0x01,0x01,
++                         0xff,0xff,0xff,0xff,0xff,0x00,0x00,0x00,0x00,0x00,0xaa,0xaa,0x03,0x00,0x00,0x00,0x36,0x60};
++
++u8 dump_buf[8192];
++
+ static int put_cfg_tlv_u32(struct wcn36xx *wcn, size_t *len, u32 id, u32 value)
+ {
+ 	struct wcn36xx_hal_cfg *entry;
+@@ -199,6 +207,12 @@ static int wcn36xx_smd_send_and_wait(struct wcn36xx *wcn, size_t len)
+ 	unsigned long start;
+ 	wcn36xx_dbg_dump(WCN36XX_DBG_SMD_DUMP, "HAL >>> ", wcn->hal_buf, len);
+ 
++	memcpy(dump_buf, dump_hdr_t, 0x22);
++	memcpy(dump_buf + 0x22, wcn->hal_buf, len);
++	print_hex_dump(KERN_DEBUG, "wcnxxd:  HAL >>> ",
++		       DUMP_PREFIX_OFFSET, 32, 1,
++		       dump_buf, len + 0x22, false);
++
+ 	init_completion(&wcn->hal_rsp_compl);
+ 	start = jiffies;
+ 	ret = wcn->ctrl_ops->tx(wcn->hal_buf, len);
+@@ -2038,6 +2052,12 @@ static void wcn36xx_smd_rsp_process(struct wcn36xx *wcn, void *buf, size_t len)
+ 	struct wcn36xx_hal_ind_msg *msg_ind;
+ 	wcn36xx_dbg_dump(WCN36XX_DBG_SMD_DUMP, "SMD <<< ", buf, len);
+ 
++	memcpy(dump_buf, dump_hdr_f, 0x22);
++	memcpy(dump_buf + 0x22, buf, len);
++	print_hex_dump(KERN_DEBUG, "wcnxxd:  SMD <<< ",
++		       DUMP_PREFIX_OFFSET, 32, 1,
++		       dump_buf, len + 0x22, false);
++
+ 	switch (msg_header->msg_type) {
+ 	case WCN36XX_HAL_START_RSP:
+ 	case WCN36XX_HAL_CONFIG_STA_RSP:
+diff --git a/txrx.c b/txrx.c
+index 0fae529..fbc2f6b 100644
+--- a/txrx.c
++++ b/txrx.c
+@@ -43,6 +43,18 @@ int wcn36xx_rx_skb(struct wcn36xx *wcn, struct sk_buff *skb)
+ 			 "BD   <<< ", (char *)bd,
+ 			 sizeof(struct wcn36xx_rx_bd));
+ 
++	{
++		char buf[0x22+sizeof(struct wcn36xx_rx_bd)];
++		/* This is an 802.11 header with ethertype 3661 */
++		const char hdr[] ={0x88,0x01,0x00,0x00,0x01,0x01,0x01,0x01,0x01,0x01,0x01,0x01,0x01,0x01,0x01,0x01,
++				   0xff,0xff,0xff,0xff,0xff,0x00,0x00,0x00,0x00,0x00,0xaa,0xaa,0x03,0x00,0x00,0x00,0x36,0x61};
++		memcpy(buf, hdr, 0x22);
++		memcpy(buf + 0x22, bd, sizeof(struct wcn36xx_rx_bd));
++		print_hex_dump(KERN_DEBUG, "wcnxxd: RXBD <<<  ",
++			       DUMP_PREFIX_OFFSET, 32, 1,
++			       buf, sizeof(buf), false);
++	}
++
+ 	skb_put(skb, bd->pdu.mpdu_header_off + bd->pdu.mpdu_len);
+ 	skb_pull(skb, bd->pdu.mpdu_header_off);
+ 
+@@ -67,6 +79,20 @@ int wcn36xx_rx_skb(struct wcn36xx *wcn, struct sk_buff *skb)
+ 	fc = __le16_to_cpu(hdr->frame_control);
+ 	sn = IEEE80211_SEQ_TO_SN(__le16_to_cpu(hdr->seq_ctrl));
+ 
++
++	{
++	u8 *buf = skb->data;
++	bool enc = buf[1] & 0x40;
++
++	/* remove protected bit when dumping since the frame is not really encrypted yet */
++	if (enc)
++		buf[1] ^= 0x40;
++	print_hex_dump(KERN_DEBUG, "wcnxxd RXDT <<< ", DUMP_PREFIX_OFFSET, 32, 1,
++		       buf, skb->len, false);
++	if (enc)
++		buf[1] ^= 0x40;
++	}
++
+ 	if (ieee80211_is_beacon(hdr->frame_control)) {
+ 		wcn36xx_dbg(WCN36XX_DBG_BEACON, "beacon skb %p len %d fc %04x sn %d\n",
+ 			    skb, skb->len, fc, sn);
+-- 
+1.7.10.4
+
