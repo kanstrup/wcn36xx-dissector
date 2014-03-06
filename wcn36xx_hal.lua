@@ -42,6 +42,7 @@ local thermal_mit_mode_strings = {}
 local thermal_mit_level_strings = {}
 local fw_caps_strings = {}
 local rsp_status_strings = {}
+local coex_ind_type_strings = {}
 
 -- Firmware version
 local fw_major = 0
@@ -660,6 +661,18 @@ function wcn36xx.dissector(inbuffer, pinfo, tree)
 			-- DEL_STA_SELF_REQ
 			status = 0;
 			params:add_le(f.DEL_STA_SELF_REQ_selfMacAddr, buffer(n, 6)); n = n + 6
+		elseif (msg_type == 129) then
+			-- COEX_IND
+			local coextype = buffer(n, 4)
+			params:add_le(f.COEX_IND_coexIndType, coextype); n = n + 4
+			local coexind = params:add_le(wcn36xx, buffer(n, 16), "coexIndData")
+			if (coextype:le_uint() == 4 or
+				coextype:le_uint() == 5) then
+				coexind:add_le(f.COEX_IND_Bssfordisableaggr, buffer(n, 6)); n = n + 6
+				coexind:add_le(f.COEX_IND_Unused, buffer(n, 10)); n = n + 10
+			else
+				coexind:add_le(f.COEX_IND_Unused, buffer(n, 16)); n = n + 16
+			end
 		elseif (msg_type == 151) then
 			-- update scan param
 			params:add(f.scan_dot11d_enabled, buffer(n, 1)); n = n + 1
@@ -1539,6 +1552,13 @@ rsp_status_strings[36] = "PHY_DATA_ABORT"
 rsp_status_strings[37] = "PHY_INVALID_NV_FIELD"
 rsp_status_strings[38] = "WLAN_BOOT_TEST_FAILURE"
 
+coex_ind_type_strings[0] = "DISABLE_HB_MONITOR"
+coex_ind_type_strings[1] = "ENABLE_HB_MONITOR"
+coex_ind_type_strings[2] = "SCANS_ARE_COMPROMISED_BY_COEX"
+coex_ind_type_strings[3] = "SCANS_ARE_NOT_COMPROMISED_BY_COEX"
+coex_ind_type_strings[4] = "DISABLE_AGGREGATION_IN_2P4"
+coex_ind_type_strings[5] = "ENABLE_AGGREGATION_IN_2P4"
+
 -- Protocol fields
 f.msg_type = ProtoField.uint16("wcn36xx.msg_type", "msg_type", base.DEC, msg_type_strings)
 f.msg_version = ProtoField.uint16("wcn36xx.msg_version", "msg_version")
@@ -2008,6 +2028,10 @@ f.ADD_STA_SELF_RSP_dpuSignature = ProtoField.uint8("wcn36xx.ADD_STA_SELF_RSP_dpu
 f.DEL_STA_SELF_REQ_selfMacAddr = ProtoField.ether("wcn36xx.DEL_STA_SELF_REQ_selfMacAddr", "selfMacAddr")
 
 f.DEL_STA_SELF_RSP_selfMacAddr = ProtoField.ether("wcn36xx.DEL_STA_SELF_RSP_selfMacAddr", "selfMacAddr")
+
+f.COEX_IND_coexIndType = ProtoField.uint32("wcn36xx.COEX_IND_coexIndType", "coexIndType", base.DEC, coex_ind_type_strings)
+f.COEX_IND_Bssfordisableaggr = ProtoField.ether("wcn36xx.COEX_IND_Bssfordisableaggra", "Bssfordisableaggr")
+f.COEX_IND_Unused = ProtoField.bytes("wcn36xx.COEX_IND_Unused", "Unused")
 
 f.ADD_BA_SESSION_RSP_baDialogToken = ProtoField.uint8("wcn36xx.ADD_BA_SESSION_RSP_baDialogToken", "baDialogToken")
 f.ADD_BA_SESSION_RSP_baTID = ProtoField.uint8("wcn36xx.ADD_BA_SESSION_RSP_baTID", "baTID")
