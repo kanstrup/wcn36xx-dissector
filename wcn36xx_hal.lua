@@ -742,7 +742,7 @@ function wcn36xx.dissector(inbuffer, pinfo, tree)
 		elseif (msg_type == 185) then
 			-- GET_ROAM_RSSI_REQ
 			params:add_le(f.GET_ROAM_RSSI_REQ_staId, buffer(n, 4)); n = n + 4
-		elseif ((msg_type < 191) and
+		elseif ((msg_type_strings[msg_type] ~= nil) and
 			(string.find(msg_type_strings[msg_type], "RSP") ~= nil)) then
 			-- parse responses
 			local status
