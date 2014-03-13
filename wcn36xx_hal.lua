@@ -888,7 +888,15 @@ function wcn36xx.dissector(inbuffer, pinfo, tree)
 				params:add_le(f.bssid, buffer(n, 6)); n = n + 6
 				status = buffer(n, 4):le_uint()
 				params:add_le(f.rsp_status, buffer(n, 4)); n = n + 4
+				local num = buffer(n, 2):le_uint()
 				params:add_le(f.trigger_ba_rsp_candidate_cnt, buffer(n, 2)); n = n + 2
+				for i = 0, num-1 do
+					local cand = subtree:add(wcn36xx, buffer(n, 22), i)
+					cand:add_le(f.TRIGGER_BA_RSP_Cand_staAddr, buffer(n, 6)); n = n + 6
+					for j = 0, 7 do
+						cand:add_le(f.TRIGGER_BA_RSP_Cand_baInfo, buffer(n, 2)); n = n + 2
+					end
+				end
 			elseif (msg_type == 75) then
 				-- tl flush ac
 				params:add(f.tl_flush_ac_sta_id, buffer(n, 1)); n = n + 1
@@ -2147,3 +2155,6 @@ f.WLAN_ROAM_SCAN_OFFLOAD_REQ_ConnNet_encryption = ProtoField.uint32("wcn36xx.WLA
 f.WLAN_ROAM_SCAN_OFFLOAD_REQ_ConnNet_mcencryption = ProtoField.uint32("wcn36xx.WLAN_ROAM_SCAN_OFFLOAD_REQ_ConnNet_mcencryption", "mcencryption")
 f.WLAN_ROAM_SCAN_OFFLOAD_REQ_ConnNet_ChannelCount = ProtoField.uint8("wcn36xx.WLAN_ROAM_SCAN_OFFLOAD_REQ_ConnNet_ChannelCount", "ChannelCount")
 f.WLAN_ROAM_SCAN_OFFLOAD_REQ_ConnNet_ChannelCache = ProtoField.bytes("wcn36xx.WLAN_ROAM_SCAN_OFFLOAD_REQ_ConnNet_ChannelCache", "ChannelCache")
+
+f.TRIGGER_BA_RSP_Cand_staAddr = ProtoField.ether("wcn36xx.TRIGGER_BA_RSP_Cand_staAddr", "staAddr")
+f.TRIGGER_BA_RSP_Cand_baInfo = ProtoField.uint16("wcn36xx.TRIGGER_BA_RSP_Cand_baInfo", "baInfo", base.HEX)
