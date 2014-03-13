@@ -934,6 +934,9 @@ function wcn36xx.dissector(inbuffer, pinfo, tree)
 			elseif (msg_type == 152) then
 				-- UPDATE_SCAN_PARAM_RSP
 				status = 0
+			elseif (msg_type == 158) then
+				-- 8023_MULTICAST_LIST_RSP
+				params:add_le(f.MULTICAST_LIST_RSP_bssIdx, buffer(n, 1)); n = n + 1
 			elseif (msg_type == 167) then
 				status = 0
 			elseif (msg_type == 176) then
@@ -2172,3 +2175,5 @@ f.GTK_OFFLOAD_REQ_aKCK = ProtoField.bytes("wcn36xx.GTK_OFFLOAD_REQ_aKCK", "aKCK"
 f.GTK_OFFLOAD_REQ_aKEK = ProtoField.bytes("wcn36xx.GTK_OFFLOAD_REQ_aKEK", "aKEK")
 f.GTK_OFFLOAD_REQ_ullKeyReplayCounter = ProtoField.uint64("wcn36xx.GTK_OFFLOAD_REQ_ullKeyReplayCounter", "ullKeyReplayCounter")
 f.GTK_OFFLOAD_REQ_bssIdx = ProtoField.uint8("wcn36xx.GTK_OFFLOAD_REQ_bssIdx", "bssIdx")
+
+f.MULTICAST_LIST_RSP_bssIdx = ProtoField.uint8("wcn36xx.8023_MULTICAST_LIST_RSP_bssIdx", "bssIdx")
