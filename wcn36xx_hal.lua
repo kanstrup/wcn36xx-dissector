@@ -254,7 +254,7 @@ function wcn36xx.dissector(inbuffer, pinfo, tree)
 		local params = subtree:add(wcn36xx, buffer(n), msg_type_str)
 
 		if (msg_type == 0) then
-			-- start
+			-- START_REQ
 			params:add_le(f.start_driver_type, buffer(n, 4)); n = n + 4
 			local start_len = buffer(n, 4):le_uint()
 			params:add_le(f.start_len, buffer(n, 4)); n = n + 4
@@ -266,7 +266,7 @@ function wcn36xx.dissector(inbuffer, pinfo, tree)
 			-- STOP_REQ
 			params:add_le(f.STOP_REQ_reason, buffer(n, 4)); n = n + 4
 		elseif (msg_type == 4) then
-			-- init scan
+			-- INIT_SCAN_REQ
 			params:add_le(f.init_scan_mode, buffer(n, 4)); n = n + 4
 			params:add_le(f.bssid, buffer(n, 6)); n = n + 6
 			params:add(f.init_scan_notify, buffer(n, 1)); n = n + 1
@@ -285,7 +285,7 @@ function wcn36xx.dissector(inbuffer, pinfo, tree)
 			scan_entry:add(f.hal_scan_entry_active_bss_count, buffer(n, 1)); n = n + 1
 		elseif ((msg_type == 6) or
 			(msg_type == 8)) then
-			-- start/end scan
+			-- START_SCAN_REQ/END_SCAN_REQ
 			local channel = buffer(n, 1); n = n + 1
 			pinfo.cols.info:append(", channel "..channel:uint())
 			params:add(f.scan_channel, channel)
@@ -309,7 +309,7 @@ function wcn36xx.dissector(inbuffer, pinfo, tree)
 			-- CONFIG_STA_REQ
 			n = n + parse_config_sta(buffer(n):tvb(), pinfo, params)
 		elseif (msg_type == 14) then
-			-- delete sta
+			-- DELETE_STA_REQ
 			params:add(f.sta_index, buffer(n, 1)); n = n + 1
 		elseif (msg_type == 16 and cmd_len == 470) then
 			-- CONFIG_BSS
@@ -407,10 +407,10 @@ function wcn36xx.dissector(inbuffer, pinfo, tree)
 			params:add_le(f.CONFIG_BSS_V1_vhtCapable, buffer(n, 1)); n = n + 1
 			params:add_le(f.CONFIG_BSS_V1_vhtTxChannelWidthSet, buffer(n, 1)); n = n + 1
 		elseif (msg_type == 18) then
-			-- delete bss
+			-- DELETE_BSS_REQ
 			params:add(f.sta_index, buffer(n, 1)); n = n + 1
 		elseif (msg_type == 20) then
-			-- join
+			-- JOIN_REQ
 			params:add_le(f.bssid, buffer(n, 6)); n = n + 6
 			params:add(f.join_channel, buffer(n, 1)); n = n + 1
 			params:add_le(f.join_self_sta_mac_addr, buffer(n, 6)); n = n + 6
@@ -434,13 +434,13 @@ function wcn36xx.dissector(inbuffer, pinfo, tree)
 			params:add_le(f.SET_STAKEY_REQ_key, buffer(n, 228)); n = n + 228
 			params:add_le(f.SET_STAKEY_REQ_singleTidRc, buffer(n, 1)); n = n + 1
 		elseif (msg_type == 28) then
-			-- remove bss key
+			-- RMV_BSSKEY_REQ
 			params:add(f.bss_index, buffer(n, 1)); n = n + 1
 			params:add_le(f.ani_ed_enc_type, buffer(n, 4)); n = n + 4
 			params:add(f.rmv_bsskey_key_id, buffer(n, 1)); n = n + 1
 			params:add_le(f.rmv_bsskey_wep_type, buffer(n, 4)); n = n + 4
 		elseif (msg_type == 30) then
-			-- remove sta key
+			-- RMV_STAKEY_REQ
 			params:add_le(f.rmv_stakey_sta_index, buffer(n, 2)); n = n + 2
 			params:add_le(f.ani_ed_enc_type, buffer(n, 4)); n = n + 4
 			params:add(f.rmv_stakey_key_id, buffer(n, 1)); n = n + 1
@@ -458,19 +458,19 @@ function wcn36xx.dissector(inbuffer, pinfo, tree)
 			n = n + parse_update_edca(buffer(n, 4):tvb(), pinfo, e)
 
 		elseif (msg_type == 38) then
-			-- add ba
+			-- ADD_BA_REQ
 			params:add(f.add_ba_session_id, buffer(n, 1)); n = n + 1
 			params:add(f.add_ba_win_size, buffer(n, 1)); n = n + 1
 			if buffer:len() > n then
 				params:add(f.add_ba_reorder_on_chip, buffer(n, 1)); n = n + 1
 			end
 		elseif (msg_type == 40) then
-			-- del ba
+			-- DEL_BA_REQ
 			params:add_le(f.del_ba_sta_id, buffer(n, 2)); n = n + 2
 			params:add(f.tid, buffer(n, 1)); n = n + 1
 			params:add(f.del_ba_direction, buffer(n, 1)); n = n + 1
 		elseif (msg_type == 42) then
-			-- channel switch
+			-- CH_SWITCH_REQ
 			local channel = buffer(n, 1); n = n + 1
 			pinfo.cols.info:append(", channel "..channel:uint())
 			params:add(f.ch_switch_channel_number, channel)
@@ -481,29 +481,29 @@ function wcn36xx.dissector(inbuffer, pinfo, tree)
 			params:add_le(f.ch_switch_self_sta_mac_addr, buffer(n, 6)); n = n + 6
 			params:add_le(f.bssid, buffer(n, 6)); n = n + 6
 		elseif (msg_type == 44) then
-			-- set link state
+			-- SET_LINK_ST_REQ
 			params:add_le(f.bssid, buffer(n, 6)); n = n + 6
 			params:add_le(f.set_link_st_state, buffer(n, 4)); n = n + 4
 			params:add_le(f.set_link_st_self_mac_addr, buffer(n, 6)); n = n + 6
 		elseif (msg_type == 46) then
-			-- get stats
+			-- GET_STATS_REQ
 			params:add_le(f.get_stats_sta_id, buffer(n, 4)); n = n + 4
 			params:add_le(f.get_stats_stats_mask, buffer(n, 4)); n = n + 4
 		elseif (msg_type == 48) then
-			-- update cfg
+			-- UPDATE_CFG_REQ
 			params:add_le(f.update_cfg_len, buffer(n, 4)); n = n + 4
 			while buffer:len() > n do
 				n = n + parse_cfg(buffer(n):tvb(), pinfo, params)
 			end
 		elseif (msg_type == 55) then
-			-- download nv
+			-- DOWNLOAD_NV_REQ
 			params:add_le(f.nv_frag_number, buffer(n, 2)); n = n + 2
 			params:add_le(f.nv_last_fragment, buffer(n, 2)); n = n + 2
 			local size = buffer(n, 4):le_uint()
 			params:add_le(f.nv_img_buffer_size, buffer(n, 4)); n = n + 4
 			params:add_le(f.nv_buffer, buffer(n, size)); n = n + size
 		elseif (msg_type == 57) then
-			-- add ba session
+			-- ADD_BA_SESSION_REQ
 			params:add_le(f.add_ba_session_sta_index, buffer(n, 2)); n = n + 2
 			params:add_le(f.add_ba_session_mac_addr, buffer(n, 6)); n = n + 6
 			params:add(f.add_ba_session_dialog_token, buffer(n, 1)); n = n + 1
@@ -548,7 +548,7 @@ function wcn36xx.dissector(inbuffer, pinfo, tree)
 			-- SIGNAL_BTAMP_EVENT_REQ
 			params:add_le(f.SIGNAL_BTAMP_EVENT_REQ_btAmpEventType, buffer(n, 4)); n = n + 4
 		elseif (msg_type == 78) then
-			-- enter bmps
+			-- ENTER_BMPS_REQ
 			params:add(f.bss_index, buffer(n, 1)); n = n + 1
 			params:add_le(f.enter_bmps_tbtt, buffer(n, 8)); n = n + 8
 			params:add(f.enter_bmps_dtim_count, buffer(n, 1)); n = n + 1
@@ -557,7 +557,7 @@ function wcn36xx.dissector(inbuffer, pinfo, tree)
 			params:add_le(f.enter_bmps_num_beacon_per_rssi_average, buffer(n, 4)); n = n + 4
 			params:add(f.enter_bmps_rssi_filter_enable, buffer(n, 1)); n = n + 1
 		elseif (msg_type == 79) then
-			-- exit bmps
+			-- EXIT_BMPS_REQ
 			params:add(f.exit_bmps_send_data_null, buffer(n, 1)); n = n + 1
 			params:add(f.bss_index, buffer(n, 1)); n = n + 1
 		elseif (msg_type == 83) then
@@ -565,7 +565,7 @@ function wcn36xx.dissector(inbuffer, pinfo, tree)
 			params:add_le(f.CONFIGURE_RXP_FILTER_REQ_setMcstBcstFilterSetting, buffer(n, 1)); n = n + 1
 			params:add_le(f.CONFIGURE_RXP_FILTER_REQ_setMcstBcstFilter, buffer(n, 1)); n = n + 1
 		elseif (msg_type == 84) then
-			-- add beacon filter
+			-- ADD_BCN_FILTER_REQ
 			params:add_le(f.beacon_filter_capability_info, buffer(n, 2)); n = n + 2
 			params:add_le(f.beacon_filter_capability_mask, buffer(n, 2)); n = n + 2
 			params:add_le(f.beacon_filter_beacon_interval, buffer(n, 2)); n = n + 2
@@ -619,7 +619,7 @@ function wcn36xx.dissector(inbuffer, pinfo, tree)
 			-- EXIT_WOWL_REQ
 			params:add_le(f.EXIT_WOWL_REQ_bssIdx, buffer(n, 1)); n = n + 1
 		elseif (msg_type == 90) then
-			-- host offload
+			-- HOST_OFFLOAD_REQ
 			local type = buffer(n, 1):uint()
 			params:add(f.host_offload_type, buffer(n, 1)); n = n + 1
 			params:add(f.host_offload_enable, buffer(n, 1)); n = n + 1
@@ -642,7 +642,7 @@ function wcn36xx.dissector(inbuffer, pinfo, tree)
 				params:add_le(f.ns_offload_slot_index, buffer(n, 4)); n = n + 4
 			end
 		elseif (msg_type == 91) then
-			-- set rssi threshold
+			-- SET_RSSI_THRESH_REQ
 			params:add(f.set_rssi_threshold_t1, buffer(n, 1)); n = n + 1
 			params:add(f.set_rssi_threshold_t2, buffer(n, 1)); n = n + 1
 			params:add(f.set_rssi_threshold_t3, buffer(n, 1)); n = n + 1
@@ -654,7 +654,7 @@ function wcn36xx.dissector(inbuffer, pinfo, tree)
 			params:add(f.set_rssi_threshold_t3neg, buffer(n, 1):bitfield(2));
 			n = n + 1
 		elseif (msg_type == 125) then
-			-- add sta self
+			-- HAL_ADD_STA_SELF_REQ
 			params:add_le(f.add_sta_self_addr, buffer(n, 6)); n = n + 6
 			params:add_le(f.add_sta_self_status, buffer(n, 4)); n = n + 4
 		elseif (msg_type == 127) then
@@ -674,7 +674,7 @@ function wcn36xx.dissector(inbuffer, pinfo, tree)
 				coexind:add_le(f.COEX_IND_Unused, buffer(n, 16)); n = n + 16
 			end
 		elseif (msg_type == 151) then
-			-- update scan param
+			-- UPDATE_SCAN_PARAM_REQ
 			params:add(f.scan_dot11d_enabled, buffer(n, 1)); n = n + 1
 			params:add(f.scan_dot11d_resolved, buffer(n, 1)); n = n + 1
 			local channel_count = buffer(n, 1):uint()
@@ -691,7 +691,7 @@ function wcn36xx.dissector(inbuffer, pinfo, tree)
 			params:add_le(f.scan_passive_max_ch_time, buffer(n, 2)); n = n + 2
 			params:add_le(f.scan_phy_chan_bond_state, buffer(n, 4)); n = n + 4
 		elseif (msg_type == 157) then
-			-- 8023 multicast list
+			-- 8023_MULTICAST_LIST_REQ
 			params:add(f.multicast_list_data_offset, buffer(n, 1)); n = n + 1
 			local addr_count = buffer(n, 4):le_uint()
 			params:add_le(f.multicast_list_addr_count, buffer(n, 4)); n = n + 4
@@ -702,7 +702,7 @@ function wcn36xx.dissector(inbuffer, pinfo, tree)
 			params:add(f.multicast_list_unused, buffer(n, unused)); n = n + unused
 			params:add(f.bss_index, buffer(n, 1)) n = n + 1
 		elseif (msg_type == 159) then
-			-- rcv packet filter
+			-- SET_PACKET_FILTER_REQ
 			params:add(f.rcv_packet_filter_id, buffer(n, 1)); n = n + 1
 			params:add(f.rcv_packet_filter_type, buffer(n, 1)); n = n + 1
 			local count = buffer(n, 1):uint()
@@ -720,13 +720,20 @@ function wcn36xx.dissector(inbuffer, pinfo, tree)
 				fltparams:add(f.rcv_packet_filter_param_data_mask, buffer(n, 8)); n = n + 8
 			end
 		elseif (msg_type == 166) then
-			-- set power params
+			-- SET_POWER_PARAMS_REQ
 			params:add_le(f.set_power_params_ignore_dtim, buffer(n, 4)); n = n + 4
 			params:add_le(f.set_power_params_dtim_period, buffer(n, 4)); n = n + 4
 			params:add_le(f.set_power_params_listen_interval, buffer(n, 4)); n = n + 4
 			params:add_le(f.set_power_params_bcast_mcast_filter, buffer(n, 4)); n = n + 4
 			params:add_le(f.set_power_params_enable_bet, buffer(n, 4)); n = n + 4
 			params:add_le(f.set_power_params_bet_interval, buffer(n, 4)); n = n + 4
+		elseif (msg_type == 171) then
+			-- GTK_OFFLOAD_REQ
+			params:add_le(f.GTK_OFFLOAD_REQ_ulFlags, buffer(n, 4)); n = n + 4
+			params:add_le(f.GTK_OFFLOAD_REQ_aKCK, buffer(n, 16)); n = n + 16
+			params:add_le(f.GTK_OFFLOAD_REQ_aKEK, buffer(n, 16)); n = n + 16
+			params:add_le(f.GTK_OFFLOAD_REQ_ullKeyReplayCounter, buffer(n, 8)); n = n + 8
+			params:add_le(f.GTK_OFFLOAD_REQ_bssIdx, buffer(n, 1)); n = n + 1
 		elseif (msg_type == 175) then
 			-- FEATURE_CAPS_EXCHANGE_REQ
 			local caps = params:add(buffer(n, 16), "caps")
@@ -742,12 +749,47 @@ function wcn36xx.dissector(inbuffer, pinfo, tree)
 		elseif (msg_type == 185) then
 			-- GET_ROAM_RSSI_REQ
 			params:add_le(f.GET_ROAM_RSSI_REQ_staId, buffer(n, 4)); n = n + 4
+		elseif (msg_type == 191) then
+			-- WLAN_ROAM_SCAN_OFFLOAD_REQ
+			params:add_le(f.WLAN_ROAM_SCAN_OFFLOAD_REQ_RoamScanOffloadEnabled, buffer(n, 4)); n = n + 4
+			params:add_le(f.WLAN_ROAM_SCAN_OFFLOAD_REQ_LookupThreshold, buffer(n, 1)); n = n + 1
+			params:add_le(f.WLAN_ROAM_SCAN_OFFLOAD_REQ_RoamRssiDiff, buffer(n, 1)); n = n + 1
+			params:add_le(f.WLAN_ROAM_SCAN_OFFLOAD_REQ_ChannelCacheType, buffer(n, 1)); n = n + 1
+			params:add_le(f.WLAN_ROAM_SCAN_OFFLOAD_REQ_Command, buffer(n, 1)); n = n + 1
+			params:add_le(f.WLAN_ROAM_SCAN_OFFLOAD_REQ_StartScanReason, buffer(n, 1)); n = n + 1
+			params:add_le(f.WLAN_ROAM_SCAN_OFFLOAD_REQ_NeighborScanTimerPeriod, buffer(n, 2)); n = n + 2
+			params:add_le(f.WLAN_ROAM_SCAN_OFFLOAD_REQ_NeighborRoamScanRefreshPeriod, buffer(n, 2)); n = n + 2
+			params:add_le(f.WLAN_ROAM_SCAN_OFFLOAD_REQ_NeighborScanChannelMinTime, buffer(n, 2)); n = n + 2
+			params:add_le(f.WLAN_ROAM_SCAN_OFFLOAD_REQ_NeighborScanChannelMaxTime, buffer(n, 2)); n = n + 2
+			params:add_le(f.WLAN_ROAM_SCAN_OFFLOAD_REQ_EmptyRefreshScanPeriod, buffer(n, 2)); n = n + 2
+			params:add_le(f.WLAN_ROAM_SCAN_OFFLOAD_REQ_ValidChannelCount, buffer(n, 1)); n = n + 1
+			params:add_le(f.WLAN_ROAM_SCAN_OFFLOAD_REQ_ValidChannelList, buffer(n, 80)); n = n + 80
+			params:add_le(f.WLAN_ROAM_SCAN_OFFLOAD_REQ_IsCCXEnabled, buffer(n, 4)); n = n + 4
+			params:add_le(f.WLAN_ROAM_SCAN_OFFLOAD_REQ_us24GProbeSize, buffer(n, 2)); n = n + 2
+			params:add_le(f.WLAN_ROAM_SCAN_OFFLOAD_REQ_a24GProbeTemplate, buffer(n, 450)); n = n + 450
+			params:add_le(f.WLAN_ROAM_SCAN_OFFLOAD_REQ_us5GProbeSize, buffer(n, 2)); n = n + 2
+			params:add_le(f.WLAN_ROAM_SCAN_OFFLOAD_REQ_a5GProbeTemplate, buffer(n, 450)); n = n + 450
+			params:add_le(f.WLAN_ROAM_SCAN_OFFLOAD_REQ_nProbes, buffer(n, 1)); n = n + 1
+			params:add_le(f.WLAN_ROAM_SCAN_OFFLOAD_REQ_HomeAwayTime, buffer(n, 2)); n = n + 2
+			params:add_le(f.WLAN_ROAM_SCAN_OFFLOAD_REQ_MAWCEnabled, buffer(n, 4)); n = n + 4
+			params:add_le(f.WLAN_ROAM_SCAN_OFFLOAD_REQ_ReservedBytes, buffer(n, 57)); n = n + 57
+
+			-- connected network member
+			params:add_le(f.WLAN_ROAM_SCAN_OFFLOAD_REQ_ConnNet_ssId, buffer(n, 33)); n = n + 33
+			params:add_le(f.WLAN_ROAM_SCAN_OFFLOAD_REQ_ConnNet_currAPbssid, buffer(n, 6)); n = n + 6
+			params:add_le(f.WLAN_ROAM_SCAN_OFFLOAD_REQ_ConnNet_authentication, buffer(n, 4)); n = n + 4
+			params:add_le(f.WLAN_ROAM_SCAN_OFFLOAD_REQ_ConnNet_encryption, buffer(n, 4)); n = n + 4
+			params:add_le(f.WLAN_ROAM_SCAN_OFFLOAD_REQ_ConnNet_mcencryption, buffer(n, 4)); n = n + 4
+			params:add_le(f.WLAN_ROAM_SCAN_OFFLOAD_REQ_ConnNet_ChannelCount, buffer(n, 1)); n = n + 1
+			params:add_le(f.WLAN_ROAM_SCAN_OFFLOAD_REQ_ConnNet_ChannelCache, buffer(n, 80)); n = n + 80
+
+			params:add_le(f.WLAN_ROAM_SCAN_OFFLOAD_REQ_MDID, buffer(n, 3)); n = n + 3
 		elseif ((msg_type_strings[msg_type] ~= nil) and
 			(string.find(msg_type_strings[msg_type], "RSP") ~= nil)) then
 			-- parse responses
 			local status
 			if (msg_type == 1) then
-				-- start rsp
+				-- HAL_START_RSP
 				status = buffer(n, 2):le_uint()
 				params:add_le(f.rsp_status, buffer(n, 2)); n = n + 2
 				-- jump to fw version
@@ -849,24 +891,32 @@ function wcn36xx.dissector(inbuffer, pinfo, tree)
 				params:add_le(f.ADD_BA_SESSION_RSP_STAID, buffer(n, 1)); n = n + 1
 				params:add_le(f.ADD_BA_SESSION_RSP_SSN, buffer(n, 2)); n = n + 2
 			elseif (msg_type == 60) then
-				-- trigger ba
+				-- TRIGGER_BA_RSP
 				params:add_le(f.bssid, buffer(n, 6)); n = n + 6
 				status = buffer(n, 4):le_uint()
 				params:add_le(f.rsp_status, buffer(n, 4)); n = n + 4
+				local num = buffer(n, 2):le_uint()
 				params:add_le(f.trigger_ba_rsp_candidate_cnt, buffer(n, 2)); n = n + 2
+				for i = 0, num-1 do
+					local cand = subtree:add(wcn36xx, buffer(n, 22), i)
+					cand:add_le(f.TRIGGER_BA_RSP_Cand_staAddr, buffer(n, 6)); n = n + 6
+					for j = 0, 7 do
+						cand:add_le(f.TRIGGER_BA_RSP_Cand_baInfo, buffer(n, 2)); n = n + 2
+					end
+				end
 			elseif (msg_type == 75) then
-				-- tl flush ac
+				-- TL_HAL_FLUSH_AC_RSP
 				params:add(f.tl_flush_ac_sta_id, buffer(n, 1)); n = n + 1
 				params:add(f.tid, buffer(n, 1)); n = n + 1
 				status = buffer(n, 4):le_uint()
 				params:add_le(f.rsp_status, buffer(n, 4)); n = n + 4
 			elseif (msg_type == 116) then
-				-- set max tx power
+				-- SET_MAX_TX_POWER_RSP
 				params:add(f.set_max_tx_power_rsp_power, buffer(n, 1)); n = n + 1
 				status = buffer(n, 4):le_uint()
 				params:add_le(f.rsp_status, buffer(n, 4)); n = n + 4
 			elseif (msg_type == 124) then
-				-- start oem data
+				-- START_OEM_DATA_RSP
 				params:add(f.start_oem_data_data, buffer(n))
 				status = 0
 			elseif (msg_type == 126) then
@@ -882,7 +932,11 @@ function wcn36xx.dissector(inbuffer, pinfo, tree)
 				params:add_le(f.rsp_status, buffer(n, 4)); n = n + 4
 				params:add_le(f.DEL_STA_SELF_RSP_selfMacAddr, buffer(n, 6)); n = n + 6
 			elseif (msg_type == 152) then
+				-- UPDATE_SCAN_PARAM_RSP
 				status = 0
+			elseif (msg_type == 158) then
+				-- 8023_MULTICAST_LIST_RSP
+				params:add_le(f.MULTICAST_LIST_RSP_bssIdx, buffer(n, 1)); n = n + 1
 			elseif (msg_type == 167) then
 				status = 0
 			elseif (msg_type == 176) then
@@ -891,7 +945,7 @@ function wcn36xx.dissector(inbuffer, pinfo, tree)
 				n = n + parse_caps_bits(buffer(n, 16):tvb(), pinfo, caps)
 				status = 0
 			elseif (msg_type == 140) then
-				-- enable radar
+				-- ENABLE_RADAR_DETECT_RSP
 				params:add_le(f.bssid, buffer(n, 6)); n = n + 6
 				status = buffer(n, 4):le_uint()
 				params:add_le(f.rsp_status, buffer(n, 4)); n = n + 4
@@ -2080,3 +2134,46 @@ f.FW_CAP = ProtoField.uint8("wcn36xx.fw_cap", "fw_cap", base.DEC, fw_caps_string
 f.START_SCAN_RSP_status = ProtoField.uint32("wcn36xx.START_SCAN_RSP_status", "status")
 f.START_SCAN_RSP_startTSF = ProtoField.uint64("wcn36xx.START_SCAN_RSP_startTSF", "startTSF")
 f.START_SCAN_RSP_txMgmtPower = ProtoField.uint8("wcn36xx.START_SCAN_RSP_txMgmtPower", "txMgmtPower")
+
+f.WLAN_ROAM_SCAN_OFFLOAD_REQ_RoamScanOffloadEnabled = ProtoField.uint32("wcn36xx.WLAN_ROAM_SCAN_OFFLOAD_REQ_RoamScanOffloadEnabled", "RoamScanOffloadEnabled")
+f.WLAN_ROAM_SCAN_OFFLOAD_REQ_LookupThreshold = ProtoField.uint8("wcn36xx.WLAN_ROAM_SCAN_OFFLOAD_REQ_LookupThreshold", "LookupThreshold")
+f.WLAN_ROAM_SCAN_OFFLOAD_REQ_RoamRssiDiff = ProtoField.uint8("wcn36xx.WLAN_ROAM_SCAN_OFFLOAD_REQ_RoamRssiDiff", "RoamRssiDiff")
+f.WLAN_ROAM_SCAN_OFFLOAD_REQ_ChannelCacheType = ProtoField.uint8("wcn36xx.WLAN_ROAM_SCAN_OFFLOAD_REQ_ChannelCacheType", "ChannelCacheType")
+f.WLAN_ROAM_SCAN_OFFLOAD_REQ_Command = ProtoField.uint8("wcn36xx.WLAN_ROAM_SCAN_OFFLOAD_REQ_Command", "Command")
+f.WLAN_ROAM_SCAN_OFFLOAD_REQ_StartScanReason = ProtoField.uint8("wcn36xx.WLAN_ROAM_SCAN_OFFLOAD_REQ_StartScanReason", "StartScanReason")
+f.WLAN_ROAM_SCAN_OFFLOAD_REQ_NeighborScanTimerPeriod = ProtoField.uint16("wcn36xx.WLAN_ROAM_SCAN_OFFLOAD_REQ_NeighborScanTimerPeriod", "NeighborScanTimerPeriod")
+f.WLAN_ROAM_SCAN_OFFLOAD_REQ_NeighborRoamScanRefreshPeriod = ProtoField.uint16("wcn36xx.WLAN_ROAM_SCAN_OFFLOAD_REQ_NeighborRoamScanRefreshPeriod", "NeighborRoamScanRefreshPeriod")
+f.WLAN_ROAM_SCAN_OFFLOAD_REQ_NeighborScanChannelMinTime = ProtoField.uint16("wcn36xx.WLAN_ROAM_SCAN_OFFLOAD_REQ_NeighborScanChannelMinTime", "NeighborScanChannelMinTime")
+f.WLAN_ROAM_SCAN_OFFLOAD_REQ_NeighborScanChannelMaxTime = ProtoField.uint16("wcn36xx.WLAN_ROAM_SCAN_OFFLOAD_REQ_NeighborScanChannelMaxTime", "NeighborScanChannelMaxTime")
+f.WLAN_ROAM_SCAN_OFFLOAD_REQ_EmptyRefreshScanPeriod = ProtoField.uint16("wcn36xx.WLAN_ROAM_SCAN_OFFLOAD_REQ_EmptyRefreshScanPeriod", "EmptyRefreshScanPeriod")
+f.WLAN_ROAM_SCAN_OFFLOAD_REQ_ValidChannelCount = ProtoField.uint8("wcn36xx.WLAN_ROAM_SCAN_OFFLOAD_REQ_ValidChannelCount", "ValidChannelCount")
+f.WLAN_ROAM_SCAN_OFFLOAD_REQ_ValidChannelList = ProtoField.bytes("wcn36xx.WLAN_ROAM_SCAN_OFFLOAD_REQ_ValidChannelList", "ValidChannelList")
+f.WLAN_ROAM_SCAN_OFFLOAD_REQ_IsCCXEnabled = ProtoField.uint32("wcn36xx.WLAN_ROAM_SCAN_OFFLOAD_REQ_IsCCXEnabled", "IsCCXEnabled")
+f.WLAN_ROAM_SCAN_OFFLOAD_REQ_us24GProbeSize = ProtoField.uint16("wcn36xx.WLAN_ROAM_SCAN_OFFLOAD_REQ_us24GProbeSize", "us24GProbeSize")
+f.WLAN_ROAM_SCAN_OFFLOAD_REQ_a24GProbeTemplate = ProtoField.bytes("wcn36xx.WLAN_ROAM_SCAN_OFFLOAD_REQ_a24GProbeTemplate", "a24GProbeTemplate")
+f.WLAN_ROAM_SCAN_OFFLOAD_REQ_us5GProbeSize = ProtoField.uint16("wcn36xx.WLAN_ROAM_SCAN_OFFLOAD_REQ_us5GProbeSize", "us5GProbeSize")
+f.WLAN_ROAM_SCAN_OFFLOAD_REQ_a5GProbeTemplate = ProtoField.bytes("wcn36xx.WLAN_ROAM_SCAN_OFFLOAD_REQ_a5GProbeTemplate", "a5GProbeTemplate")
+f.WLAN_ROAM_SCAN_OFFLOAD_REQ_nProbes = ProtoField.uint8("wcn36xx.WLAN_ROAM_SCAN_OFFLOAD_REQ_nProbes", "nProbes")
+f.WLAN_ROAM_SCAN_OFFLOAD_REQ_HomeAwayTime = ProtoField.uint16("wcn36xx.WLAN_ROAM_SCAN_OFFLOAD_REQ_HomeAwayTime", "HomeAwayTime")
+f.WLAN_ROAM_SCAN_OFFLOAD_REQ_MAWCEnabled = ProtoField.uint32("wcn36xx.WLAN_ROAM_SCAN_OFFLOAD_REQ_MAWCEnabled", "MAWCEnabled")
+f.WLAN_ROAM_SCAN_OFFLOAD_REQ_ReservedBytes = ProtoField.bytes("wcn36xx.WLAN_ROAM_SCAN_OFFLOAD_REQ_ReservedBytes", "ReservedBytes")
+f.WLAN_ROAM_SCAN_OFFLOAD_REQ_ConnectedNetwork = ProtoField.bytes("wcn36xx.WLAN_ROAM_SCAN_OFFLOAD_REQ_ConnectedNetwork", "ConnectedNetwork")
+f.WLAN_ROAM_SCAN_OFFLOAD_REQ_MDID = ProtoField.bytes("wcn36xx.WLAN_ROAM_SCAN_OFFLOAD_REQ_MDID", "MDID")
+f.WLAN_ROAM_SCAN_OFFLOAD_REQ_ConnNet_ssId = ProtoField.bytes("wcn36xx.WLAN_ROAM_SCAN_OFFLOAD_REQ_ConnNet_ssId", "ssId")
+f.WLAN_ROAM_SCAN_OFFLOAD_REQ_ConnNet_currAPbssid = ProtoField.ether("wcn36xx.WLAN_ROAM_SCAN_OFFLOAD_REQ_ConnNet_currAPbssid", "currAPbssid")
+f.WLAN_ROAM_SCAN_OFFLOAD_REQ_ConnNet_authentication = ProtoField.uint32("wcn36xx.WLAN_ROAM_SCAN_OFFLOAD_REQ_ConnNet_authentication", "authentication")
+f.WLAN_ROAM_SCAN_OFFLOAD_REQ_ConnNet_encryption = ProtoField.uint32("wcn36xx.WLAN_ROAM_SCAN_OFFLOAD_REQ_ConnNet_encryption", "encryption")
+f.WLAN_ROAM_SCAN_OFFLOAD_REQ_ConnNet_mcencryption = ProtoField.uint32("wcn36xx.WLAN_ROAM_SCAN_OFFLOAD_REQ_ConnNet_mcencryption", "mcencryption")
+f.WLAN_ROAM_SCAN_OFFLOAD_REQ_ConnNet_ChannelCount = ProtoField.uint8("wcn36xx.WLAN_ROAM_SCAN_OFFLOAD_REQ_ConnNet_ChannelCount", "ChannelCount")
+f.WLAN_ROAM_SCAN_OFFLOAD_REQ_ConnNet_ChannelCache = ProtoField.bytes("wcn36xx.WLAN_ROAM_SCAN_OFFLOAD_REQ_ConnNet_ChannelCache", "ChannelCache")
+
+f.TRIGGER_BA_RSP_Cand_staAddr = ProtoField.ether("wcn36xx.TRIGGER_BA_RSP_Cand_staAddr", "staAddr")
+f.TRIGGER_BA_RSP_Cand_baInfo = ProtoField.uint16("wcn36xx.TRIGGER_BA_RSP_Cand_baInfo", "baInfo", base.HEX)
+
+f.GTK_OFFLOAD_REQ_ulFlags = ProtoField.uint32("wcn36xx.GTK_OFFLOAD_REQ_ulFlags", "ulFlags", base.HEX)
+f.GTK_OFFLOAD_REQ_aKCK = ProtoField.bytes("wcn36xx.GTK_OFFLOAD_REQ_aKCK", "aKCK")
+f.GTK_OFFLOAD_REQ_aKEK = ProtoField.bytes("wcn36xx.GTK_OFFLOAD_REQ_aKEK", "aKEK")
+f.GTK_OFFLOAD_REQ_ullKeyReplayCounter = ProtoField.uint64("wcn36xx.GTK_OFFLOAD_REQ_ullKeyReplayCounter", "ullKeyReplayCounter")
+f.GTK_OFFLOAD_REQ_bssIdx = ProtoField.uint8("wcn36xx.GTK_OFFLOAD_REQ_bssIdx", "bssIdx")
+
+f.MULTICAST_LIST_RSP_bssIdx = ProtoField.uint8("wcn36xx.8023_MULTICAST_LIST_RSP_bssIdx", "bssIdx")
