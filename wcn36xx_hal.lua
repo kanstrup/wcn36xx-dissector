@@ -742,6 +742,41 @@ function wcn36xx.dissector(inbuffer, pinfo, tree)
 		elseif (msg_type == 185) then
 			-- GET_ROAM_RSSI_REQ
 			params:add_le(f.GET_ROAM_RSSI_REQ_staId, buffer(n, 4)); n = n + 4
+		elseif (msg_type == 191) then
+			-- WLAN_ROAM_SCAN_OFFLOAD_REQ
+			params:add_le(f.WLAN_ROAM_SCAN_OFFLOAD_REQ_RoamScanOffloadEnabled, buffer(n, 4)); n = n + 4
+			params:add_le(f.WLAN_ROAM_SCAN_OFFLOAD_REQ_LookupThreshold, buffer(n, 1)); n = n + 1
+			params:add_le(f.WLAN_ROAM_SCAN_OFFLOAD_REQ_RoamRssiDiff, buffer(n, 1)); n = n + 1
+			params:add_le(f.WLAN_ROAM_SCAN_OFFLOAD_REQ_ChannelCacheType, buffer(n, 1)); n = n + 1
+			params:add_le(f.WLAN_ROAM_SCAN_OFFLOAD_REQ_Command, buffer(n, 1)); n = n + 1
+			params:add_le(f.WLAN_ROAM_SCAN_OFFLOAD_REQ_StartScanReason, buffer(n, 1)); n = n + 1
+			params:add_le(f.WLAN_ROAM_SCAN_OFFLOAD_REQ_NeighborScanTimerPeriod, buffer(n, 2)); n = n + 2
+			params:add_le(f.WLAN_ROAM_SCAN_OFFLOAD_REQ_NeighborRoamScanRefreshPeriod, buffer(n, 2)); n = n + 2
+			params:add_le(f.WLAN_ROAM_SCAN_OFFLOAD_REQ_NeighborScanChannelMinTime, buffer(n, 2)); n = n + 2
+			params:add_le(f.WLAN_ROAM_SCAN_OFFLOAD_REQ_NeighborScanChannelMaxTime, buffer(n, 2)); n = n + 2
+			params:add_le(f.WLAN_ROAM_SCAN_OFFLOAD_REQ_EmptyRefreshScanPeriod, buffer(n, 2)); n = n + 2
+			params:add_le(f.WLAN_ROAM_SCAN_OFFLOAD_REQ_ValidChannelCount, buffer(n, 1)); n = n + 1
+			params:add_le(f.WLAN_ROAM_SCAN_OFFLOAD_REQ_ValidChannelList, buffer(n, 80)); n = n + 80
+			params:add_le(f.WLAN_ROAM_SCAN_OFFLOAD_REQ_IsCCXEnabled, buffer(n, 4)); n = n + 4
+			params:add_le(f.WLAN_ROAM_SCAN_OFFLOAD_REQ_us24GProbeSize, buffer(n, 2)); n = n + 2
+			params:add_le(f.WLAN_ROAM_SCAN_OFFLOAD_REQ_a24GProbeTemplate, buffer(n, 450)); n = n + 450
+			params:add_le(f.WLAN_ROAM_SCAN_OFFLOAD_REQ_us5GProbeSize, buffer(n, 2)); n = n + 2
+			params:add_le(f.WLAN_ROAM_SCAN_OFFLOAD_REQ_a5GProbeTemplate, buffer(n, 450)); n = n + 450
+			params:add_le(f.WLAN_ROAM_SCAN_OFFLOAD_REQ_nProbes, buffer(n, 1)); n = n + 1
+			params:add_le(f.WLAN_ROAM_SCAN_OFFLOAD_REQ_HomeAwayTime, buffer(n, 2)); n = n + 2
+			params:add_le(f.WLAN_ROAM_SCAN_OFFLOAD_REQ_MAWCEnabled, buffer(n, 4)); n = n + 4
+			params:add_le(f.WLAN_ROAM_SCAN_OFFLOAD_REQ_ReservedBytes, buffer(n, 57)); n = n + 57
+
+			-- connected network member
+			params:add_le(f.WLAN_ROAM_SCAN_OFFLOAD_REQ_ConnNet_ssId, buffer(n, 33)); n = n + 33
+			params:add_le(f.WLAN_ROAM_SCAN_OFFLOAD_REQ_ConnNet_currAPbssid, buffer(n, 6)); n = n + 6
+			params:add_le(f.WLAN_ROAM_SCAN_OFFLOAD_REQ_ConnNet_authentication, buffer(n, 4)); n = n + 4
+			params:add_le(f.WLAN_ROAM_SCAN_OFFLOAD_REQ_ConnNet_encryption, buffer(n, 4)); n = n + 4
+			params:add_le(f.WLAN_ROAM_SCAN_OFFLOAD_REQ_ConnNet_mcencryption, buffer(n, 4)); n = n + 4
+			params:add_le(f.WLAN_ROAM_SCAN_OFFLOAD_REQ_ConnNet_ChannelCount, buffer(n, 1)); n = n + 1
+			params:add_le(f.WLAN_ROAM_SCAN_OFFLOAD_REQ_ConnNet_ChannelCache, buffer(n, 80)); n = n + 80
+
+			params:add_le(f.WLAN_ROAM_SCAN_OFFLOAD_REQ_MDID, buffer(n, 3)); n = n + 3
 		elseif ((msg_type_strings[msg_type] ~= nil) and
 			(string.find(msg_type_strings[msg_type], "RSP") ~= nil)) then
 			-- parse responses
@@ -2080,3 +2115,35 @@ f.FW_CAP = ProtoField.uint8("wcn36xx.fw_cap", "fw_cap", base.DEC, fw_caps_string
 f.START_SCAN_RSP_status = ProtoField.uint32("wcn36xx.START_SCAN_RSP_status", "status")
 f.START_SCAN_RSP_startTSF = ProtoField.uint64("wcn36xx.START_SCAN_RSP_startTSF", "startTSF")
 f.START_SCAN_RSP_txMgmtPower = ProtoField.uint8("wcn36xx.START_SCAN_RSP_txMgmtPower", "txMgmtPower")
+
+f.WLAN_ROAM_SCAN_OFFLOAD_REQ_RoamScanOffloadEnabled = ProtoField.uint32("wcn36xx.WLAN_ROAM_SCAN_OFFLOAD_REQ_RoamScanOffloadEnabled", "RoamScanOffloadEnabled")
+f.WLAN_ROAM_SCAN_OFFLOAD_REQ_LookupThreshold = ProtoField.uint8("wcn36xx.WLAN_ROAM_SCAN_OFFLOAD_REQ_LookupThreshold", "LookupThreshold")
+f.WLAN_ROAM_SCAN_OFFLOAD_REQ_RoamRssiDiff = ProtoField.uint8("wcn36xx.WLAN_ROAM_SCAN_OFFLOAD_REQ_RoamRssiDiff", "RoamRssiDiff")
+f.WLAN_ROAM_SCAN_OFFLOAD_REQ_ChannelCacheType = ProtoField.uint8("wcn36xx.WLAN_ROAM_SCAN_OFFLOAD_REQ_ChannelCacheType", "ChannelCacheType")
+f.WLAN_ROAM_SCAN_OFFLOAD_REQ_Command = ProtoField.uint8("wcn36xx.WLAN_ROAM_SCAN_OFFLOAD_REQ_Command", "Command")
+f.WLAN_ROAM_SCAN_OFFLOAD_REQ_StartScanReason = ProtoField.uint8("wcn36xx.WLAN_ROAM_SCAN_OFFLOAD_REQ_StartScanReason", "StartScanReason")
+f.WLAN_ROAM_SCAN_OFFLOAD_REQ_NeighborScanTimerPeriod = ProtoField.uint16("wcn36xx.WLAN_ROAM_SCAN_OFFLOAD_REQ_NeighborScanTimerPeriod", "NeighborScanTimerPeriod")
+f.WLAN_ROAM_SCAN_OFFLOAD_REQ_NeighborRoamScanRefreshPeriod = ProtoField.uint16("wcn36xx.WLAN_ROAM_SCAN_OFFLOAD_REQ_NeighborRoamScanRefreshPeriod", "NeighborRoamScanRefreshPeriod")
+f.WLAN_ROAM_SCAN_OFFLOAD_REQ_NeighborScanChannelMinTime = ProtoField.uint16("wcn36xx.WLAN_ROAM_SCAN_OFFLOAD_REQ_NeighborScanChannelMinTime", "NeighborScanChannelMinTime")
+f.WLAN_ROAM_SCAN_OFFLOAD_REQ_NeighborScanChannelMaxTime = ProtoField.uint16("wcn36xx.WLAN_ROAM_SCAN_OFFLOAD_REQ_NeighborScanChannelMaxTime", "NeighborScanChannelMaxTime")
+f.WLAN_ROAM_SCAN_OFFLOAD_REQ_EmptyRefreshScanPeriod = ProtoField.uint16("wcn36xx.WLAN_ROAM_SCAN_OFFLOAD_REQ_EmptyRefreshScanPeriod", "EmptyRefreshScanPeriod")
+f.WLAN_ROAM_SCAN_OFFLOAD_REQ_ValidChannelCount = ProtoField.uint8("wcn36xx.WLAN_ROAM_SCAN_OFFLOAD_REQ_ValidChannelCount", "ValidChannelCount")
+f.WLAN_ROAM_SCAN_OFFLOAD_REQ_ValidChannelList = ProtoField.bytes("wcn36xx.WLAN_ROAM_SCAN_OFFLOAD_REQ_ValidChannelList", "ValidChannelList")
+f.WLAN_ROAM_SCAN_OFFLOAD_REQ_IsCCXEnabled = ProtoField.uint32("wcn36xx.WLAN_ROAM_SCAN_OFFLOAD_REQ_IsCCXEnabled", "IsCCXEnabled")
+f.WLAN_ROAM_SCAN_OFFLOAD_REQ_us24GProbeSize = ProtoField.uint16("wcn36xx.WLAN_ROAM_SCAN_OFFLOAD_REQ_us24GProbeSize", "us24GProbeSize")
+f.WLAN_ROAM_SCAN_OFFLOAD_REQ_a24GProbeTemplate = ProtoField.bytes("wcn36xx.WLAN_ROAM_SCAN_OFFLOAD_REQ_a24GProbeTemplate", "a24GProbeTemplate")
+f.WLAN_ROAM_SCAN_OFFLOAD_REQ_us5GProbeSize = ProtoField.uint16("wcn36xx.WLAN_ROAM_SCAN_OFFLOAD_REQ_us5GProbeSize", "us5GProbeSize")
+f.WLAN_ROAM_SCAN_OFFLOAD_REQ_a5GProbeTemplate = ProtoField.bytes("wcn36xx.WLAN_ROAM_SCAN_OFFLOAD_REQ_a5GProbeTemplate", "a5GProbeTemplate")
+f.WLAN_ROAM_SCAN_OFFLOAD_REQ_nProbes = ProtoField.uint8("wcn36xx.WLAN_ROAM_SCAN_OFFLOAD_REQ_nProbes", "nProbes")
+f.WLAN_ROAM_SCAN_OFFLOAD_REQ_HomeAwayTime = ProtoField.uint16("wcn36xx.WLAN_ROAM_SCAN_OFFLOAD_REQ_HomeAwayTime", "HomeAwayTime")
+f.WLAN_ROAM_SCAN_OFFLOAD_REQ_MAWCEnabled = ProtoField.uint32("wcn36xx.WLAN_ROAM_SCAN_OFFLOAD_REQ_MAWCEnabled", "MAWCEnabled")
+f.WLAN_ROAM_SCAN_OFFLOAD_REQ_ReservedBytes = ProtoField.bytes("wcn36xx.WLAN_ROAM_SCAN_OFFLOAD_REQ_ReservedBytes", "ReservedBytes")
+f.WLAN_ROAM_SCAN_OFFLOAD_REQ_ConnectedNetwork = ProtoField.bytes("wcn36xx.WLAN_ROAM_SCAN_OFFLOAD_REQ_ConnectedNetwork", "ConnectedNetwork")
+f.WLAN_ROAM_SCAN_OFFLOAD_REQ_MDID = ProtoField.bytes("wcn36xx.WLAN_ROAM_SCAN_OFFLOAD_REQ_MDID", "MDID")
+f.WLAN_ROAM_SCAN_OFFLOAD_REQ_ConnNet_ssId = ProtoField.bytes("wcn36xx.WLAN_ROAM_SCAN_OFFLOAD_REQ_ConnNet_ssId", "ssId")
+f.WLAN_ROAM_SCAN_OFFLOAD_REQ_ConnNet_currAPbssid = ProtoField.ether("wcn36xx.WLAN_ROAM_SCAN_OFFLOAD_REQ_ConnNet_currAPbssid", "currAPbssid")
+f.WLAN_ROAM_SCAN_OFFLOAD_REQ_ConnNet_authentication = ProtoField.uint32("wcn36xx.WLAN_ROAM_SCAN_OFFLOAD_REQ_ConnNet_authentication", "authentication")
+f.WLAN_ROAM_SCAN_OFFLOAD_REQ_ConnNet_encryption = ProtoField.uint32("wcn36xx.WLAN_ROAM_SCAN_OFFLOAD_REQ_ConnNet_encryption", "encryption")
+f.WLAN_ROAM_SCAN_OFFLOAD_REQ_ConnNet_mcencryption = ProtoField.uint32("wcn36xx.WLAN_ROAM_SCAN_OFFLOAD_REQ_ConnNet_mcencryption", "mcencryption")
+f.WLAN_ROAM_SCAN_OFFLOAD_REQ_ConnNet_ChannelCount = ProtoField.uint8("wcn36xx.WLAN_ROAM_SCAN_OFFLOAD_REQ_ConnNet_ChannelCount", "ChannelCount")
+f.WLAN_ROAM_SCAN_OFFLOAD_REQ_ConnNet_ChannelCache = ProtoField.bytes("wcn36xx.WLAN_ROAM_SCAN_OFFLOAD_REQ_ConnNet_ChannelCache", "ChannelCache")
