@@ -727,6 +727,13 @@ function wcn36xx.dissector(inbuffer, pinfo, tree)
 			params:add_le(f.set_power_params_bcast_mcast_filter, buffer(n, 4)); n = n + 4
 			params:add_le(f.set_power_params_enable_bet, buffer(n, 4)); n = n + 4
 			params:add_le(f.set_power_params_bet_interval, buffer(n, 4)); n = n + 4
+		elseif (msg_type == 171) then
+			-- GTK_OFFLOAD_REQ
+			params:add_le(f.GTK_OFFLOAD_REQ_ulFlags, buffer(n, 4)); n = n + 4
+			params:add_le(f.GTK_OFFLOAD_REQ_aKCK, buffer(n, 16)); n = n + 16
+			params:add_le(f.GTK_OFFLOAD_REQ_aKEK, buffer(n, 16)); n = n + 16
+			params:add_le(f.GTK_OFFLOAD_REQ_ullKeyReplayCounter, buffer(n, 8)); n = n + 8
+			params:add_le(f.GTK_OFFLOAD_REQ_bssIdx, buffer(n, 1)); n = n + 1
 		elseif (msg_type == 175) then
 			-- FEATURE_CAPS_EXCHANGE_REQ
 			local caps = params:add(buffer(n, 16), "caps")
@@ -2158,3 +2165,9 @@ f.WLAN_ROAM_SCAN_OFFLOAD_REQ_ConnNet_ChannelCache = ProtoField.bytes("wcn36xx.WL
 
 f.TRIGGER_BA_RSP_Cand_staAddr = ProtoField.ether("wcn36xx.TRIGGER_BA_RSP_Cand_staAddr", "staAddr")
 f.TRIGGER_BA_RSP_Cand_baInfo = ProtoField.uint16("wcn36xx.TRIGGER_BA_RSP_Cand_baInfo", "baInfo", base.HEX)
+
+f.GTK_OFFLOAD_REQ_ulFlags = ProtoField.uint32("wcn36xx.GTK_OFFLOAD_REQ_ulFlags", "ulFlags", base.HEX)
+f.GTK_OFFLOAD_REQ_aKCK = ProtoField.bytes("wcn36xx.GTK_OFFLOAD_REQ_aKCK", "aKCK")
+f.GTK_OFFLOAD_REQ_aKEK = ProtoField.bytes("wcn36xx.GTK_OFFLOAD_REQ_aKEK", "aKEK")
+f.GTK_OFFLOAD_REQ_ullKeyReplayCounter = ProtoField.uint64("wcn36xx.GTK_OFFLOAD_REQ_ullKeyReplayCounter", "ullKeyReplayCounter")
+f.GTK_OFFLOAD_REQ_bssIdx = ProtoField.uint8("wcn36xx.GTK_OFFLOAD_REQ_bssIdx", "bssIdx")
