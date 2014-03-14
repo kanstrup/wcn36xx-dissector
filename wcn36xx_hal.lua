@@ -1006,6 +1006,11 @@ function wcn36xx.dissector(inbuffer, pinfo, tree)
 				status = buffer(n, 4):le_uint()
 				params:add_le(f.rsp_status, buffer(n, 4)); n = n + 4
 				params:add_le(f.DEL_STA_SELF_RSP_selfMacAddr, buffer(n, 6)); n = n + 6
+			elseif (msg_type == 140) then
+				-- ENABLE_RADAR_DETECT_RSP
+				params:add_le(f.bssid, buffer(n, 6)); n = n + 6
+				status = buffer(n, 4):le_uint()
+				params:add_le(f.rsp_status, buffer(n, 4)); n = n + 4
 			elseif (msg_type == 152) then
 				-- UPDATE_SCAN_PARAM_RSP
 				status = 0
@@ -1021,11 +1026,6 @@ function wcn36xx.dissector(inbuffer, pinfo, tree)
 				local caps = params:add(buffer(n, 16), "caps")
 				n = n + parse_caps_bits(buffer(n, 16):tvb(), pinfo, caps)
 				status = 0
-			elseif (msg_type == 140) then
-				-- ENABLE_RADAR_DETECT_RSP
-				params:add_le(f.bssid, buffer(n, 6)); n = n + 6
-				status = buffer(n, 4):le_uint()
-				params:add_le(f.rsp_status, buffer(n, 4)); n = n + 4
 			elseif (msg_type == 186) then
 				-- GET_ROAM_RSSI_RSP
 				status = buffer(n, 4):le_uint()
