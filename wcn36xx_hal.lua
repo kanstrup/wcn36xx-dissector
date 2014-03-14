@@ -1020,6 +1020,7 @@ function wcn36xx.dissector(inbuffer, pinfo, tree)
 				params:add_le(f.rsp_status, buffer(n, 4)); n = n + 4
 				params:add_le(f.MULTICAST_LIST_RSP_bssIdx, buffer(n, 1)); n = n + 1
 			elseif (msg_type == 167) then
+				-- WLAN_HAL_SET_POWER_PARAMS_RSP
 				status = 0
 			elseif (msg_type == 176) then
 				-- FEATURE_CAPS_EXCHANGE_RSP
