@@ -669,6 +669,9 @@ function wcn36xx.dissector(inbuffer, pinfo, tree)
 			else
 				coexind:add_le(f.COEX_IND_Unused, buffer(n, 16)); n = n + 16
 			end
+		elseif (msg_type == 130) then
+			-- OTA_TX_COMPL_IND
+			params:add_le(f.OTA_TX_COMPL_IND_status, buffer(n, 4)); n = n + 4
 		elseif (msg_type == 145) then
 			-- KEEP_ALIVE_REQ
 			params:add_le(f.KEEP_ALIVE_REQ_packetType, buffer(n, 1)); n = n + 1
@@ -2224,3 +2227,5 @@ f.KEEP_ALIVE_REQ_hostIpv4Addr = ProtoField.ipv4("wcn36xx.KEEP_ALIVE_REQ_hostIpv4
 f.KEEP_ALIVE_REQ_destIpv4Addr = ProtoField.ipv4("wcn36xx.KEEP_ALIVE_REQ_destIpv4Addr", "destIpv4Addr")
 f.KEEP_ALIVE_REQ_destMacAddr = ProtoField.ether("wcn36xx.KEEP_ALIVE_REQ_destMacAddr", "destMacAddr")
 f.KEEP_ALIVE_REQ_bssIdx = ProtoField.uint8("wcn36xx.KEEP_ALIVE_REQ_bssIdx", "bssIdx")
+
+f.OTA_TX_COMPL_IND_status = ProtoField.uint32("wcn36xx.OTA_TX_COMPL_IND_status", "status")
