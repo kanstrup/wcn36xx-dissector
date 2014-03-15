@@ -778,6 +778,10 @@ function wcn36xx.dissector(inbuffer, pinfo, tree)
 			-- UPDATE_VHT_OP_MODE_REQ
 			params:add_le(f.UPDATE_VHT_OP_MODE_REQ_opMode, buffer(n, 2)); n = n + 2
 			params:add_le(f.UPDATE_VHT_OP_MODE_REQ_staId, buffer(n, 2)); n = n + 2
+		elseif (msg_type == 184) then
+			-- P2P_NOA_START_IND
+			params:add_le(f.P2P_NOA_START_IND_status, buffer(n, 4)); n = n + 4
+			params:add_le(f.P2P_NOA_START_IND_bssIdx, buffer(n, 4)); n = n + 4
 		elseif (msg_type == 185) then
 			-- GET_ROAM_RSSI_REQ
 			params:add_le(f.GET_ROAM_RSSI_REQ_staId, buffer(n, 4)); n = n + 4
@@ -2296,3 +2300,6 @@ f.P2P_NOA_ATTR_IND_uNoa2Duration = ProtoField.uint32("wcn36xx.P2P_NOA_ATTR_IND_u
 f.P2P_NOA_ATTR_IND_uNoa2Interval = ProtoField.uint32("wcn36xx.P2P_NOA_ATTR_IND_uNoa2Interval", "uNoa2Interval")
 f.P2P_NOA_ATTR_IND_uNoa2StartTime = ProtoField.uint32("wcn36xx.P2P_NOA_ATTR_IND_uNoa2StartTime", "uNoa2StartTime")
 f.P2P_NOA_ATTR_IND_status = ProtoField.uint32("wcn36xx.P2P_NOA_ATTR_IND_status", "status")
+
+f.P2P_NOA_START_IND_status = ProtoField.uint32("wcn36xx.P2P_NOA_START_IND_status", "status")
+f.P2P_NOA_START_IND_bssIdx = ProtoField.uint32("wcn36xx.P2P_NOA_START_IND_bssIdx", "bssIdx")
