@@ -649,6 +649,15 @@ function wcn36xx.dissector(inbuffer, pinfo, tree)
 			params:add(f.set_rssi_threshold_t3pos, buffer(n, 1):bitfield(3));
 			params:add(f.set_rssi_threshold_t3neg, buffer(n, 1):bitfield(2));
 			n = n + 1
+		elseif (msg_type == 119) then
+			-- SET_P2P_GONOA_REQ
+			params:add_le(f.SET_P2P_GONOA_REQ_opp_ps, buffer(n, 1)); n = n + 1
+			params:add_le(f.SET_P2P_GONOA_REQ_ctWindow, buffer(n, 4)); n = n + 4
+			params:add_le(f.SET_P2P_GONOA_REQ_count, buffer(n, 1)); n = n + 1
+			params:add_le(f.SET_P2P_GONOA_REQ_duration, buffer(n, 4)); n = n + 4
+			params:add_le(f.SET_P2P_GONOA_REQ_interval, buffer(n, 4)); n = n + 4
+			params:add_le(f.SET_P2P_GONOA_REQ_single_noa_duration, buffer(n, 4)); n = n + 4
+			params:add_le(f.SET_P2P_GONOA_REQ_psSelection, buffer(n, 1)); n = n + 1
 		elseif (msg_type == 125) then
 			-- HAL_ADD_STA_SELF_REQ
 			params:add_le(f.add_sta_self_addr, buffer(n, 6)); n = n + 6
@@ -2248,3 +2257,11 @@ f.START_RSP_ucMaxBssids = ProtoField.uint8("wcn36xx.START_RSP_ucMaxBssids", "ucM
 f.START_RSP_wcnssWlanVersion = ProtoField.uint32("wcn36xx.START_RSP_wcnssWlanVersion", "wcnssWlanVersion", base.HEX)
 f.START_RSP_wcnssCrmVersionString = ProtoField.string("wcn36xx.START_RSP_wcnssCrmVersionString", "wcnssCrmVersionString")
 f.START_RSP_wcnssWlanVersionString = ProtoField.string("wcn36xx.START_RSP_wcnssWlanVersionString", "wcnssWlanVersionString")
+
+f.SET_P2P_GONOA_REQ_opp_ps = ProtoField.uint8("wcn36xx.SET_P2P_GONOA_REQ_opp_ps", "opp_ps")
+f.SET_P2P_GONOA_REQ_ctWindow = ProtoField.uint32("wcn36xx.SET_P2P_GONOA_REQ_ctWindow", "ctWindow")
+f.SET_P2P_GONOA_REQ_count = ProtoField.uint8("wcn36xx.SET_P2P_GONOA_REQ_count", "count")
+f.SET_P2P_GONOA_REQ_duration = ProtoField.uint32("wcn36xx.SET_P2P_GONOA_REQ_duration", "duration")
+f.SET_P2P_GONOA_REQ_interval = ProtoField.uint32("wcn36xx.SET_P2P_GONOA_REQ_interval", "interval")
+f.SET_P2P_GONOA_REQ_single_noa_duration = ProtoField.uint32("wcn36xx.SET_P2P_GONOA_REQ_single_noa_duration", "single_noa_duration")
+f.SET_P2P_GONOA_REQ_psSelection = ProtoField.uint8("wcn36xx.SET_P2P_GONOA_REQ_psSelection", "psSelection")
