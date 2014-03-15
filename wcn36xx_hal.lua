@@ -403,7 +403,7 @@ function wcn36xx.dissector(inbuffer, pinfo, tree)
 			params:add_le(f.CONFIG_BSS_V1_vhtTxChannelWidthSet, buffer(n, 1)); n = n + 1
 		elseif (msg_type == 18) then
 			-- DELETE_BSS_REQ
-			params:add(f.sta_index, buffer(n, 1)); n = n + 1
+			params:add_le(f.DELETE_BSS_REQ_bssIdx, buffer(n, 1)); n = n + 1
 		elseif (msg_type == 20) then
 			-- JOIN_REQ
 			params:add_le(f.bssid, buffer(n, 6)); n = n + 6
@@ -1984,6 +1984,8 @@ f.CONFIG_BSS_V1_txMgmtPower = ProtoField.uint8("wcn36xx.CONFIG_BSS_V1_txMgmtPowe
 f.CONFIG_BSS_V1_maxTxPower = ProtoField.uint8("wcn36xx.CONFIG_BSS_V1_maxTxPower", "maxTxPower")
 f.CONFIG_BSS_V1_vhtCapable = ProtoField.uint8("wcn36xx.CONFIG_BSS_V1_vhtCapable", "vhtCapable")
 f.CONFIG_BSS_V1_vhtTxChannelWidthSet = ProtoField.uint8("wcn36xx.CONFIG_BSS_V1_vhtTxChannelWidthSet", "vhtTxChannelWidthSet")
+
+f.DELETE_BSS_REQ_bssIdx = ProtoField.uint8("wcn36xx.DELETE_BSS_REQ_bssIdx", "bssIdx")
 
 f.SEND_BEACON_REQ_beaconLength = ProtoField.uint32("wcn36xx.SEND_BEACON_REQ_beaconLength", "beaconLength")
 f.SEND_BEACON_REQ_beacon = ProtoField.bytes("wcn36xx.SEND_BEACON_REQ_beacon", "beacon")
