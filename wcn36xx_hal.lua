@@ -799,7 +799,8 @@ function wcn36xx.dissector(inbuffer, pinfo, tree)
 				params:add(f.start_rsp_fw_major, buffer(n, 1)); n = n + 1
 			elseif (msg_type == 7) then
 				-- START_SCAN_RSP
-				params:add_le(f.START_SCAN_RSP_status, buffer(n, 4)); n = n + 4
+				status = buffer(n, 4):le_uint()
+				params:add_le(f.rsp_status, buffer(n, 4)); n = n + 4
 				params:add_le(f.START_SCAN_RSP_startTSF, buffer(n, 8)); n = n + 8
 				params:add_le(f.START_SCAN_RSP_txMgmtPower, buffer(n, 1)); n = n + 1
 			elseif (msg_type == 13) then
