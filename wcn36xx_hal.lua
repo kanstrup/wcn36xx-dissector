@@ -289,11 +289,6 @@ function wcn36xx.dissector(inbuffer, pinfo, tree)
 			local channel = buffer(n, 1); n = n + 1
 			pinfo.cols.info:append(", channel "..channel:uint())
 			params:add(f.scan_channel, channel)
-		elseif (msg_type == 7) then
-			-- START_SCAN_RSP
-			params:add_le(f.START_SCAN_RSP_status, buffer(n, 4)); n = n + 4
-			params:add_le(f.START_SCAN_RSP_startTSF, buffer(n, 8)); n = n + 8
-			params:add_le(f.START_SCAN_RSP_txMgmtPower, buffer(n, 1)); n = n + 1
 		elseif (msg_type == 10) then
 			-- FINISH_SCAN_REQ
 			params:add_le(f.FINISH_SCAN_REQ_scanMode, buffer(n, 4)); n = n + 4
@@ -802,6 +797,11 @@ function wcn36xx.dissector(inbuffer, pinfo, tree)
 				params:add(f.start_rsp_fw_version, buffer(n, 1)); n = n + 1
 				params:add(f.start_rsp_fw_minor, buffer(n, 1)); n = n + 1
 				params:add(f.start_rsp_fw_major, buffer(n, 1)); n = n + 1
+			elseif (msg_type == 7) then
+				-- START_SCAN_RSP
+				params:add_le(f.START_SCAN_RSP_status, buffer(n, 4)); n = n + 4
+				params:add_le(f.START_SCAN_RSP_startTSF, buffer(n, 8)); n = n + 8
+				params:add_le(f.START_SCAN_RSP_txMgmtPower, buffer(n, 1)); n = n + 1
 			elseif (msg_type == 13) then
 				-- CONFIG_STA_RSP
 				status = buffer(n, 4):le_uint()
