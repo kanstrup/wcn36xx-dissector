@@ -43,6 +43,7 @@ local thermal_mit_level_strings = {}
 local fw_caps_strings = {}
 local rsp_status_strings = {}
 local coex_ind_type_strings = {}
+local keep_alive_packet_type_strings = {}
 
 -- Firmware version
 local fw_major = 0
@@ -668,6 +669,14 @@ function wcn36xx.dissector(inbuffer, pinfo, tree)
 			else
 				coexind:add_le(f.COEX_IND_Unused, buffer(n, 16)); n = n + 16
 			end
+		elseif (msg_type == 145) then
+			-- KEEP_ALIVE_REQ
+			params:add_le(f.KEEP_ALIVE_REQ_packetType, buffer(n, 1)); n = n + 1
+			params:add_le(f.KEEP_ALIVE_REQ_timePeriod, buffer(n, 4)); n = n + 4
+			params:add_le(f.KEEP_ALIVE_REQ_hostIpv4Addr, buffer(n, 4)); n = n + 4
+			params:add_le(f.KEEP_ALIVE_REQ_destIpv4Addr, buffer(n, 4)); n = n + 4
+			params:add_le(f.KEEP_ALIVE_REQ_destMacAddr, buffer(n, 6)); n = n + 6
+			params:add_le(f.KEEP_ALIVE_REQ_bssIdx, buffer(n, 1)); n = n + 1
 		elseif (msg_type == 151) then
 			-- UPDATE_SCAN_PARAM_REQ
 			params:add(f.scan_dot11d_enabled, buffer(n, 1)); n = n + 1
@@ -1631,6 +1640,9 @@ coex_ind_type_strings[3] = "SCANS_ARE_NOT_COMPROMISED_BY_COEX"
 coex_ind_type_strings[4] = "DISABLE_AGGREGATION_IN_2P4"
 coex_ind_type_strings[5] = "ENABLE_AGGREGATION_IN_2P4"
 
+keep_alive_packet_type_strings[0] = "NULL_PKT"
+keep_alive_packet_type_strings[1] = "UNSOLICIT_ARP_RSP"
+
 -- Protocol fields
 f.msg_type = ProtoField.uint16("wcn36xx.msg_type", "msg_type", base.DEC, msg_type_strings)
 f.msg_version = ProtoField.uint16("wcn36xx.msg_version", "msg_version")
@@ -2205,3 +2217,10 @@ f.JOIN_RSP_txMgmtPower = ProtoField.uint8("wcn36xx.JOIN_RSP_txMgmtPower", "txMgm
 f.CH_SWITCH_RSP_channelNumber = ProtoField.uint8("wcn36xx.CH_SWITCH_RSP_channelNumber", "channelNumber")
 f.CH_SWITCH_RSP_txMgmtPower = ProtoField.uint8("wcn36xx.CH_SWITCH_RSP_txMgmtPower", "txMgmtPower")
 f.CH_SWITCH_RSP_bssId = ProtoField.ether("wcn36xx.CH_SWITCH_RSP_bssId", "bssId")
+
+f.KEEP_ALIVE_REQ_packetType = ProtoField.uint8("wcn36xx.KEEP_ALIVE_REQ_packetType", "packetType", base.DEC, keep_alive_packet_type_strings)
+f.KEEP_ALIVE_REQ_timePeriod = ProtoField.uint32("wcn36xx.KEEP_ALIVE_REQ_timePeriod", "timePeriod")
+f.KEEP_ALIVE_REQ_hostIpv4Addr = ProtoField.ipv4("wcn36xx.KEEP_ALIVE_REQ_hostIpv4Addr", "hostIpv4Addr")
+f.KEEP_ALIVE_REQ_destIpv4Addr = ProtoField.ipv4("wcn36xx.KEEP_ALIVE_REQ_destIpv4Addr", "destIpv4Addr")
+f.KEEP_ALIVE_REQ_destMacAddr = ProtoField.ether("wcn36xx.KEEP_ALIVE_REQ_destMacAddr", "destMacAddr")
+f.KEEP_ALIVE_REQ_bssIdx = ProtoField.uint8("wcn36xx.KEEP_ALIVE_REQ_bssIdx", "bssIdx")
