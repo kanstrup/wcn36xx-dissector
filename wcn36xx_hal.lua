@@ -796,19 +796,18 @@ function wcn36xx.dissector(inbuffer, pinfo, tree)
 			-- parse responses
 			local status
 			if (msg_type == 1) then
-				-- HAL_START_RSP
+				-- START_RSP
 				status = buffer(n, 2):le_uint()
 				params:add_le(f.rsp_status, buffer(n, 2)); n = n + 2
-				-- jump to fw version
-				n = n + 2
+				params:add_le(f.START_RSP_ucMaxStations, buffer(n, 1)); n = n + 1
+				params:add_le(f.START_RSP_ucMaxBssids, buffer(n, 1)); n = n + 1
 				fw_revision = buffer(n, 1)
 				fw_version = buffer(n + 1, 1)
 				fw_minor = buffer(n + 2, 1)
 				fw_major = buffer(n + 3, 1)
-				params:add(f.start_rsp_fw_revision, buffer(n, 1)); n = n + 1
-				params:add(f.start_rsp_fw_version, buffer(n, 1)); n = n + 1
-				params:add(f.start_rsp_fw_minor, buffer(n, 1)); n = n + 1
-				params:add(f.start_rsp_fw_major, buffer(n, 1)); n = n + 1
+				params:add_le(f.START_RSP_wcnssWlanVersion, buffer(n, 4)); n = n + 4
+				params:add_le(f.START_RSP_wcnssCrmVersionString, buffer(n, 64)); n = n + 64
+				params:add_le(f.START_RSP_wcnssWlanVersionString, buffer(n, 64)); n = n + 64
 			elseif (msg_type == 7) then
 				-- START_SCAN_RSP
 				status = buffer(n, 4):le_uint()
@@ -2243,3 +2242,9 @@ f.OTA_TX_COMPL_IND_status = ProtoField.uint32("wcn36xx.OTA_TX_COMPL_IND_status",
 f.DELETE_STA_RSP_staId = ProtoField.uint8("wcn36xx.DELETE_STA_RSP_staId", "staId")
 
 f.ENTER_BMPS_RSP_bssIdx = ProtoField.uint8("wcn36xx.ENTER_BMPS_RSP_bssIdx", "bssIdx")
+
+f.START_RSP_ucMaxStations = ProtoField.uint8("wcn36xx.START_RSP_ucMaxStations", "ucMaxStations")
+f.START_RSP_ucMaxBssids = ProtoField.uint8("wcn36xx.START_RSP_ucMaxBssids", "ucMaxBssids")
+f.START_RSP_wcnssWlanVersion = ProtoField.uint32("wcn36xx.START_RSP_wcnssWlanVersion", "wcnssWlanVersion", base.HEX)
+f.START_RSP_wcnssCrmVersionString = ProtoField.string("wcn36xx.START_RSP_wcnssCrmVersionString", "wcnssCrmVersionString")
+f.START_RSP_wcnssWlanVersionString = ProtoField.string("wcn36xx.START_RSP_wcnssWlanVersionString", "wcnssWlanVersionString")
