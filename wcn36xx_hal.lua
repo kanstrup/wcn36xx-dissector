@@ -681,6 +681,22 @@ function wcn36xx.dissector(inbuffer, pinfo, tree)
 		elseif (msg_type == 130) then
 			-- OTA_TX_COMPL_IND
 			params:add_le(f.OTA_TX_COMPL_IND_status, buffer(n, 4)); n = n + 4
+		elseif (msg_type == 138) then
+			-- P2P_NOA_ATTR_IND
+			params:add_le(f.P2P_NOA_ATTR_IND_index, buffer(n, 1)); n = n + 1
+			params:add_le(f.P2P_NOA_ATTR_IND_oppPsFlag, buffer(n, 1)); n = n + 1
+			params:add_le(f.P2P_NOA_ATTR_IND_ctWin, buffer(n, 2)); n = n + 2
+			params:add_le(f.P2P_NOA_ATTR_IND_uNoa1IntervalCnt, buffer(n, 2)); n = n + 2
+			params:add_le(f.P2P_NOA_ATTR_IND_bssIdx, buffer(n, 2)); n = n + 2
+			params:add_le(f.P2P_NOA_ATTR_IND_uNoa1Duration, buffer(n, 4)); n = n + 4
+			params:add_le(f.P2P_NOA_ATTR_IND_uNoa1Interval, buffer(n, 4)); n = n + 4
+			params:add_le(f.P2P_NOA_ATTR_IND_uNoa1StartTime, buffer(n, 4)); n = n + 4
+			params:add_le(f.P2P_NOA_ATTR_IND_uNoa2IntervalCnt, buffer(n, 2)); n = n + 2
+			params:add_le(f.P2P_NOA_ATTR_IND_rsvd2, buffer(n, 2)); n = n + 2
+			params:add_le(f.P2P_NOA_ATTR_IND_uNoa2Duration, buffer(n, 4)); n = n + 4
+			params:add_le(f.P2P_NOA_ATTR_IND_uNoa2Interval, buffer(n, 4)); n = n + 4
+			params:add_le(f.P2P_NOA_ATTR_IND_uNoa2StartTime, buffer(n, 4)); n = n + 4
+			params:add_le(f.P2P_NOA_ATTR_IND_status, buffer(n, 4)); n = n + 4
 		elseif (msg_type == 145) then
 			-- KEEP_ALIVE_REQ
 			params:add_le(f.KEEP_ALIVE_REQ_packetType, buffer(n, 1)); n = n + 1
@@ -2265,3 +2281,18 @@ f.SET_P2P_GONOA_REQ_duration = ProtoField.uint32("wcn36xx.SET_P2P_GONOA_REQ_dura
 f.SET_P2P_GONOA_REQ_interval = ProtoField.uint32("wcn36xx.SET_P2P_GONOA_REQ_interval", "interval")
 f.SET_P2P_GONOA_REQ_single_noa_duration = ProtoField.uint32("wcn36xx.SET_P2P_GONOA_REQ_single_noa_duration", "single_noa_duration")
 f.SET_P2P_GONOA_REQ_psSelection = ProtoField.uint8("wcn36xx.SET_P2P_GONOA_REQ_psSelection", "psSelection")
+
+f.P2P_NOA_ATTR_IND_index = ProtoField.uint8("wcn36xx.P2P_NOA_ATTR_IND_index", "index")
+f.P2P_NOA_ATTR_IND_oppPsFlag = ProtoField.uint8("wcn36xx.P2P_NOA_ATTR_IND_oppPsFlag", "oppPsFlag")
+f.P2P_NOA_ATTR_IND_ctWin = ProtoField.uint16("wcn36xx.P2P_NOA_ATTR_IND_ctWin", "ctWin")
+f.P2P_NOA_ATTR_IND_uNoa1IntervalCnt = ProtoField.uint16("wcn36xx.P2P_NOA_ATTR_IND_uNoa1IntervalCnt", "uNoa1IntervalCnt")
+f.P2P_NOA_ATTR_IND_bssIdx = ProtoField.uint16("wcn36xx.P2P_NOA_ATTR_IND_bssIdx", "bssIdx")
+f.P2P_NOA_ATTR_IND_uNoa1Duration = ProtoField.uint32("wcn36xx.P2P_NOA_ATTR_IND_uNoa1Duration", "uNoa1Duration")
+f.P2P_NOA_ATTR_IND_uNoa1Interval = ProtoField.uint32("wcn36xx.P2P_NOA_ATTR_IND_uNoa1Interval", "uNoa1Interval")
+f.P2P_NOA_ATTR_IND_uNoa1StartTime = ProtoField.uint32("wcn36xx.P2P_NOA_ATTR_IND_uNoa1StartTime", "uNoa1StartTime")
+f.P2P_NOA_ATTR_IND_uNoa2IntervalCnt = ProtoField.uint16("wcn36xx.P2P_NOA_ATTR_IND_uNoa2IntervalCnt", "uNoa2IntervalCnt")
+f.P2P_NOA_ATTR_IND_rsvd2 = ProtoField.uint16("wcn36xx.P2P_NOA_ATTR_IND_rsvd2", "rsvd2")
+f.P2P_NOA_ATTR_IND_uNoa2Duration = ProtoField.uint32("wcn36xx.P2P_NOA_ATTR_IND_uNoa2Duration", "uNoa2Duration")
+f.P2P_NOA_ATTR_IND_uNoa2Interval = ProtoField.uint32("wcn36xx.P2P_NOA_ATTR_IND_uNoa2Interval", "uNoa2Interval")
+f.P2P_NOA_ATTR_IND_uNoa2StartTime = ProtoField.uint32("wcn36xx.P2P_NOA_ATTR_IND_uNoa2StartTime", "uNoa2StartTime")
+f.P2P_NOA_ATTR_IND_status = ProtoField.uint32("wcn36xx.P2P_NOA_ATTR_IND_status", "status")
