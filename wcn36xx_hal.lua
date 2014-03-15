@@ -685,6 +685,9 @@ function wcn36xx.dissector(inbuffer, pinfo, tree)
 			-- HOST_SUSPEND_IND
 			params:add_le(f.HOST_SUSPEND_IND_configuredMcstBcstFilterSetting, buffer(n, 4)); n = n + 4
 			params:add_le(f.HOST_SUSPEND_IND_activeSessionCount, buffer(n, 4)); n = n + 4
+		elseif (msg_type == 132) then
+			-- HOST_RESUME_REQ
+			params:add_le(f.HOST_RESUME_REQ_configuredMcstBcstFilterSetting, buffer(n, 1)); n = n + 1
 		elseif (msg_type == 138) then
 			-- P2P_NOA_ATTR_IND
 			params:add_le(f.P2P_NOA_ATTR_IND_index, buffer(n, 1)); n = n + 1
@@ -2310,3 +2313,5 @@ f.P2P_NOA_START_IND_bssIdx = ProtoField.uint32("wcn36xx.P2P_NOA_START_IND_bssIdx
 
 f.HOST_SUSPEND_IND_configuredMcstBcstFilterSetting = ProtoField.uint32("wcn36xx.HOST_SUSPEND_IND_configuredMcstBcstFilterSetting", "configuredMcstBcstFilterSetting")
 f.HOST_SUSPEND_IND_activeSessionCount = ProtoField.uint32("wcn36xx.HOST_SUSPEND_IND_activeSessionCount", "activeSessionCount")
+
+f.HOST_RESUME_REQ_configuredMcstBcstFilterSetting = ProtoField.uint8("wcn36xx.HOST_RESUME_REQ_configuredMcstBcstFilterSetting", "configuredMcstBcstFilterSetting")
