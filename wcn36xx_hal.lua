@@ -945,6 +945,11 @@ function wcn36xx.dissector(inbuffer, pinfo, tree)
 				params:add(f.tid, buffer(n, 1)); n = n + 1
 				status = buffer(n, 4):le_uint()
 				params:add_le(f.rsp_status, buffer(n, 4)); n = n + 4
+			elseif (msg_type == 97) then
+				-- ENTER_BMPS_RSP
+				status = buffer(n, 4):le_uint()
+				params:add_le(f.rsp_status, buffer(n, 4)); n = n + 4
+				params:add_le(f.ENTER_BMPS_RSP_bssIdx, buffer(n, 1)); n = n + 1
 			elseif (msg_type == 116) then
 				-- SET_MAX_TX_POWER_RSP
 				params:add(f.set_max_tx_power_rsp_power, buffer(n, 1)); n = n + 1
@@ -2236,3 +2241,5 @@ f.KEEP_ALIVE_REQ_bssIdx = ProtoField.uint8("wcn36xx.KEEP_ALIVE_REQ_bssIdx", "bss
 f.OTA_TX_COMPL_IND_status = ProtoField.uint32("wcn36xx.OTA_TX_COMPL_IND_status", "status")
 
 f.DELETE_STA_RSP_staId = ProtoField.uint8("wcn36xx.DELETE_STA_RSP_staId", "staId")
+
+f.ENTER_BMPS_RSP_bssIdx = ProtoField.uint8("wcn36xx.ENTER_BMPS_RSP_bssIdx", "bssIdx")
