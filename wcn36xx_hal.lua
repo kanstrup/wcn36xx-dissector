@@ -884,11 +884,6 @@ function wcn36xx.dissector(inbuffer, pinfo, tree)
 				params:add_le(f.CONFIG_BSS_RSP_bssBcastStaIdx, buffer(n, 1)); n = n + 1
 				params:add_le(f.CONFIG_BSS_RSP_staMac, buffer(n, 6)); n = n + 6
 				params:add_le(f.CONFIG_BSS_RSP_txMgmtPower, buffer(n, 1)); n = n + 1
-			elseif (msg_type == 19) then
-				-- DELETE_BSS_RSP
-				status = buffer(n, 4):le_uint()
-				params:add_le(f.rsp_status, buffer(n, 4)); n = n + 4
-				params:add_le(f.DELETE_BSS_RSP_bssIdx, buffer(n, 1)); n = n + 1
 			elseif (msg_type == 21) then
 				-- JOIN_RSP
 				status = buffer(n, 4):le_uint()
@@ -1023,11 +1018,13 @@ function wcn36xx.dissector(inbuffer, pinfo, tree)
 				params:add_le(f.rsp_status, buffer(n, 4)); n = n + 4
 				params:add_le(f.GET_ROAM_RSSI_RSP_staId, buffer(n, 1)); n = n + 1
 				params:add_le(f.GET_ROAM_RSSI_RSP_rssi, buffer(n, 1)); n = n + 1
-			elseif (msg_type == 97 or
+			elseif (msg_type == 19 or
+				msg_type == 97 or
 				msg_type == 98 or
 				msg_type == 158 or
 				msg_type == 160 or
 				msg_type == 172) then
+				-- DELETE_BSS_RSP
 				-- ENTER_BMPS_RSP
 				-- EXIT_BMPS_RSP
 				-- 8023_MULTICAST_LIST_RSP
