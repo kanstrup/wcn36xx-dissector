@@ -1006,30 +1006,41 @@ function wcn36xx.dissector(inbuffer, pinfo, tree)
 				status = buffer(n, 4):le_uint()
 				params:add_le(f.rsp_status, buffer(n, 4)); n = n + 4
 				params:add_le(f.DEL_STA_SELF_RSP_selfMacAddr, buffer(n, 6)); n = n + 6
+			elseif (msg_type == 140) then
+				-- ENABLE_RADAR_DETECT_RSP
+				params:add_le(f.bssid, buffer(n, 6)); n = n + 6
+				status = buffer(n, 4):le_uint()
+				params:add_le(f.rsp_status, buffer(n, 4)); n = n + 4
 			elseif (msg_type == 152) then
 				-- UPDATE_SCAN_PARAM_RSP
 				status = 0
-			elseif (msg_type == 158) then
-				-- 8023_MULTICAST_LIST_RSP
-				params:add_le(f.MULTICAST_LIST_RSP_bssIdx, buffer(n, 1)); n = n + 1
 			elseif (msg_type == 167) then
+				-- WLAN_HAL_SET_POWER_PARAMS_RSP
 				status = 0
 			elseif (msg_type == 176) then
 				-- FEATURE_CAPS_EXCHANGE_RSP
 				local caps = params:add(buffer(n, 16), "caps")
 				n = n + parse_caps_bits(buffer(n, 16):tvb(), pinfo, caps)
 				status = 0
-			elseif (msg_type == 140) then
-				-- ENABLE_RADAR_DETECT_RSP
-				params:add_le(f.bssid, buffer(n, 6)); n = n + 6
-				status = buffer(n, 4):le_uint()
-				params:add_le(f.rsp_status, buffer(n, 4)); n = n + 4
 			elseif (msg_type == 186) then
 				-- GET_ROAM_RSSI_RSP
 				status = buffer(n, 4):le_uint()
 				params:add_le(f.rsp_status, buffer(n, 4)); n = n + 4
 				params:add_le(f.GET_ROAM_RSSI_RSP_staId, buffer(n, 1)); n = n + 1
 				params:add_le(f.GET_ROAM_RSSI_RSP_rssi, buffer(n, 1)); n = n + 1
+			elseif (msg_type == 97 or
+				msg_type == 98 or
+				msg_type == 158 or
+				msg_type == 160 or
+				msg_type == 172) then
+				-- ENTER_BMPS_RSP
+				-- EXIT_BMPS_RSP
+				-- 8023_MULTICAST_LIST_RSP
+				-- SET_PACKET_FILTER_RSP
+				-- GTK_OFFLOAD_RSP
+				status = buffer(n, 4):le_uint()
+				params:add_le(f.rsp_status, buffer(n, 4)); n = n + 4
+				params:add_le(f.rsp_bssIdx, buffer(n, 1)); n = n + 1
 			else
 				-- all others
 				status = buffer(n, 4):le_uint()
@@ -1899,6 +1910,7 @@ f.rmv_stakey_key_id = ProtoField.int8("wcn36xx.rmv_stakey_key_id", "key_id")
 f.rmv_stakey_unicast= ProtoField.bool("wcn36xx.rmv_stakey_unicast", "unicast")
 
 f.rsp_status = ProtoField.uint32("wcn36xx.rsp_status", "status", base.HEX, rsp_status_strings)
+f.rsp_bssIdx = ProtoField.uint8("wcn36xx.rsp_bssIdx", "bssIdx")
 f.start_rsp_fw_major = ProtoField.uint8("wcn36xx.start_rsp_fw_major", "fw_major")
 f.start_rsp_fw_minor = ProtoField.uint8("wcn36xx.start_rsp_fw_minor", "fw_minor")
 f.start_rsp_fw_version = ProtoField.uint8("wcn36xx.start_rsp_fw_version", "fw_version")
