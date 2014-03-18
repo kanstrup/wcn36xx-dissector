@@ -452,7 +452,6 @@ function wcn36xx.dissector(inbuffer, pinfo, tree)
 			n = n + parse_update_edca(buffer(n, 4):tvb(), pinfo, e)
 			e = params:add(buffer(n, 4), "acvo")
 			n = n + parse_update_edca(buffer(n, 4):tvb(), pinfo, e)
-
 		elseif (msg_type == 38) then
 			-- ADD_BA_REQ
 			params:add(f.add_ba_session_id, buffer(n, 1)); n = n + 1
