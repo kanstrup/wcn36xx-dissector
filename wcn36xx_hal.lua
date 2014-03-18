@@ -121,7 +121,7 @@ function parse_config_sta(buffer, pinfo, tree)
 		tree:add_le(f.CONFIG_STA_REQ_us32MaxAmpduDuration, buffer(n, 1)); n = n + 1
 		tree:add_le(f.CONFIG_STA_REQ_fDsssCckMode40Mhz, buffer(n, 1)); n = n + 1
 		tree:add_le(f.CONFIG_STA_REQ_staIdx, buffer(n, 1)); n = n + 1
-		tree:add_le(f.CONFIG_STA_REQ_bssIdx, buffer(n, 1)); n = n + 1
+		tree:add_le(f.bssIdx, buffer(n, 1)); n = n + 1
 		tree:add_le(f.CONFIG_STA_REQ_p2pCapableSta, buffer(n, 1)); n = n + 1
 		tree:add_le(f.CONFIG_STA_REQ_reserved, buffer(n, 1)); n = n + 1
 		tree:add_le(f.CONFIG_STA_REQ_supportedRates, buffer(n, 58)); n = n + 58
@@ -154,7 +154,7 @@ function parse_config_sta(buffer, pinfo, tree)
 		tree:add_le(f.CONFIG_STA_REQ_V1_us32MaxAmpduDuration, buffer(n, 1)); n = n + 1
 		tree:add_le(f.CONFIG_STA_REQ_V1_fDsssCckMode40Mhz, buffer(n, 1)); n = n + 1
 		tree:add_le(f.CONFIG_STA_REQ_V1_staIdx, buffer(n, 1)); n = n + 1
-		tree:add_le(f.CONFIG_STA_REQ_V1_bssIdx, buffer(n, 1)); n = n + 1
+		tree:add_le(f.bssIdx, buffer(n, 1)); n = n + 1
 		tree:add_le(f.CONFIG_STA_REQ_V1_p2pCapableSta, buffer(n, 1)); n = n + 1
 		tree:add_le(f.CONFIG_STA_REQ_V1_misc_flags, buffer(n, 1)); n = n + 1
 		tree:add_le(f.CONFIG_STA_REQ_V1_supportedRates, buffer(n, 66)); n = n + 66
@@ -404,7 +404,7 @@ function wcn36xx.dissector(inbuffer, pinfo, tree)
 			params:add_le(f.CONFIG_BSS_V1_vhtTxChannelWidthSet, buffer(n, 1)); n = n + 1
 		elseif (msg_type == 18) then
 			-- DELETE_BSS_REQ
-			params:add_le(f.DELETE_BSS_REQ_bssIdx, buffer(n, 1)); n = n + 1
+			params:add_le(f.bssIdx, buffer(n, 1)); n = n + 1
 		elseif (msg_type == 20) then
 			-- JOIN_REQ
 			params:add_le(f.bssid, buffer(n, 6)); n = n + 6
@@ -416,7 +416,7 @@ function wcn36xx.dissector(inbuffer, pinfo, tree)
 			params:add(f.join_max_tx_power, buffer(n, 1)); n = n + 1
 		elseif (msg_type == 24) then
 			-- SET_BSSKEY_REQ
-			params:add_le(f.SET_BSSKEY_REQ_bssIdx, buffer(n, 1)); n = n + 1
+			params:add_le(f.bssIdx, buffer(n, 1)); n = n + 1
 			params:add_le(f.SET_BSSKEY_REQ_encType, buffer(n, 4)); n = n + 4
 			params:add_le(f.SET_BSSKEY_REQ_numKeys, buffer(n, 1)); n = n + 1
 			params:add_le(f.SET_BSSKEY_REQ_key, buffer(n, 228)); n = n + 228
@@ -515,7 +515,7 @@ function wcn36xx.dissector(inbuffer, pinfo, tree)
 			params:add_le(f.TRIGGER_BA_REQ_baCandidateCnt, buffer(n, 2)); n = n + 2
 		elseif (msg_type == 61) then
 			-- UPDATE_BEACON_REQ
-			params:add_le(f.UPDATE_BEACON_REQ_bssIdx, buffer(n, 1)); n = n + 1
+			params:add_le(f.bssIdx, buffer(n, 1)); n = n + 1
 			params:add_le(f.UPDATE_BEACON_REQ_fShortPreamble, buffer(n, 1)); n = n + 1
 			params:add_le(f.UPDATE_BEACON_REQ_fShortSlotTime, buffer(n, 1)); n = n + 1
 			params:add_le(f.UPDATE_BEACON_REQ_beaconInterval, buffer(n, 2)); n = n + 2
@@ -589,11 +589,11 @@ function wcn36xx.dissector(inbuffer, pinfo, tree)
 			params:add_le(f.ADD_WOWL_BCAST_PTRN_ucPatternMask, buffer(n, 128)); n = n + 128
 			params:add_le(f.ADD_WOWL_BCAST_PTRN_ucPatternExt, buffer(n, 128)); n = n + 128
 			params:add_le(f.ADD_WOWL_BCAST_PTRN_ucPatternMaskExt, buffer(n, 128)); n = n + 128
-			params:add_le(f.ADD_WOWL_BCAST_PTRN_bssIdx, buffer(n, 1)); n = n + 1
+			params:add_le(f.bssIdx, buffer(n, 1)); n = n + 1
 		elseif (msg_type == 87) then
 			-- DEL_WOWL_BCAST_PTRN
 			params:add_le(f.DEL_WOWL_BCAST_PTRN_ucPatternId, buffer(n, 1)); n = n + 1
-			params:add_le(f.DEL_WOWL_BCAST_PTRN_bssIdx, buffer(n, 1)); n = n + 1
+			params:add_le(f.bssIdx, buffer(n, 1)); n = n + 1
 		elseif (msg_type == 88) then
 			-- ENTER_WOWL_REQ
 			params:add_le(f.ENTER_WOWL_REQ_ucMagicPktEnable, buffer(n, 1)); n = n + 1
@@ -610,10 +610,10 @@ function wcn36xx.dissector(inbuffer, pinfo, tree)
 			params:add_le(f.ENTER_WOWL_REQ_ucWowNetScanOffloadMatch, buffer(n, 1)); n = n + 1
 			params:add_le(f.ENTER_WOWL_REQ_ucWowGTKRekeyError, buffer(n, 1)); n = n + 1
 			params:add_le(f.ENTER_WOWL_REQ_ucWoWBSSConnLoss, buffer(n, 1)); n = n + 1
-			params:add_le(f.ENTER_WOWL_REQ_bssIdx, buffer(n, 1)); n = n + 1
+			params:add_le(f.bssIdx, buffer(n, 1)); n = n + 1
 		elseif (msg_type == 89) then
 			-- EXIT_WOWL_REQ
-			params:add_le(f.EXIT_WOWL_REQ_bssIdx, buffer(n, 1)); n = n + 1
+			params:add_le(f.bssIdx, buffer(n, 1)); n = n + 1
 		elseif (msg_type == 90) then
 			-- HOST_OFFLOAD_REQ
 			local type = buffer(n, 1):uint()
@@ -711,7 +711,7 @@ function wcn36xx.dissector(inbuffer, pinfo, tree)
 			params:add_le(f.KEEP_ALIVE_REQ_hostIpv4Addr, buffer(n, 4)); n = n + 4
 			params:add_le(f.KEEP_ALIVE_REQ_destIpv4Addr, buffer(n, 4)); n = n + 4
 			params:add_le(f.KEEP_ALIVE_REQ_destMacAddr, buffer(n, 6)); n = n + 6
-			params:add_le(f.KEEP_ALIVE_REQ_bssIdx, buffer(n, 1)); n = n + 1
+			params:add_le(f.bssIdx, buffer(n, 1)); n = n + 1
 		elseif (msg_type == 151) then
 			-- UPDATE_SCAN_PARAM_REQ
 			params:add(f.scan_dot11d_enabled, buffer(n, 1)); n = n + 1
@@ -772,7 +772,7 @@ function wcn36xx.dissector(inbuffer, pinfo, tree)
 			params:add_le(f.GTK_OFFLOAD_REQ_aKCK, buffer(n, 16)); n = n + 16
 			params:add_le(f.GTK_OFFLOAD_REQ_aKEK, buffer(n, 16)); n = n + 16
 			params:add_le(f.GTK_OFFLOAD_REQ_ullKeyReplayCounter, buffer(n, 8)); n = n + 8
-			params:add_le(f.GTK_OFFLOAD_REQ_bssIdx, buffer(n, 1)); n = n + 1
+			params:add_le(f.bssIdx, buffer(n, 1)); n = n + 1
 		elseif (msg_type == 175) then
 			-- FEATURE_CAPS_EXCHANGE_REQ
 			local caps = params:add(buffer(n, 16), "caps")
@@ -1789,10 +1789,8 @@ f.ADD_WOWL_BCAST_PTRN_ucPatternMaskSize = ProtoField.uint8("wcn36xx.ADD_WOWL_BCA
 f.ADD_WOWL_BCAST_PTRN_ucPatternMask = ProtoField.bytes("wcn36xx.ADD_WOWL_BCAST_PTRN_ucPatternMask", "ucPatternMask")
 f.ADD_WOWL_BCAST_PTRN_ucPatternExt = ProtoField.bytes("wcn36xx.ADD_WOWL_BCAST_PTRN_ucPatternExt", "ucPatternExt")
 f.ADD_WOWL_BCAST_PTRN_ucPatternMaskExt = ProtoField.bytes("wcn36xx.ADD_WOWL_BCAST_PTRN_ucPatternMaskExt", "ucPatternMaskExt")
-f.ADD_WOWL_BCAST_PTRN_bssIdx = ProtoField.uint8("wcn36xx.ADD_WOWL_BCAST_PTRN_bssIdx", "bssIdx")
 
 f.DEL_WOWL_BCAST_PTRN_ucPatternId = ProtoField.uint8("wcn36xx.DEL_WOWL_BCAST_PTRN_ucPatternId", "ucPatternId")
-f.DEL_WOWL_BCAST_PTRN_bssIdx = ProtoField.uint8("wcn36xx.DEL_WOWL_BCAST_PTRN_bssIdx", "bssIdx")
 
 f.ENTER_WOWL_REQ_ucMagicPktEnable = ProtoField.uint8("wcn36xx.ENTER_WOWL_REQ_ucMagicPktEnable", "ucMagicPktEnable")
 f.ENTER_WOWL_REQ_magicPtrn = ProtoField.ether("wcn36xx.ENTER_WOWL_REQ_magicPtrn", "magicPtrn")
@@ -1808,9 +1806,6 @@ f.ENTER_WOWL_REQ_ucWoWEAPOL4WayEnable = ProtoField.uint8("wcn36xx.ENTER_WOWL_REQ
 f.ENTER_WOWL_REQ_ucWowNetScanOffloadMatch = ProtoField.uint8("wcn36xx.ENTER_WOWL_REQ_ucWowNetScanOffloadMatch", "ucWowNetScanOffloadMatch")
 f.ENTER_WOWL_REQ_ucWowGTKRekeyError = ProtoField.uint8("wcn36xx.ENTER_WOWL_REQ_ucWowGTKRekeyError", "ucWowGTKRekeyError")
 f.ENTER_WOWL_REQ_ucWoWBSSConnLoss = ProtoField.uint8("wcn36xx.ENTER_WOWL_REQ_ucWoWBSSConnLoss", "ucWoWBSSConnLoss")
-f.ENTER_WOWL_REQ_bssIdx = ProtoField.uint8("wcn36xx.ENTER_WOWL_REQ_bssIdx", "bssIdx")
-
-f.EXIT_WOWL_REQ_bssIdx = ProtoField.uint8("wcn36xx.EXIT_WOWL_REQ_bssIdx", "bssIdx")
 
 f.host_offload_type = ProtoField.uint8("wcn36xx.host_offload_type", "type", base.DEC, offload_type_strings)
 f.host_offload_enable = ProtoField.bool("wcn36xx.host_offload_enable", "enable")
@@ -1941,7 +1936,6 @@ f.CONFIG_STA_REQ_delayedBASupport = ProtoField.uint8("wcn36xx.CONFIG_STA_REQ_del
 f.CONFIG_STA_REQ_us32MaxAmpduDuration = ProtoField.uint8("wcn36xx.CONFIG_STA_REQ_us32MaxAmpduDuration", "us32MaxAmpduDuration")
 f.CONFIG_STA_REQ_fDsssCckMode40Mhz = ProtoField.uint8("wcn36xx.CONFIG_STA_REQ_fDsssCckMode40Mhz", "fDsssCckMode40Mhz")
 f.CONFIG_STA_REQ_staIdx = ProtoField.uint8("wcn36xx.CONFIG_STA_REQ_staIdx", "staIdx")
-f.CONFIG_STA_REQ_bssIdx = ProtoField.uint8("wcn36xx.CONFIG_STA_REQ_bssIdx", "bssIdx")
 f.CONFIG_STA_REQ_p2pCapableSta = ProtoField.uint8("wcn36xx.CONFIG_STA_REQ_p2pCapableSta", "p2pCapableSta")
 f.CONFIG_STA_REQ_reserved = ProtoField.uint8("wcn36xx.CONFIG_STA_REQ_reserved", "reserved")
 f.CONFIG_STA_REQ_supportedRates = ProtoField.bytes("wcn36xx.CONFIG_STA_REQ_supportedRates", "supportedRates")
@@ -1973,7 +1967,6 @@ f.CONFIG_STA_REQ_V1_delayedBASupport = ProtoField.uint8("wcn36xx.CONFIG_STA_REQ_
 f.CONFIG_STA_REQ_V1_us32MaxAmpduDuration = ProtoField.uint8("wcn36xx.CONFIG_STA_REQ_V1_us32MaxAmpduDuration", "us32MaxAmpduDuration")
 f.CONFIG_STA_REQ_V1_fDsssCckMode40Mhz = ProtoField.uint8("wcn36xx.CONFIG_STA_REQ_V1_fDsssCckMode40Mhz", "fDsssCckMode40Mhz")
 f.CONFIG_STA_REQ_V1_staIdx = ProtoField.uint8("wcn36xx.CONFIG_STA_REQ_V1_staIdx", "staIdx")
-f.CONFIG_STA_REQ_V1_bssIdx = ProtoField.uint8("wcn36xx.CONFIG_STA_REQ_V1_bssIdx", "bssIdx")
 f.CONFIG_STA_REQ_V1_p2pCapableSta = ProtoField.uint8("wcn36xx.CONFIG_STA_REQ_V1_p2pCapableSta", "p2pCapableSta")
 f.CONFIG_STA_REQ_V1_misc_flags = ProtoField.uint8("wcn36xx.CONFIG_STA_REQ_V1_misc_flags", "misc_flags")
 f.CONFIG_STA_REQ_V1_supportedRates = ProtoField.bytes("wcn36xx.CONFIG_STA_REQ_V1_supportedRates", "supportedRates")
@@ -2066,8 +2059,6 @@ f.CONFIG_BSS_V1_maxTxPower = ProtoField.uint8("wcn36xx.CONFIG_BSS_V1_maxTxPower"
 f.CONFIG_BSS_V1_vhtCapable = ProtoField.uint8("wcn36xx.CONFIG_BSS_V1_vhtCapable", "vhtCapable")
 f.CONFIG_BSS_V1_vhtTxChannelWidthSet = ProtoField.uint8("wcn36xx.CONFIG_BSS_V1_vhtTxChannelWidthSet", "vhtTxChannelWidthSet")
 
-f.DELETE_BSS_REQ_bssIdx = ProtoField.uint8("wcn36xx.DELETE_BSS_REQ_bssIdx", "bssIdx")
-
 f.DELETE_BSS_RSP_bssIdx = ProtoField.uint8("wcn36xx.DELETE_BSS_RSP_bssIdx", "bssIdx")
 
 f.SEND_BEACON_REQ_beaconLength = ProtoField.uint32("wcn36xx.SEND_BEACON_REQ_beaconLength", "beaconLength")
@@ -2081,7 +2072,6 @@ f.UPDATE_PROBE_RSP_TEMPLATE_REQ_probeRespTemplateLen = ProtoField.uint32("wcn36x
 f.UPDATE_PROBE_RSP_TEMPLATE_REQ_ucProxyProbeReqValidIEBmap = ProtoField.bytes("wcn36xx.UPDATE_PROBE_RSP_TEMPLATE_REQ_ucProxyProbeReqValidIEBmap", "ucProxyProbeReqValidIEBmap")
 f.UPDATE_PROBE_RSP_TEMPLATE_REQ_bssId = ProtoField.ether("wcn36xx.UPDATE_PROBE_RSP_TEMPLATE_REQ_bssId", "bssId")
 
-f.UPDATE_BEACON_REQ_bssIdx = ProtoField.uint8("wcn36xx.UPDATE_BEACON_REQ_bssIdx", "bssIdx")
 f.UPDATE_BEACON_REQ_fShortPreamble = ProtoField.uint8("wcn36xx.UPDATE_BEACON_REQ_fShortPreamble", "fShortPreamble")
 f.UPDATE_BEACON_REQ_fShortSlotTime = ProtoField.uint8("wcn36xx.UPDATE_BEACON_REQ_fShortSlotTime", "fShortSlotTime")
 f.UPDATE_BEACON_REQ_beaconInterval = ProtoField.uint16("wcn36xx.UPDATE_BEACON_REQ_beaconInterval", "beaconInterval")
@@ -2124,7 +2114,6 @@ f.CONFIG_BSS_RSP_bssBcastStaIdx = ProtoField.uint8("wcn36xx.CONFIG_BSS_RSP_bssBc
 f.CONFIG_BSS_RSP_staMac = ProtoField.ether("wcn36xx.CONFIG_BSS_RSP_staMac", "staMac")
 f.CONFIG_BSS_RSP_txMgmtPower = ProtoField.uint8("wcn36xx.CONFIG_BSS_RSP_txMgmtPower", "txMgmtPower")
 
-f.SET_BSSKEY_REQ_bssIdx = ProtoField.uint8("wcn36xx.SET_BSSKEY_REQ_bssIdx", "bssIdx")
 f.SET_BSSKEY_REQ_encType = ProtoField.uint32("wcn36xx.SET_BSSKEY_REQ_encType", "encType", base.DEC, ani_ed_type_strings)
 f.SET_BSSKEY_REQ_numKeys = ProtoField.uint8("wcn36xx.SET_BSSKEY_REQ_numKeys", "numKeys")
 f.SET_BSSKEY_REQ_key = ProtoField.bytes("wcn36xx.SET_BSSKEY_REQ_key", "key")
@@ -2260,7 +2249,6 @@ f.GTK_OFFLOAD_REQ_ulFlags = ProtoField.uint32("wcn36xx.GTK_OFFLOAD_REQ_ulFlags",
 f.GTK_OFFLOAD_REQ_aKCK = ProtoField.bytes("wcn36xx.GTK_OFFLOAD_REQ_aKCK", "aKCK")
 f.GTK_OFFLOAD_REQ_aKEK = ProtoField.bytes("wcn36xx.GTK_OFFLOAD_REQ_aKEK", "aKEK")
 f.GTK_OFFLOAD_REQ_ullKeyReplayCounter = ProtoField.uint64("wcn36xx.GTK_OFFLOAD_REQ_ullKeyReplayCounter", "ullKeyReplayCounter")
-f.GTK_OFFLOAD_REQ_bssIdx = ProtoField.uint8("wcn36xx.GTK_OFFLOAD_REQ_bssIdx", "bssIdx")
 
 f.MULTICAST_LIST_RSP_bssIdx = ProtoField.uint8("wcn36xx.8023_MULTICAST_LIST_RSP_bssIdx", "bssIdx")
 
@@ -2275,7 +2263,6 @@ f.KEEP_ALIVE_REQ_timePeriod = ProtoField.uint32("wcn36xx.KEEP_ALIVE_REQ_timePeri
 f.KEEP_ALIVE_REQ_hostIpv4Addr = ProtoField.ipv4("wcn36xx.KEEP_ALIVE_REQ_hostIpv4Addr", "hostIpv4Addr")
 f.KEEP_ALIVE_REQ_destIpv4Addr = ProtoField.ipv4("wcn36xx.KEEP_ALIVE_REQ_destIpv4Addr", "destIpv4Addr")
 f.KEEP_ALIVE_REQ_destMacAddr = ProtoField.ether("wcn36xx.KEEP_ALIVE_REQ_destMacAddr", "destMacAddr")
-f.KEEP_ALIVE_REQ_bssIdx = ProtoField.uint8("wcn36xx.KEEP_ALIVE_REQ_bssIdx", "bssIdx")
 
 f.OTA_TX_COMPL_IND_status = ProtoField.uint32("wcn36xx.OTA_TX_COMPL_IND_status", "status")
 
