@@ -855,7 +855,7 @@ function wcn36xx.dissector(inbuffer, pinfo, tree)
 				status = buffer(n, 4):le_uint()
 				params:add_le(f.rsp_status, buffer(n, 4)); n = n + 4
 				params:add_le(f.CONFIG_STA_RSP_staIdx, buffer(n, 1)); n = n + 1
-				params:add_le(f.CONFIG_STA_RSP_bssIdx, buffer(n, 1)); n = n + 1
+				params:add_le(f.bssIdx, buffer(n, 1)); n = n + 1
 				params:add_le(f.CONFIG_STA_RSP_dpuIndex, buffer(n, 1)); n = n + 1
 				params:add_le(f.CONFIG_STA_RSP_bcastDpuIndex, buffer(n, 1)); n = n + 1
 				params:add_le(f.CONFIG_STA_RSP_bcastMgmtDpuIdx, buffer(n, 1)); n = n + 1
@@ -872,7 +872,7 @@ function wcn36xx.dissector(inbuffer, pinfo, tree)
 				-- CONFIG_BSS_RSP
 				status = buffer(n, 4):le_uint()
 				params:add_le(f.rsp_status, buffer(n, 4)); n = n + 4
-				params:add_le(f.CONFIG_BSS_RSP_bssIdx, buffer(n, 1)); n = n + 1
+				params:add_le(f.bssIdx, buffer(n, 1)); n = n + 1
 				params:add_le(f.CONFIG_BSS_RSP_dpuDescIndx, buffer(n, 1)); n = n + 1
 				params:add_le(f.CONFIG_BSS_RSP_ucastDpuSignature, buffer(n, 1)); n = n + 1
 				params:add_le(f.CONFIG_BSS_RSP_bcastDpuDescIndx, buffer(n, 1)); n = n + 1
@@ -1032,7 +1032,7 @@ function wcn36xx.dissector(inbuffer, pinfo, tree)
 				-- GTK_OFFLOAD_RSP
 				status = buffer(n, 4):le_uint()
 				params:add_le(f.rsp_status, buffer(n, 4)); n = n + 4
-				params:add_le(f.rsp_bssIdx, buffer(n, 1)); n = n + 1
+				params:add_le(f.bssIdx, buffer(n, 1)); n = n + 1
 			else
 				-- all others
 				status = buffer(n, 4):le_uint()
@@ -1897,7 +1897,6 @@ f.rmv_stakey_key_id = ProtoField.int8("wcn36xx.rmv_stakey_key_id", "key_id")
 f.rmv_stakey_unicast= ProtoField.bool("wcn36xx.rmv_stakey_unicast", "unicast")
 
 f.rsp_status = ProtoField.uint32("wcn36xx.rsp_status", "status", base.HEX, rsp_status_strings)
-f.rsp_bssIdx = ProtoField.uint8("wcn36xx.rsp_bssIdx", "bssIdx")
 f.start_rsp_fw_major = ProtoField.uint8("wcn36xx.start_rsp_fw_major", "fw_major")
 f.start_rsp_fw_minor = ProtoField.uint8("wcn36xx.start_rsp_fw_minor", "fw_minor")
 f.start_rsp_fw_version = ProtoField.uint8("wcn36xx.start_rsp_fw_version", "fw_version")
@@ -2056,8 +2055,6 @@ f.CONFIG_BSS_V1_maxTxPower = ProtoField.uint8("wcn36xx.CONFIG_BSS_V1_maxTxPower"
 f.CONFIG_BSS_V1_vhtCapable = ProtoField.uint8("wcn36xx.CONFIG_BSS_V1_vhtCapable", "vhtCapable")
 f.CONFIG_BSS_V1_vhtTxChannelWidthSet = ProtoField.uint8("wcn36xx.CONFIG_BSS_V1_vhtTxChannelWidthSet", "vhtTxChannelWidthSet")
 
-f.DELETE_BSS_RSP_bssIdx = ProtoField.uint8("wcn36xx.DELETE_BSS_RSP_bssIdx", "bssIdx")
-
 f.SEND_BEACON_REQ_beaconLength = ProtoField.uint32("wcn36xx.SEND_BEACON_REQ_beaconLength", "beaconLength")
 f.SEND_BEACON_REQ_beacon = ProtoField.bytes("wcn36xx.SEND_BEACON_REQ_beacon", "beacon")
 f.SEND_BEACON_REQ_timIeOffset = ProtoField.uint32("wcn36xx.SEND_BEACON_REQ_timIeOffset", "timIeOffset")
@@ -2095,7 +2092,6 @@ f.FINISH_SCAN_REQ_frameLength = ProtoField.uint8("wcn36xx.FINISH_SCAN_REQ_frameL
 f.FINISH_SCAN_REQ_macMgmtHdr = ProtoField.bytes("wcn36xx.FINISH_SCAN_REQ_macMgmtHdr", "macMgmtHdr")
 f.FINISH_SCAN_REQ_scanEntry = ProtoField.bytes("wcn36xx.FINISH_SCAN_REQ_scanEntry", "scanEntry")
 
-f.CONFIG_BSS_RSP_bssIdx = ProtoField.uint8("wcn36xx.CONFIG_BSS_RSP_bssIdx", "bssIdx")
 f.CONFIG_BSS_RSP_dpuDescIndx = ProtoField.uint8("wcn36xx.CONFIG_BSS_RSP_dpuDescIndx", "dpuDescIndx")
 f.CONFIG_BSS_RSP_ucastDpuSignature = ProtoField.uint8("wcn36xx.CONFIG_BSS_RSP_ucastDpuSignature", "ucastDpuSignature")
 f.CONFIG_BSS_RSP_bcastDpuDescIndx = ProtoField.uint8("wcn36xx.CONFIG_BSS_RSP_bcastDpuDescIndx", "bcastDpuDescIndx")
@@ -2176,7 +2172,6 @@ f.GET_ROAM_RSSI_RSP_staId = ProtoField.uint8("wcn36xx.GET_ROAM_RSSI_RSP_staId", 
 f.GET_ROAM_RSSI_RSP_rssi = ProtoField.uint8("wcn36xx.GET_ROAM_RSSI_RSP_rssi", "rssi")
 
 f.CONFIG_STA_RSP_staIdx = ProtoField.uint8("wcn36xx.CONFIG_STA_RSP_staIdx", "staIdx")
-f.CONFIG_STA_RSP_bssIdx = ProtoField.uint8("wcn36xx.CONFIG_STA_RSP_bssIdx", "bssIdx")
 f.CONFIG_STA_RSP_dpuIndex = ProtoField.uint8("wcn36xx.CONFIG_STA_RSP_dpuIndex", "dpuIndex")
 f.CONFIG_STA_RSP_bcastDpuIndex = ProtoField.uint8("wcn36xx.CONFIG_STA_RSP_bcastDpuIndex", "bcastDpuIndex")
 f.CONFIG_STA_RSP_bcastMgmtDpuIdx = ProtoField.uint8("wcn36xx.CONFIG_STA_RSP_bcastMgmtDpuIdx", "bcastMgmtDpuIdx")
@@ -2243,8 +2238,6 @@ f.GTK_OFFLOAD_REQ_ulFlags = ProtoField.uint32("wcn36xx.GTK_OFFLOAD_REQ_ulFlags",
 f.GTK_OFFLOAD_REQ_aKCK = ProtoField.bytes("wcn36xx.GTK_OFFLOAD_REQ_aKCK", "aKCK")
 f.GTK_OFFLOAD_REQ_aKEK = ProtoField.bytes("wcn36xx.GTK_OFFLOAD_REQ_aKEK", "aKEK")
 f.GTK_OFFLOAD_REQ_ullKeyReplayCounter = ProtoField.uint64("wcn36xx.GTK_OFFLOAD_REQ_ullKeyReplayCounter", "ullKeyReplayCounter")
-
-f.MULTICAST_LIST_RSP_bssIdx = ProtoField.uint8("wcn36xx.8023_MULTICAST_LIST_RSP_bssIdx", "bssIdx")
 
 f.JOIN_RSP_txMgmtPower = ProtoField.uint8("wcn36xx.JOIN_RSP_txMgmtPower", "txMgmtPower")
 
