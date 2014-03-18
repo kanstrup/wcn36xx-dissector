@@ -431,7 +431,7 @@ function wcn36xx.dissector(inbuffer, pinfo, tree)
 			params:add_le(f.SET_STAKEY_REQ_singleTidRc, buffer(n, 1)); n = n + 1
 		elseif (msg_type == 28) then
 			-- RMV_BSSKEY_REQ
-			params:add(f.bss_index, buffer(n, 1)); n = n + 1
+			params:add(f.bssIdx, buffer(n, 1)); n = n + 1
 			params:add_le(f.ani_ed_enc_type, buffer(n, 4)); n = n + 4
 			params:add(f.rmv_bsskey_key_id, buffer(n, 1)); n = n + 1
 			params:add_le(f.rmv_bsskey_wep_type, buffer(n, 4)); n = n + 4
@@ -545,7 +545,7 @@ function wcn36xx.dissector(inbuffer, pinfo, tree)
 			params:add_le(f.SIGNAL_BTAMP_EVENT_REQ_btAmpEventType, buffer(n, 4)); n = n + 4
 		elseif (msg_type == 78) then
 			-- ENTER_BMPS_REQ
-			params:add(f.bss_index, buffer(n, 1)); n = n + 1
+			params:add(f.bssIdx, buffer(n, 1)); n = n + 1
 			params:add_le(f.enter_bmps_tbtt, buffer(n, 8)); n = n + 8
 			params:add(f.enter_bmps_dtim_count, buffer(n, 1)); n = n + 1
 			params:add(f.enter_bmps_dtim_period, buffer(n, 1)); n = n + 1
@@ -555,7 +555,7 @@ function wcn36xx.dissector(inbuffer, pinfo, tree)
 		elseif (msg_type == 79) then
 			-- EXIT_BMPS_REQ
 			params:add(f.exit_bmps_send_data_null, buffer(n, 1)); n = n + 1
-			params:add(f.bss_index, buffer(n, 1)); n = n + 1
+			params:add(f.bssIdx, buffer(n, 1)); n = n + 1
 		elseif (msg_type == 83) then
 			-- CONFIGURE_RXP_FILTER_REQ
 			params:add_le(f.CONFIGURE_RXP_FILTER_REQ_setMcstBcstFilterSetting, buffer(n, 1)); n = n + 1
@@ -567,7 +567,7 @@ function wcn36xx.dissector(inbuffer, pinfo, tree)
 			params:add_le(f.beacon_filter_beacon_interval, buffer(n, 2)); n = n + 2
 			local num = buffer(n, 2):le_uint()
 			params:add_le(f.beacon_filter_ie_num, buffer(n, 2)); n = n + 2
-			params:add(f.bss_index, buffer(n, 1)); n = n + 1
+			params:add(f.bssIdx, buffer(n, 1)); n = n + 1
 			params:add(f.beacon_filter_reserved, buffer(n, 1)); n = n + 1
 			local elements
 			for i = 1,num do
@@ -634,7 +634,7 @@ function wcn36xx.dissector(inbuffer, pinfo, tree)
 				params:add_le(f.ns_offload_self_addr, buffer(n, 6)); n = n + 6
 				params:add(f.ns_offload_valid, buffer(n, 1)); n = n + 1
 				params:add(f.ns_offload_reserved2, buffer(n, 1)); n = n + 1
-				params:add(f.bss_index, buffer(n, 1)); n = n + 1
+				params:add(f.bssIdx, buffer(n, 1)); n = n + 1
 				params:add_le(f.ns_offload_slot_index, buffer(n, 4)); n = n + 4
 			end
 		elseif (msg_type == 91) then
@@ -739,7 +739,7 @@ function wcn36xx.dissector(inbuffer, pinfo, tree)
 			end
 			local unused = cmd_len - n - 1
 			params:add(f.multicast_list_unused, buffer(n, unused)); n = n + unused
-			params:add(f.bss_index, buffer(n, 1)) n = n + 1
+			params:add(f.bssIdx, buffer(n, 1)) n = n + 1
 		elseif (msg_type == 159) then
 			-- SET_PACKET_FILTER_REQ
 			params:add(f.rcv_packet_filter_id, buffer(n, 1)); n = n + 1
@@ -747,7 +747,7 @@ function wcn36xx.dissector(inbuffer, pinfo, tree)
 			local count = buffer(n, 1):uint()
 			params:add(f.rcv_packet_filter_params_count, buffer(n, 1)); n = n + 1
 			params:add_le(f.rcv_packet_filter_coalesce_time, buffer(n, 4)); n = n + 4
-			params:add(f.bss_index, buffer(n, 1)); n = n + 1
+			params:add(f.bssIdx, buffer(n, 1)); n = n + 1
 			for i = 1,count do
 				local fltparams = subtree:add(wcn36xx, buffer(n, 22), i)
 				fltparams:add(f.rcv_packet_filter_param_protocol_layer, buffer(n, 1)); n = n + 1
@@ -1700,7 +1700,7 @@ f.msg_version = ProtoField.uint16("wcn36xx.msg_version", "msg_version")
 f.len = ProtoField.uint32("wcn36xx.len", "len")
 f.data = ProtoField.bytes("wcn36xx.data", "data")
 
-f.bss_index = ProtoField.uint8("wcn36xx.bss_index", "bss_index", base.DEC)
+f.bssIdx = ProtoField.uint8("wcn36xx.bssIdx", "bssIdx", base.DEC)
 f.bssid = ProtoField.ether("wcn36xx.bssid", "bssid")
 f.sta_index = ProtoField.uint8("wcn36xx.sta_index", "sta_index")
 f.tid = ProtoField.uint8("wcn36xx.tid", "tid")
